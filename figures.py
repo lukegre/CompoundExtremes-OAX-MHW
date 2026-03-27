@@ -36,10 +36,41 @@ def _(cxf, xr):
     return data, ds_spatial_stats
 
 
+@app.cell
+def _(data):
+    df_event_stats = data.cex["stats"].to_series().unstack()
+    da_selector = (
+        df_event_stats[["loc_lat_mode", "loc_lon_mode"]].to_xarray().rename(loc_lat_mode="lat", loc_lon_mode="lon")
+    )
+
+    def year_start_decimal(x, start_year=1982):
+        return (x // 12 + start_year) + (x % 12) / 12
+
+    df_event_stats = df_event_stats.assign(
+        year_start_decimal = lambda x: x.month_start_sice_198201.apply(lambda x: year_start_decimal(x, start_year=1982)),
+        duration_2sigma_mon_clipped = lambda x: x.duration_2sigma_mon.where(lambda y: y < x.duration_max_mon, x.duration_max_mon),
+        area_max_mil = lambda x: x.area_max_km2 * 1e-06,
+        area_max_scl = lambda x: (x.area_max_mil - x.area_max_mil.min() + 2.3) ** 2.6,
+        cex_intensity_norm_p95 = lambda x: x.cex_intensity_norm_p95.clip(0, 10),
+    
+        loc_region = data.masks.regions_HL.sel(**da_selector).to_series().astype(int),
+        loc_basin = data.masks.basins.sel(**da_selector).to_series().astype(int)
+    )
+    return (df_event_stats,)
+
+
 @app.cell(hide_code=True)
 def _(mo):
     mo.md(r"""
     # Figure 2
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## Figure 2 top
     """)
     return
 
@@ -70,6 +101,14 @@ def _(crs, cxf, data, ds_spatial_stats: "xr.Dataset", np, plt):
     plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1)
     # fig2_top.savefig('./figures/figure2_top_w7.5.png', dpi=300, transparent=True)
     fig2_top
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    ## Figure 2 bottom
+    """)
     return
 
 
@@ -203,6 +242,14 @@ def _(mo):
 
 
 @app.cell
+def _(mo):
+    mo.md(r"""
+    ## Figure 3 top
+    """)
+    return
+
+
+@app.cell
 def _(data, np, xr):
     num_extremes = data.cex.mask.sum("time").compute()
     num_extremes_seasonal = data.cex.mask.groupby("time.season").sum("time").compute()
@@ -316,6 +363,14 @@ def _(
 
 
 @app.cell
+def _(mo):
+    mo.md(r"""
+    ## Figure 3 bottom
+    """)
+    return
+
+
+@app.cell
 def _(
     Any,
     cex_HL_area,
@@ -407,19 +462,15 @@ def _(Any, crs, cxf, data, ds_spatial_stats: "xr.Dataset", np, plt):
     fig4 = plt.figure(figsize=[7.5, 5.3], dpi=100)
     fig4.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1)
 
-    _props_imshow: dict[str, Any] = {
+    props_fig4: dict[str, Any] = {
         "cbar_kwargs": {"orientation": "horizontal", "shrink": 0.6},
         "proj": crs.EqualEarth(-155),
     }
     img4: list[Any] = [
-        ds_spatial_stats.cex_I.geo.imshow(pos=221, levels=6, **_props_imshow),
-        ds_spatial_stats.cex_D.geo.imshow(
-            pos=222, levels=np.arange(0.5, 3.1, 0.5), vmin=0.5, **_props_imshow
-        ),
-        ds_spatial_stats.cex_mhw_I.geo.imshow(pos=223, levels=6, **_props_imshow),
-        ds_spatial_stats.cex_oax_I.geo.imshow(
-            pos=224, levels=np.arange(0.03, 0.18, 0.03), **_props_imshow
-        ),
+        ds_spatial_stats.cex_I.geo.imshow(pos=221, levels=6, **props_fig4),
+        ds_spatial_stats.cex_D.geo.imshow(pos=222, levels=np.arange(0.5, 3.1, 0.5), vmin=0.5, **props_fig4),
+        ds_spatial_stats.cex_mhw_I.geo.imshow(pos=223, levels=6, **props_fig4),
+        ds_spatial_stats.cex_oax_I.geo.imshow(pos=224, levels=np.arange(0.03, 0.18, 0.03), **props_fig4),
     ]
 
     [cxf.vis.plot_contours(data.masks.regions_HL, img.axes) for img in img4]
@@ -443,6 +494,137 @@ def _(mo):
 
 @app.cell
 def _():
+    import scipy.stats.distributions as dists
+
+
+    return (dists,)
+
+
+@app.cell
+def _(Any, dists, np, plt):
+    def plot_distribution(
+        y: np.ndarray|None=None, dist_func: dists.rv_continuous=dists.genextreme, bins=30, ax=None, annot=True, **hist_kwargs
+    ):
+        if y is None:
+            raise ValueError("y must be provided")
+
+        args = dist_func.fit(y)
+        dist = dist_func(*args)
+
+        if ax is None:
+            fig, ax = plt.subplots()
+
+        hist_kwargs: dict[str, Any] = dict(density=True, color="k", lw=0) | hist_kwargs
+        hist_kwargs["width"] = np.diff(bins).mean() * hist_kwargs.get("width", 1)
+        ybin, xbin, _ = ax.hist(y, bins=bins, **hist_kwargs)
+
+        x = np.linspace(xbin.min(), xbin.max(), 100)
+        yhat = dist.pdf(np.convolve(xbin, [0.5] * 2, mode="valid"))
+        yhat_plot = dist.pdf(x)
+        ax.plot(x, yhat_plot)
+
+        description = {
+            "name": dist_func.__class__.__name__.replace("_gen", ""),
+            "args": args,
+            "rmse": ((ybin - yhat) ** 2).mean() ** 0.5,
+            "mean": dist.stats(moments="m"),
+            "var": dist.stats(moments="v"),
+            "mode": x[yhat_plot.argmax()],
+        }
+
+        txt = ""
+        for key, val in description.items():
+            if isinstance(val, (float, np.ndarray)):
+                txt += f"{key} = {val:.2f}\n"
+            elif isinstance(val, (list, tuple)):
+                val = [np.around(v, 2) for v in val]
+                txt += f"{key} = {val}\n"
+            else:
+                txt += f"{key} = {val}\n"
+        txt = txt.replace("[", "").replace("]", "")
+
+        if annot:
+            ax.text(0.95, 0.95, txt, ha="right", va="top", transform=ax.transAxes)
+
+        if hasattr(y, "name"):
+            ax.set_title(y.name)
+
+        ax.description = description
+
+        return ax
+
+
+    return (plot_distribution,)
+
+
+@app.cell
+def _(Any, df_event_stats, dists, np, plot_distribution, plt, vis):
+    from matplotlib.patches import Rectangle
+    big = (df_event_stats.area_max_mil > 2) & df_event_stats.loc_region.isin([2,3,4])
+    sml = (df_event_stats.area_max_mil <= 2) & df_event_stats.loc_region.isin([2,3,4])
+
+    if "collapse_figure_layout":
+        fig5, axs5 = plt.subplots(2, 3, figsize=[7.5, 4.5], sharex=False)
+        axs5 = axs5.T.flatten()
+
+    if "collapse_plot_distributions":
+        axs5_props: dict[str, Any] = dict(annot=False, dist_func=dists.genextreme)
+        axs5[0] = plot_distribution(ax=axs5[0], bins=np.arange(0, 2.1, .1),  **axs5_props, y=df_event_stats[sml | big].area_max_mil)
+        axs5[2] = plot_distribution(ax=axs5[2], bins=np.arange(1, 8, 0.25),  **axs5_props, y=df_event_stats[sml].duration_2sigma_mon.where(lambda x: x!=1).dropna())
+        axs5[4] = plot_distribution(ax=axs5[4], bins=np.arange(2, 4, 0.2),   **axs5_props, y=df_event_stats[sml].cex_intensity_norm_p95, )
+
+        axs5[1] = plot_distribution(ax=axs5[1], bins=np.arange(0, 9, 1),     **axs5_props, y=df_event_stats[sml | big].area_max_mil)
+        axs5[3] = plot_distribution(ax=axs5[3], bins=np.arange(1, 8, 0.5),   **axs5_props, y=df_event_stats[big].duration_2sigma_mon.where(lambda x: x!=1).dropna())
+        axs5[5] = plot_distribution(ax=axs5[5], bins=np.arange(2, 4, 0.2), **axs5_props, y=df_event_stats[big].cex_intensity_norm_p95, )
+
+    if "collapse_annotations":
+        for i, a in enumerate(axs5):
+            d = a.description
+            txt = "GEV ($\mu, \sigma, \\xi$)\n"
+            txt += f"$\mu$ = {d['args'][1]:.2f}\n"
+            txt += f"$\sigma$ = {d['args'][2]:.2f}\n"
+            txt += f"$\\xi$ = {-d['args'][0]:.2f}\n"  # notation of Scipy flips C
+
+            txt += f"mode = {d['mode']:.2f}\n"
+            txt += f"mean = {d['mean']:.2f}"
+            a.text(0.98, 0.98, txt, transform=a.transAxes, fontsize=8, va='top', ha='right')
+    
+    if "collapse_axes_ticks":
+        axs5[1].set_xticks([2, 4, 6, 8])
+        axs5[1].set_ylim(0, 0.14)
+        axs5[1].set_xlim(2, 8)
+        axs5[2].set_xlim(1, 8)
+        axs5[3].set_xlim(1, 8)
+        axs5[4].set_xlim(2, 4)
+        axs5[5].set_xlim(2, 4)
+
+    if "collapse_axes_labels":
+        [a.set_title('') for a in axs5]
+        axs5[1].set_xlabel('Area (10$^6$ km$^2$)')
+        axs5[3].set_xlabel('Duration (months)')
+        axs5[5].set_xlabel('$\widetilde{I}^{\ Q95}_{\\rm{OAX}\cap\\rm{MHW}}\,$', size='large')
+
+    if "collapse_line_and_bar_properties":
+        axs5[0].get_lines()[0].set_color('C1')
+        axs5[1].get_lines()[0].set_color('C1')
+        axs5[1].get_lines()[0].set_linestyle('--')
+
+        for a in axs5:
+            [b.set_facecolor('0.78') for b in a.get_children()[:-1] if isinstance(b, Rectangle)]
+            [b.set_linewidth(0.5) for b in a.get_children()[:-1] if isinstance(b, Rectangle)]
+
+    if "collapse_labelling":
+        # number subplots requires that this is run first
+        fig5.tight_layout()
+
+        axs5[0].set_ylabel('Small events dist.\n(Area < 2 million km$^2$)')
+        axs5[1].set_ylabel('Large events dist.\n(Area $\geq$ 2 million km$^2$)')
+
+        vis.number_subplots(axs5.reshape(-1, 2).T.flatten(), space=0.03)
+
+    # fig5.savefig('../figures/manuscript_v2/figure6_distsGEV_w7.5.pdf', bbox_inches='tight')
+
+    fig5
     return
 
 
@@ -464,6 +646,7 @@ def _(Any):
         dict(idx=352, text="South Pacific\n(2015)", dx=0.3, dy=-0.8, ha="center"),
         dict(idx=437, text="Barrier Reef\n(2022)", dx=-0.3, dy=-0.45, ha="center"),
         dict(idx=450, text="Atlantic\n(2023)", dx=-0.2, dy=1.0, ha="center"),
+    
         # dict(idx=154, text="Northern \nEq. Pacific \n(1998)", dx=0.1, dy=0.5, ha="center"),
         # dict(idx=159, text="SE Asia\n(1998)", dx=0.2, dy=-0.5),
         # dict(idx=449, text="Indian Ocean\n(2023)", dx=0.3, dy=0.75, ha='left'),
@@ -477,24 +660,12 @@ def _(Any):
 
 @app.cell
 def _(data, event_idxs: list[int], xr):
-    df_event_stats = data.cex["stats"].to_series().unstack()
-
-    df_event_stats["duration_2sigma_mon_clipped"] = df_event_stats["duration_2sigma_mon"].where(
-        lambda x: x < df_event_stats.duration_max_mon, df_event_stats.duration_max_mon
-    )
-    df_event_stats["area_max_mil"] = df_event_stats.area_max_km2 * 1e-06
-    df_event_stats["area_max_scl"] = (
-        df_event_stats.area_max_mil - df_event_stats.area_max_mil.min() + 2.3
-    ) ** 2.6
-    df_event_stats["cex_intensity_norm_p95"] = df_event_stats.cex_intensity_norm_p95.clip(0, 10)
-    df_event_stats["chosen"] = df_event_stats.index.isin(event_idxs)
-
     most_extreme: xr.DataArray = data.cex.blobs.isin(event_idxs).compute()
     most_intense_avg: xr.DataArray = data.cex.intensity_norm.where(
         most_extreme & data.cex.mask
     ).quantile(0.95, dim="time")
     most_extreme_contours: xr.DataArray = most_extreme.any("time").astype(int)
-    return df_event_stats, most_extreme_contours, most_intense_avg
+    return most_extreme_contours, most_intense_avg
 
 
 @app.cell
@@ -563,6 +734,8 @@ def _(
     plt,
     vis,
 ):
+    _df_events = df_event_stats.assign(chosen = lambda x: x.index.isin(event_idxs))
+
     if "collapse_figure_layout":
         fig6 = plt.figure(figsize=(7, 8.3))
         axs6: list[plt.Axes] = [
@@ -573,7 +746,7 @@ def _(
 
     if "collapse_plot_scatter":
         plot_extreme_events_scatter(
-            df_event_stats,
+            _df_events,
             c="area_max_mil",
             s="area_max_scl",
             x="duration_2sigma_mon_clipped",
@@ -586,7 +759,7 @@ def _(
     if "collapse_scatter_annotations":
 
         def plot_arrow(idx, text, dx, dy, **kwargs):  # collapse_scatter_plotting
-            y, _x = df_event_stats.loc[
+            y, _x = _df_events.loc[
                 idx, ["cex_intensity_norm_p95", "duration_2sigma_mon_clipped"]
             ]
             ty = y + dy
@@ -687,13 +860,16 @@ def _(
     if "collapse_map_extent":
         axs6[1].set_extent([-180, 180, -90, 90], crs=crs.PlateCarree())  # type: ignore
 
-    # fig6_top.savefig('./figures/fig6_bot_only-with_annotations_top.pdf', bbox_inches='tight')
+    fig6.savefig('./figures/fig6-with_annotations.pdf', bbox_inches='tight')
     fig6
     return
 
 
 @app.cell
-def _():
+def _(mo):
+    mo.md(r"""
+    # Figure 7
+    """)
     return
 
 
