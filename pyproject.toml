@@ -12,6 +12,7 @@ dependencies = [
     "dask>=2026.3.0",
     "fsspec>=2026.2.0",
     "loguru>=0.7.3",
+    "marimo>=0.21.1",
     "matplotlib>=3.10.8",
     "numbagg>=0.9.4",
     "pandas>=3.0.1",

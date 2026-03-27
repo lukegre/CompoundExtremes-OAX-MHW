@@ -1,0 +1,706 @@
+import marimo
+
+__generated_with = "0.20.4"
+app = marimo.App()
+
+
+@app.cell
+def _():
+    import marimo as mo
+
+    return (mo,)
+
+
+@app.cell
+def _():
+    import warnings
+    from typing import Any
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
+    import xarray as xr
+    from cartopy import crs, feature
+
+    import compoundx_figs as cxf
+    from compoundx_figs import vis
+
+    plt.style.use("./scripts/plotting.mplstyle")
+    return Any, crs, cxf, feature, np, pd, plt, vis, warnings, xr
+
+
+@app.cell
+def _(cxf, xr):
+    data = cxf.Datasets.from_yaml("data/sources.yaml", with_cache=True)
+    ds_spatial_stats: xr.Dataset = xr.open_zarr("data/derived/spatial_stats.zarr")
+    return data, ds_spatial_stats
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Figure 2
+    """)
+    return
+
+
+@app.cell
+def _(crs, cxf, data, ds_spatial_stats: "xr.Dataset", np, plt):
+    fig2_top = plt.figure(figsize=[7.5, 5.1], dpi=100)
+    props_imshow = {
+        "cbar_kwargs": {"orientation": "horizontal", "shrink": 0.6},
+        "proj": crs.EqualEarth(-155),
+    }
+    img2_top = [
+        ds_spatial_stats.mhw_I.geo.imshow(pos=221, **props_imshow, levels=np.arange(0.2, 1.3, 0.2)),
+        ds_spatial_stats.mhw_D.geo.imshow(pos=222, **props_imshow, levels=np.arange(1, 4.1, 0.5)),
+        ds_spatial_stats.oax_I.geo.imshow(
+            pos=223, **props_imshow, levels=np.arange(0.03, 0.09, 0.01)
+        ),
+        ds_spatial_stats.oax_D.geo.imshow(pos=224, **props_imshow, levels=np.arange(1, 4.1, 0.5)),
+    ]
+    [cxf.vis.plot_contours(data.masks.regions_HL, img.axes) for img in img2_top]
+
+    if "collapse_labels":
+        props_text = dict(rotation=90, weight="bold", ha="center", va="center", zorder=10)
+        img2_top[0].axes.text(-0.03, 0.5, "MHW", transform=img2_top[0].axes.transAxes, **props_text)
+        img2_top[2].axes.text(-0.03, 0.5, "OAX", transform=img2_top[2].axes.transAxes, **props_text)
+        cxf.vis.number_subplots([img.axes for img in img2_top], space=0.02)
+
+    plt.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1)
+    # fig2_top.savefig('./figures/figure2_top_w7.5.png', dpi=300, transparent=True)
+    fig2_top
+    return
+
+
+@app.cell
+def _(cxf, data):
+    # Figure 2 e-f: area of HL and LL regions, and area of MHW and OAX in those regions
+    mask_HL = (data.masks.regions_HL == 1) & data.masks.ice_mask
+    mask_LL = (data.masks.regions_HL == 2) & data.masks.ice_mask
+    area_HL_Mkm2 = (data.masks.area * mask_HL).sum().compute() / 1e12
+    area_LL_Mkm2 = (data.masks.area * mask_LL).sum().compute() / 1e12
+
+    def compute_area(da, mask):
+        return (
+            data.masks.area.where(da.mask & mask)
+            .sum(["lat", "lon"])
+            .compute()
+            .pipe(cxf.vis.line.smooth, w=12)
+            / 1e12
+        )
+
+    mhw_HL_area = compute_area(data.mhw, mask_HL)
+    mhw_LL_area = compute_area(data.mhw, mask_LL)
+    oax_HL_area = compute_area(data.oax, mask_HL)
+    oax_LL_area = compute_area(data.oax, mask_LL)
+    # for Figure 3
+    cex_HL_area = compute_area(data.cex, mask_HL)
+    cex_LL_area = compute_area(data.cex, mask_LL)
+
+    def hl_pct_to_area(x):
+        return x / 100 * area_HL_Mkm2.values
+
+    def ll_pct_to_area(x):
+        return x / 100 * area_LL_Mkm2.values
+
+    return (
+        cex_HL_area,
+        cex_LL_area,
+        hl_pct_to_area,
+        ll_pct_to_area,
+        mhw_HL_area,
+        mhw_LL_area,
+        oax_HL_area,
+        oax_LL_area,
+    )
+
+
+@app.cell
+def _(
+    Any,
+    data,
+    hl_pct_to_area,
+    ll_pct_to_area,
+    mhw_HL_area,
+    mhw_LL_area,
+    np,
+    oax_HL_area,
+    oax_LL_area,
+    pd,
+    plt,
+    vis,
+):
+    if "collapse_figure_layout":
+        fig2_bot, axs2_bot = plt.subplot_mosaic("e\nf\nf", figsize=(7.5, 2.5), sharex=True)
+        fig2_bot.subplots_adjust(hspace=0.2, left=0.1, right=0.95, top=0.98, bottom=0.15)
+
+    if "collapse_plot_data":
+        with plt.rc_context({"lines.linewidth": 4}):
+            mhw_HL_area.plot(ax=axs2_bot["e"], label="MHW", c="C1")
+            oax_HL_area.plot(ax=axs2_bot["e"], label="OAX", c="C0")
+            mhw_LL_area.plot(ax=axs2_bot["f"], label="MHW", c="C1")
+            oax_LL_area.plot(ax=axs2_bot["f"], label="OAX", c="C0")
+            _x: Any = data.masks.el_nino_mask.time
+            _bar_props: dict[str, Any] = dict(lw=0, zorder=0)
+            axs2_bot["f"].fill_between(_x, data.masks.el_nino_mask * 55, color="0.75", **_bar_props)
+            axs2_bot["f"].fill_between(_x, data.masks.la_nina_mask * 55, color="0.93", **_bar_props)
+
+    if "collapse_secondary_axes_ticks":
+        axs2_bot_2nd: dict[str, plt.Axes] = {}
+        axs2_bot_2nd["e"] = vis.line.add_secondary_yaxis_with_custom_values(
+            axs2_bot["e"], ticks=[10, 20], tick_inverter=hl_pct_to_area
+        )
+        axs2_bot_2nd["f"] = vis.line.add_secondary_yaxis_with_custom_values(
+            axs2_bot["f"], ticks=[5, 10, 15, 20], tick_inverter=ll_pct_to_area
+        )
+
+    if "collapse_legend_labels":
+        text_props: dict[str, Any] = {
+            "weight": 1000,
+            "size": "large",
+            "ha": "center",
+            "family": "arial black",
+        }
+        _text_x = pd.Timestamp("2006")
+        axs2_bot["f"].text(_text_x, 45, "MHW", c="C1", **text_props)
+        axs2_bot["f"].text(_text_x, 35, "OAX", c="C0", **text_props)
+
+    if "collapse_axes_ticks":
+        axs2_bot["f"].set_xlim(pd.Timestamp("1982-01-01"), pd.Timestamp("2025-01-01"))
+        axs2_bot["e"].set_ylim(0, 20)
+        axs2_bot["f"].set_ylim(0, 60)
+        axs2_bot["f"].set_yticks([0, 15, 30, 45, 60])
+        axs2_bot["f"].set_yticklabels(["0", "15", "30", "45", ""])
+        axs2_bot["f"].set_xticks(pd.date_range("1985-01-01", "2025-01-01", freq="5YS"))
+        axs2_bot["f"].set_xticklabels(np.arange(1985, 2026, 5))
+
+    if "collapse_axes_labels":
+        vis.clear_labels(axs2_bot["e"])
+        vis.clear_labels(axs2_bot["f"])
+        vis.line.set_fig_ylabel(axs2_bot, "Extreme event area (10$^6$ km$^2$)", x=-0.05)
+        vis.line.set_fig_ylabel(axs2_bot, "Area cover (%)", color="#aaaaaa", x=0.9)
+        vis.number_subplots(
+            axs2_bot.values(),
+            ["(e) High latitudes", "(f) Mid-Low latitudes"],
+            bbox=dict(facecolor="white", edgecolor="none", pad=2),
+            space=0.04,
+        )
+
+    # fig2_bot.savefig('./figures/figure2_bot_w7.5.pdf')
+    # fig2_bot.savefig('./figures/figure2_bot_w7.5.png', dpi=300, transparent=True)
+
+    fig2_bot
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Figre 3
+    """)
+    return
+
+
+@app.cell
+def _(data, np, xr):
+    num_extremes = data.cex.mask.sum("time").compute()
+    num_extremes_seasonal = data.cex.mask.groupby("time.season").sum("time").compute()
+    num_extremes_smmmer_sh = num_extremes_seasonal.sel(season="DJF", lat=slice(-90, 0))
+    num_extremes_smmmer_nh = num_extremes_seasonal.sel(season="JJA", lat=slice(0, 90))
+    num_extremes_winter_sh = num_extremes_seasonal.sel(season="JJA", lat=slice(-90, 0))
+    num_extremes_winter_nh = num_extremes_seasonal.sel(season="DJF", lat=slice(0, 90))
+    num_extremes_summer = xr.concat(
+        [num_extremes_smmmer_sh, num_extremes_smmmer_nh], dim="lat", coords="all"
+    )
+    num_extremes_winter = xr.concat(
+        [num_extremes_winter_sh, num_extremes_winter_nh], dim="lat", coords="all"
+    )
+    quantile = 0.95
+    expected_num_compound_extremes = (1 - quantile) ** 2 * data.cex.time.size
+    num_years = np.unique(data.cex.time.dt.year).size
+
+    def make_cbar_secondary_xaxis(img):
+        return img.colorbar.ax.secondary_xaxis("top").xaxis
+
+    def inverse_lmf(x):
+        return x * expected_num_compound_extremes
+
+    def inverse_freq(x):
+        return x * num_years
+
+    return (
+        inverse_freq,
+        inverse_lmf,
+        make_cbar_secondary_xaxis,
+        num_extremes,
+        num_extremes_summer,
+        num_extremes_winter,
+    )
+
+
+@app.cell
+def _(
+    crs,
+    cxf,
+    feature,
+    inverse_freq,
+    inverse_lmf,
+    make_cbar_secondary_xaxis,
+    np,
+    num_extremes,
+    num_extremes_summer,
+    num_extremes_winter,
+    plt,
+    vis,
+):
+    if "collapse_figure_layout":
+        fig3_top, axs3 = plt.subplot_mosaic(
+            "aa\naa\naa\nbc\nbc",
+            figsize=(7.5, 6.8),
+            subplot_kw={"projection": crs.EqualEarth(central_longitude=205)},
+        )
+        fig3_top.subplots_adjust(hspace=0.1)
+        img3_top: dict[str, plt.Axes] = {}
+
+    if "collapse_plot_maps":
+        props = {
+            "transform": crs.PlateCarree(),
+            "cmap": "bone_r",
+            "cbar_kwargs": {
+                "pad": 0.13,
+                "fraction": 0.1,
+                "location": "bottom",
+                "aspect": 20,
+                "shrink": 0.45,
+                "extendfrac": 0.05,
+                "label": "Number of compound extremes",
+            },
+        }
+        img3_top["top"] = num_extremes.plot.imshow(ax=axs3["a"], **props)
+
+        props["cbar_kwargs"] |= {"shrink": 0.58, "pad": 0.03}
+        img3_top["left"] = num_extremes_summer.plot.imshow(ax=axs3["b"], vmax=8, **props)
+        img3_top["right"] = num_extremes_winter.plot.imshow(ax=axs3["c"], vmax=8, **props)
+
+    if "collapse_add_map_features":
+        [ax.add_feature(feature.LAND, facecolor="0.9", zorder=2) for ax in axs3.values()]
+        [ax.coastlines(lw=0.5, color="k", zorder=3) for ax in axs3.values()]
+
+    if "collapse_labels":
+        [cxf.vis.clear_labels(ax) for ax in axs3.values()]
+        img3_top["top"].axes.set_title("(a) Full period [1982 - 2020]", size="medium")
+        img3_top["left"].axes.set_title("(b) Summer", x=0.3, ha="center", size="medium")
+        img3_top["right"].axes.set_title("(c) Winter", x=0.7, ha="center", size="medium")
+
+    if "collapse_colorbar_labels":
+        expected_label = "$\\frac{\\text{Number of compound extremes}}{\\text{Expected number of compound extremes}}$"
+        number_events = "Number of compound extremes"
+        events_per_year = "Number of compound extremes per year"
+
+        vis.line.custom_tick_values(
+            axis=img3_top["top"].colorbar.ax.xaxis,
+            ticks=[0, 5, 10, 15, 20],
+            tick_inverter=inverse_lmf,
+            label=number_events,
+        )
+        vis.line.custom_tick_values(
+            make_cbar_secondary_xaxis(img3_top["top"]),
+            ticks=np.arange(0, 0.61, 0.1),
+            tick_inverter=inverse_freq,
+            label=events_per_year,
+        )
+
+    fig3_top
+    return
+
+
+@app.cell
+def _(
+    Any,
+    cex_HL_area,
+    cex_LL_area,
+    data,
+    hl_pct_to_area,
+    ll_pct_to_area,
+    np,
+    pd,
+    plt,
+    vis,
+):
+    fig3_bot, axs3_bot = plt.subplot_mosaic("e\nf\nf", figsize=(7.5, 2.5), sharex=True)
+    fig3_bot.subplots_adjust(hspace=0.2, left=0.1, right=0.95, top=0.98, bottom=0.15)
+
+    with plt.rc_context({"lines.linewidth": 4}):
+        cex_HL_area.plot(ax=axs3_bot["e"], label="CEX", c="C2")
+        cex_LL_area.plot(ax=axs3_bot["f"], label="CEX", c="C2")
+
+        axs3_bot_x = data.masks.el_nino_mask.time
+        ax3_bot_y1 = axs3_bot["f"].get_ylim()[1] * 0.95
+
+        axs3_bot_bar_props: dict[str, Any] = dict(lw=0, zorder=0)
+        axs3_bot["f"].fill_between(
+            axs3_bot_x, data.masks.el_nino_mask * ax3_bot_y1, color="0.75", **axs3_bot_bar_props
+        )
+        axs3_bot["f"].fill_between(
+            axs3_bot_x, data.masks.la_nina_mask * ax3_bot_y1, color="0.93", **axs3_bot_bar_props
+        )
+
+    if "collapse_secondary_axes_ticks":
+        axs3_bot_2nd: dict[str, Any] = {}
+        axs3_bot_2nd["e"] = vis.line.add_secondary_yaxis_with_custom_values(
+            axs3_bot["e"], ticks=[1, 2], tick_inverter=hl_pct_to_area
+        )
+        axs3_bot_2nd["f"] = vis.line.add_secondary_yaxis_with_custom_values(
+            axs3_bot["f"], ticks=[2, 4, 6], tick_inverter=ll_pct_to_area
+        )
+
+    if "collapse_legend_labels":
+        axs3_bot_text_props: dict[str, Any] = {
+            "weight": 1000,
+            "size": "large",
+            "ha": "center",
+            "family": "arial black",
+        }
+        axs3_bot["f"].text(pd.Timestamp("2005"), 10, "CEX", c="C2", **axs3_bot_text_props)  # type: ignore
+
+    if "collapse_axes_ticks":
+        axs3_bot["f"].set_xlim(pd.Timestamp("1982-01-01"), pd.Timestamp("2025-01-01"))  # type: ignore
+        axs3_bot["e"].set_ylim(0, 2.1)
+        axs3_bot["f"].set_ylim(0, 18)
+        axs3_bot["f"].set_yticks([0, 4, 8, 12, 16])
+        axs3_bot["f"].set_xticks(pd.date_range("1985-01-01", "2025-01-01", freq="5YS"))
+        axs3_bot["f"].set_xticklabels(np.arange(1985, 2026, 5))
+
+    if "collapse_axes_labels":
+        vis.clear_labels(axs3_bot["e"])
+        vis.clear_labels(axs3_bot["f"])
+        vis.line.set_fig_ylabel(axs3_bot, "Extreme event area (10$^6$ km$^2$)", x=-0.05)
+        vis.line.set_fig_ylabel(axs3_bot, "Area cover (%)", color="#aaaaaa", x=0.9)
+        vis.number_subplots(
+            axs3_bot.values(),
+            [
+                "(d) High latitudes (seasonally stratified regions)",
+                "(e) Mid-Low latitudes (permanently stratified regions)",
+            ],
+            bbox=dict(facecolor="white", edgecolor="none", pad=2),
+            space=0.04,
+        )
+
+    # fig3_bot.savefig("./figures/figure3_bot_w7.5.pdf")
+    # fig3_bot.savefig("./figures/figure3_bot_w7.5.png", dpi=300, transparent=True)
+
+    fig3_bot
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Figure 4
+    """)
+    return
+
+
+@app.cell
+def _(Any, crs, cxf, data, ds_spatial_stats: "xr.Dataset", np, plt):
+    fig4 = plt.figure(figsize=[7.5, 5.3], dpi=100)
+    fig4.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.1)
+
+    _props_imshow: dict[str, Any] = {
+        "cbar_kwargs": {"orientation": "horizontal", "shrink": 0.6},
+        "proj": crs.EqualEarth(-155),
+    }
+    img4: list[Any] = [
+        ds_spatial_stats.cex_I.geo.imshow(pos=221, levels=6, **_props_imshow),
+        ds_spatial_stats.cex_D.geo.imshow(
+            pos=222, levels=np.arange(0.5, 3.1, 0.5), vmin=0.5, **_props_imshow
+        ),
+        ds_spatial_stats.cex_mhw_I.geo.imshow(pos=223, levels=6, **_props_imshow),
+        ds_spatial_stats.cex_oax_I.geo.imshow(
+            pos=224, levels=np.arange(0.03, 0.18, 0.03), **_props_imshow
+        ),
+    ]
+
+    [cxf.vis.plot_contours(data.masks.regions_HL, img.axes) for img in img4]
+
+    if "collapse_labels":
+        cxf.vis.number_subplots([img.axes for img in img4], space=0.02)
+
+    # fig_top.savefig("./figures/figure2_top_w7.5.png", dpi=300, transparent=True)
+
+    fig4
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""
+    # Figure 5
+    """)
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Figure 6
+    """)
+    return
+
+
+@app.cell
+def _(Any):
+    fig6_chosen_events: list[dict[str, Any]] = [
+        dict(idx=24, text="Madagascar\n(1987)", dx=0.3, dy=0.45, ha="center"),
+        dict(idx=231, text="Mediterranean\nSea (2003)", dx=-0.4, dy=0.7, ha="center"),
+        dict(idx=294, text="Western\nAustralia\n(2011)", dx=0, dy=0.6, ha="left"),
+        dict(idx=330, text="The Blob (2015)", dx=-0, dy=1, ha="center"),
+        dict(idx=352, text="South Pacific\n(2015)", dx=0.3, dy=-0.8, ha="center"),
+        dict(idx=437, text="Barrier Reef\n(2022)", dx=-0.3, dy=-0.45, ha="center"),
+        dict(idx=450, text="Atlantic\n(2023)", dx=-0.2, dy=1.0, ha="center"),
+        # dict(idx=154, text="Northern \nEq. Pacific \n(1998)", dx=0.1, dy=0.5, ha="center"),
+        # dict(idx=159, text="SE Asia\n(1998)", dx=0.2, dy=-0.5),
+        # dict(idx=449, text="Indian Ocean\n(2023)", dx=0.3, dy=0.75, ha='left'),
+        # dict(idx=463, text="Blob 2 (2019)", dx=0, dy=+0.5, ha="center"),
+        # dict(idx=484, text="Kuriosho\nCurrent (2024)", dx=-0.7, dy=0.9, ha="right"),
+    ]
+
+    event_idxs: list[int] = [v["idx"] for v in fig6_chosen_events]
+    return event_idxs, fig6_chosen_events
+
+
+@app.cell
+def _(data, event_idxs: list[int], xr):
+    df_event_stats = data.cex["stats"].to_series().unstack()
+
+    df_event_stats["duration_2sigma_mon_clipped"] = df_event_stats["duration_2sigma_mon"].where(
+        lambda x: x < df_event_stats.duration_max_mon, df_event_stats.duration_max_mon
+    )
+    df_event_stats["area_max_mil"] = df_event_stats.area_max_km2 * 1e-06
+    df_event_stats["area_max_scl"] = (
+        df_event_stats.area_max_mil - df_event_stats.area_max_mil.min() + 2.3
+    ) ** 2.6
+    df_event_stats["cex_intensity_norm_p95"] = df_event_stats.cex_intensity_norm_p95.clip(0, 10)
+    df_event_stats["chosen"] = df_event_stats.index.isin(event_idxs)
+
+    most_extreme: xr.DataArray = data.cex.blobs.isin(event_idxs).compute()
+    most_intense_avg: xr.DataArray = data.cex.intensity_norm.where(
+        most_extreme & data.cex.mask
+    ).quantile(0.95, dim="time")
+    most_extreme_contours: xr.DataArray = most_extreme.any("time").astype(int)
+    return df_event_stats, most_extreme_contours, most_intense_avg
+
+
+@app.cell
+def _(pd, plt, vis, warnings):
+    def plot_extreme_events_scatter(
+        df: pd.DataFrame,
+        ax: plt.Axes,
+        x="duration_avg_mon",
+        y="cex_intensity_norm_p95",
+        c="area_max_km2",
+        s="area_max_km2",
+        cmap="cividis_r",
+        highlight_index=None,
+        n_colors=10,
+        **kwargs,
+    ) -> None:
+
+        cmap = plt.cm.get_cmap(cmap, n_colors)
+
+        _props = {
+            "x": x,
+            "y": y,
+            "c": c,
+            "s": s,
+            "cmap": cmap,
+            "vmin": 0,
+            "vmax": cmap.N,
+            "edgecolor": "k",
+            "linewidth": 0.3,
+            "colorbar": False,
+        } | kwargs
+
+        df_sorted = df.sort_values(_props["c"], ascending=False)
+        df_sorted.plot.scatter(ax=ax, **_props)
+
+        if highlight_index is not None:
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=UserWarning, message=".*colormapping.*")
+
+                df_sorted_highlighted = df_sorted.loc[highlight_index]
+
+                _props.update(linewidth=4, zorder=5, c="none", edgecolor="w")
+                df_sorted_highlighted.plot.scatter(ax=ax, **_props)
+
+                _props.update(linewidth=1.5, zorder=5, c="none", edgecolor="k")
+                df_sorted_highlighted.plot.scatter(ax=ax, **_props)
+
+        vis.scatter_extras.buffer_axis_limits(ax)
+
+    return (plot_extreme_events_scatter,)
+
+
+@app.cell
+def _(
+    Any,
+    crs,
+    cxf,
+    df_event_stats,
+    event_idxs: list[int],
+    feature,
+    fig6_chosen_events: "list[dict[str, Any]]",
+    most_extreme_contours: "xr.DataArray",
+    most_intense_avg: "xr.DataArray",
+    np,
+    plot_extreme_events_scatter,
+    plt,
+    vis,
+):
+    if "collapse_figure_layout":
+        fig6 = plt.figure(figsize=(7, 8.3))
+        axs6: list[plt.Axes] = [
+            fig6.add_subplot(211),
+            fig6.add_subplot(212, projection=crs.PlateCarree(205)),
+        ]
+        fig6.subplots_adjust(hspace=0.15)
+
+    if "collapse_plot_scatter":
+        plot_extreme_events_scatter(
+            df_event_stats,
+            c="area_max_mil",
+            s="area_max_scl",
+            x="duration_2sigma_mon_clipped",
+            y="cex_intensity_norm_p95",
+            highlight_index=event_idxs,
+            cmap="cividis_r",
+            ax=axs6[0],
+        )
+
+    if "collapse_scatter_annotations":
+
+        def plot_arrow(idx, text, dx, dy, **kwargs):  # collapse_scatter_plotting
+            y, _x = df_event_stats.loc[
+                idx, ["cex_intensity_norm_p95", "duration_2sigma_mon_clipped"]
+            ]
+            ty = y + dy
+            tx = _x + dx
+            _props = dict(
+                size=9,
+                va="center",
+                ha="left",
+                color="grey",
+                zorder=0,
+                arrowprops=dict(arrowstyle="-", lw=0.5, color="k"),
+                bbox={"facecolor": "white", "alpha": 0.6, "lw": 0},
+            )
+            _props.update(kwargs)
+            axs6[0].annotate(text, xy=(_x, y), xytext=(tx, ty), **_props)
+
+        for arrow in fig6_chosen_events:
+            plot_arrow(**arrow)
+
+    if "collapse_plot_additional_features":
+        ax2 = vis.scatter_extras.scatter_x_distribution(axs6[0])
+        cb = vis.scatter_extras.scatter_colorbar_distribution(axs6[0])
+        cb.set_label("Event area maximum (Mkm$^2$)")
+        cb.set_secondary_label("Distribution\nof event size", size="small")
+
+    if "collapse_scatter_labelling":
+        compound_intensity_q95 = "$\\widetilde{\\mathit{I}}^{\\ Q95}_{\\rm{OAX}\\cap\\rm{MHW}}$"
+        axs6[0].set_ylabel(compound_intensity_q95, size=12)
+        axs6[0].set_xlabel("Duration [$\\mu + 2\\sigma$] (months)")
+        ax2.set_ylabel("Event duration PDF", color="#aaaaaa", va="top", loc="bottom")
+
+    if "collapse_scatter_axes_ticks":
+        axs6[0].set_ylim(1.7, 4.73)
+        ax2.set_ylim(0, 0.8)
+        ax2.set_yticks([])
+
+    if "collapse_plot_map":
+        axs6[1].coastlines(resolution="110m", color="k", lw=0.5, zorder=3)
+        axs6[1].add_feature(feature.LAND.with_scale("110m"), facecolor="0.85", zorder=2)
+        da = cxf.vis.fill_lon_gap(most_intense_avg)
+        img = da.plot.contourf(
+            ax=axs6[1],
+            transform=crs.PlateCarree(),
+            levels=np.arange(1.6, 4.7, 0.4),
+            cmap="Greens",
+            cbar_kwargs=dict(
+                orientation="horizontal", shrink=1, aspect=30, fraction=0.06, pad=0.01
+            ),
+        )
+
+    if "collapse_map_contours":
+        img.axes.contour(
+            most_extreme_contours.lon,
+            most_extreme_contours.lat,
+            most_extreme_contours,
+            transform=crs.PlateCarree(),
+            levels=[0.5, 1.5],
+            colors=["k"],
+            linewidths=[0.5],
+        )
+        img.axes.set_title("")
+        label_compound_intensity = "$\\widetilde{\\mathit{I}}^{\\ Q95}_{\\rm{OAX}\\cap\\rm{MHW}}$"
+        img.colorbar.set_label(label_compound_intensity, size=12)
+
+    if "collapse_map_annotations":
+        bf: dict[str, Any] = dict(size=11, weight="bold", va="bottom", zorder=7)
+        sf: dict[str, Any] = dict(size=7.5, va="top", zorder=7)
+
+        _props: dict[str, Any] = dict(ha="right", transform=crs.PlateCarree())
+        axs6[1].text(-155, 44, "again in 2019", size=sf["size"], **_props)
+        axs6[1].text(-155, 34, "2015", size=13, weight="bold", **_props)
+        axs6[1].text(-155, 32, "The Blob", style="italic", **sf, **_props)
+
+        _props = dict(ha="left", transform=crs.PlateCarree())
+        axs6[1].text(150, -1, "2022", **bf, **_props)
+        axs6[1].text(150, -1, "     Great Barrier Reef", **sf, **_props)
+
+        _props = dict(transform=crs.PlateCarree())
+        axs6[1].text(-140, -40, "2015", ha="left", **bf, **_props)
+        axs6[1].text(-140, -40, "South Pacific", ha="left", **sf, **_props)
+
+        _props = dict(transform=crs.PlateCarree())
+        axs6[1].text(50, -3, "1987", **bf, **_props)
+        axs6[1].text(50, -3, "Madagascar", **sf, **_props)
+
+        _props = dict(transform=crs.PlateCarree(), va="center")
+        axs6[1].text(-20, -41, "2023 ", **bf | _props | {"ha": "right"})
+        axs6[1].text(-20, -41, "Tropical\nAtlantic", **sf | _props | dict(ha="left"))
+
+        _props = dict(transform=crs.PlateCarree(), va="center")
+        axs6[1].text(120, -45, "2011 ", **bf | _props | dict(ha="right"))
+        axs6[1].text(120, -45, "Western\nAustralia", **sf | _props | dict(ha="left"))
+
+        _props = dict(transform=crs.PlateCarree())
+        axs6[1].text(-8, 23, "2003", **bf, **_props)
+        axs6[1].text(-8, 23, "MedSea", **sf, **_props)
+
+    if "collapse_map_extent":
+        axs6[1].set_extent([-180, 180, -90, 90], crs=crs.PlateCarree())  # type: ignore
+
+    # fig6_top.savefig('./figures/fig6_bot_only-with_annotations_top.pdf', bbox_inches='tight')
+    fig6
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+if __name__ == "__main__":
+    app.run()

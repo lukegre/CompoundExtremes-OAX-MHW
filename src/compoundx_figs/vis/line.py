@@ -22,7 +22,7 @@ def add_secondary_yaxis_with_custom_values(
     color="#aaaaaa",
     ticks: ArrayLike | None = None,
     tick_inverter: Callable | None = None,
-):
+) -> Axes:
     ax_second: Axes = ax.secondary_yaxis("right")  # type: ignore
     spine_props = {"visible": True, "linewidth": 0.5, "color": color}
     set_props(ax_second.spines["right"], **spine_props)
