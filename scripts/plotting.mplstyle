@@ -1,0 +1,33 @@
+mathtext.fontset: custom
+mathtext.rm: Times New Roman
+mathtext.it: Times New Roman:italic
+mathtext.bf: Times New Roman:bold
+
+lines.linewidth: 2.5
+
+axes.grid: False
+axes.linewidth: 0.5
+axes.edgecolor: k
+axes.spines.right: False
+axes.spines.top: False
+xtick.major.size: 2.5
+ytick.major.size: 2.5
+xtick.major.width: 0.5
+xtick.minor.size: 0
+ytick.minor.size: 0
+
+axes.xmargin: 0.01
+axes.ymargin: 0.01
+
+legend.facecolor: none
+legend.edgecolor: none
+
+figure.subplot.hspace: 0.07
+figure.subplot.wspace: 0.07
+figure.subplot.left: 0.05
+figure.subplot.right: 0.95
+figure.subplot.bottom: 0.075
+figure.subplot.top: 0.95
+
+savefig.dpi: 100
+figure.dpi: 100

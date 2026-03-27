@@ -1,0 +1,4 @@
+cex: s3://ocean-co2/extremes/ETHZ1v2025_cexTH_shift_poly2_p95.zarr/
+oax: s3://ocean-co2/extremes/ETHZ1v2025_ph_total_Bmean_shift_poly2_p95.zarr/
+mhw: s3://ocean-co2/extremes/ETHZ1v2025_temperature_Bmean_shift_poly2_p95.zarr/
+masks: s3://ocean-co2/extremes/masks.zarr/

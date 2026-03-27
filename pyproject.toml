@@ -1,0 +1,34 @@
+[project]
+name = "compoundx_figs"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "lukegre", email = "lukegre@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "cartopy>=0.25.0",
+    "dask>=2026.3.0",
+    "fsspec>=2026.2.0",
+    "loguru>=0.7.3",
+    "matplotlib>=3.10.8",
+    "numbagg>=0.9.4",
+    "pandas>=3.0.1",
+    "pykdtree>=1.4.3",
+    "python-dotenv>=1.2.2",
+    "s3fs>=2026.2.0",
+    "scipy>=1.17.1",
+    "seaborn>=0.13.2",
+    "xarray>=2026.2.0",
+    "zarr>=3.1.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.2.0",
+]
