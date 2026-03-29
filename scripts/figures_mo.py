@@ -445,7 +445,7 @@ def _(data, run_figures):
         if "collapse_save_figure":
             fig3_top.savefig(root / "figures/figure3_top_w7.5.pdf", dpi=300, transparent=False)
             fig3_top
-    return (num_extremes,)
+    return
 
 
 @app.cell
@@ -1188,14 +1188,14 @@ def _(ps):
 
 @app.cell
 def _():
-    num_extremes = xr.open_dataset("./data/sensitivities/cexTH_num_extremes_for_sensitivities.nc").num_extremes
-    return (num_extremes,)
+    ds_num_extremes = xr.open_dataset("./data/sensitivities/cexTH_num_extremes_for_sensitivities.nc").num_extremes
+    return (ds_num_extremes,)
 
 
 @app.cell
-def _(num_extremes):
+def _(ds_num_extremes):
     counts = (
-        num_extremes.squeeze(drop=True)
+        ds_num_extremes.squeeze(drop=True)
         .reset_coords(drop=True)
         .stack(
             Experiments=[
@@ -1212,9 +1212,38 @@ def _(num_extremes):
 
 @app.cell
 def _(counts):
-    fg = counts.plot.imshow(col="Experiments", col_wrap=3, size=2, aspect=2, robust=True, cmap="bone_r")
-    fg.set_titles("{value:.50s}")
-    fg.fig
+    fig, axs = plt.subplots(4, 3, figsize=(9, 6), subplot_kw={"projection": crs.PlateCarree(205)})
+    axs = axs.flatten()
+
+    for _ax, _da in zip(axs, counts):
+        _img = _da.plot.imshow(ax=_ax, vmin=0, vmax=28, cmap="bone_r", transform=crs.PlateCarree(), add_colorbar=False, rasterized=True)
+        _ax.set_title("")
+        _ax.add_feature(feature.LAND, facecolor="#cccccc")
+        _ax.coastlines(lw=0.5)
+
+
+    axs[0].set_title("90$^{th}$ precentile threshold")
+    axs[1].set_title("95$^{th}$ precentile threshold")
+    axs[2].set_title("99$^{th}$ precentile threshold")
+
+    subplot_props = dict(rotation=90, va="center")
+    axs[0].text(-0.06, 0.5, "1st order poly", transform=axs[0].transAxes, **subplot_props)
+    axs[3].text(-0.06, 0.5, "2nd order poly", transform=axs[3].transAxes, **subplot_props)
+    axs[6].text(-0.06, 0.5, "1st order poly", transform=axs[6].transAxes, **subplot_props)
+    axs[9].text(-0.06, 0.5, "2nd order poly", transform=axs[9].transAxes, **subplot_props)
+
+    fig.tight_layout()
+
+    plt.colorbar(mappable=_img, ax=axs, location="right", pad=0.02, label=r"Total number of  MHW$\cap$OAX  compound extremes [months]")
+
+    x = axs[0].get_position().x0 - 0.04
+    y0 = (axs[0].get_position().y1 + axs[3].get_position().y0) / 2
+    y1 = (axs[6].get_position().y1 + axs[9].get_position().y0) / 2
+    subplot_props = dict(rotation=90, va="center", ha="center", size="large")
+    fig.text(x, y0, "CMEMS-FFNNv2", **subplot_props)
+    fig.text(x, y1, "OceanSODA-ETHZv1", **subplot_props)
+
+    fig.savefig("./figures/figure_sensitivities_maps-num_compound_extreme_months.pdf", bbox_inches='tight')
     return
 
 
@@ -1230,27 +1259,46 @@ def _():
 def _():
     df_timeseries = pd.read_csv("./data/sensitivities/cexTH_timeseries_extremes_for_sensitivities.csv")
     df_timeseries["time"] = pd.to_datetime(df_timeseries.time)
-    return (df_timeseries,)
 
-
-@app.cell
-def _(df_timeseries):
     timeseries = (
         df_timeseries.drop(columns=["Baseline"])
         .set_index(["Dataset", "Polynomial order", "Threshold percentile", "time"])
         .drop_duplicates()
         .to_xarray()
-        .stack(Experiment=["Dataset", "Polynomial order", "Threshold percentile"])
+        .stack(Experiment=["Polynomial order", "Dataset"])
         .num_extremes_timeseries.sortby("time")
+        .pipe(lambda x: x / 1e12)
+        .assign_attrs(units="Mkm$^2$", long_name="Area")
     )
-    return (timeseries,)
+
+    ts_smooth = timeseries.rolling(time=12, center=True, min_periods=3).mean().rolling_exp(time=3).mean()
+    return (ts_smooth,)
 
 
 @app.cell
-def _(timeseries):
-    fg_ts = timeseries.plot.line(col="Experiment", col_wrap=3, x="time", size=2, aspect=2)
-    fg_ts.set_titles("{value:.50s}")
-    fg_ts.fig
+def _(ts_smooth):
+    fg_sens_timeseries = ts_smooth.plot.line(col="Experiment", col_wrap=2, x="time", size=2.5, aspect=1.7, add_legend=1, lw=3)
+    fig_sens_timeseries = fg_sens_timeseries.fig
+    axs_sens_timeseries = fg_sens_timeseries.axs.flatten()
+
+    fg_sens_timeseries.set_titles("")
+
+    [a.set_xlabel("") for a in axs_sens_timeseries]
+    first_order = r"1$^{\sf{st}}$ order polynomial"
+    second_order = r"2$^{\sf{nd}}$ order polynomial"
+
+    names = [
+        f"{first_order} CMEMS",
+        f"{first_order} ETHZ",
+        f"{second_order} CMEMS",
+        f"{second_order} ETHZ",
+    ]
+    labels = [f"{c}) {lbl}" for c, lbl in zip("abcd", names)]
+    vis.number_subplots(axs_sens_timeseries, labels, y=1)
+
+    lines = axs_sens_timeseries[0].get_lines()
+
+    fig_sens_timeseries.savefig('./figures/figure_sensitivities_timeseries-global_area.pdf', bbox_inches='tight')
     return
 
 
