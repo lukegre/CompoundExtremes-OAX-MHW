@@ -69,5 +69,5 @@ for _i, (_ds, _poly) in enumerate([(d, p) for d in datasets_vals for p in poly_o
     _ax.legend()
 
 fig_ts.tight_layout()
-fig_ts.savefig("/home/user/2025_CompoundExtremes_AGUadvances/figures/test_timeseries_2x2.png", dpi=150)
-print("Saved to figures/test_timeseries_2x2.png")
+fig_ts.savefig("/home/user/2025_CompoundExtremes_AGUadvances/scripts/test_output/test_timeseries_2x2.png", dpi=150)
+print("Saved to scripts/test_output/test_timeseries_2x2.png")
