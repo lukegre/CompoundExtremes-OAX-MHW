@@ -1248,10 +1248,25 @@ def _(df_timeseries):
 
 @app.cell
 def _(timeseries):
-    fg_ts = timeseries.plot.line(col="Experiment", col_wrap=3, x="time", size=2, aspect=2)
-    fg_ts.set_titles("{value:.50s}")
-    fg_ts.fig
-    return
+    ts_unstacked = timeseries.unstack("Experiment")
+
+    datasets = ts_unstacked["Dataset"].values
+    poly_orders = ts_unstacked["Polynomial order"].values
+    threshold_pcts = ts_unstacked["Threshold percentile"].values
+
+    fig_ts, axs_ts = plt.subplots(2, 2, figsize=(10, 6), sharex=True, sharey=True)
+
+    for _i, (_ds, _poly) in enumerate([(d, p) for d in datasets for p in poly_orders]):
+        _ax = axs_ts.flatten()[_i]
+        for _threshold in threshold_pcts:
+            _line = ts_unstacked.sel({"Dataset": _ds, "Polynomial order": _poly, "Threshold percentile": _threshold})
+            vis.line.smooth(_line).plot(ax=_ax, label=f"{_threshold:.0%}")
+        _ax.set_title(f"{_ds}, poly={_poly}")
+        _ax.legend()
+
+    fig_ts.tight_layout()
+    fig_ts
+    return (fig_ts,)
 
 
 @app.cell
