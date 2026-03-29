@@ -1,10 +1,20 @@
+# ruff: noqa: E402  - ignore module level import not at top of file
+# need to load .env before importing any other modules, to make sure S3 credentials are available before xarray import
 import dotenv
 
 dotenv.load_dotenv()
 
-from . import extreme_stats as stats
+from . import extreme_summary_stats as sumstats  # noqa: E402
 from . import vis
+from .carbsys_sensitivities import calc_sensitivities
 from .io import Datasets
 from .utils import get_project_root, suppress_warnings
 
-__all__ = ["Datasets", "stats", "suppress_warnings", "get_project_root"]
+__all__ = [
+    "Datasets",
+    "sumstats",
+    "suppress_warnings",
+    "get_project_root",
+    "calc_sensitivities",
+    "vis",
+]

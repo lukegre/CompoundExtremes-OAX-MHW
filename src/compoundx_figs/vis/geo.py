@@ -80,6 +80,7 @@ def map_subplot(
     import matplotlib.path as mpath
     import numpy as np
     from cartopy import crs, feature
+    from cartopy.mpl.geoaxes import GeoAxes
 
     fig = plt.gcf()
 
@@ -92,7 +93,7 @@ def map_subplot(
         height = n_row * 3.5
         fig.set_size_inches(width, height)
 
-    ax = fig.add_subplot(pos, projection=proj, **kwargs)
+    ax: GeoAxes = fig.add_subplot(pos, projection=proj, **kwargs)
 
     # makes maps round
     stereo_maps = (
@@ -110,19 +111,24 @@ def map_subplot(
 
     # adds features
     if coast_res == "110m":
-        land = ax.add_feature(feature.LAND, zorder=4, color=land_color)
+        ax.add_feature(feature.LAND, zorder=4, color=land_color)
     else:
-        land = ax.add_feature(
-            feature.NaturalEarthFeature(
-                "physical", "land", coast_res, facecolor=land_color
-            )
-        )
+        ne_feature = feature.NaturalEarthFeature
+        ax.add_feature(ne_feature("physical", "land", coast_res, facecolor=land_color), zorder=4)
 
-    ax.coastlines(
-        resolution=coast_res, color="black", linewidth=rcMaps["coast_lw"], zorder=5
+    import matplotlib.patches as mpatches
+
+    lw = float(rcMaps["coast_lw"])
+    ax.coastlines(resolution=coast_res, color="black", linewidth=lw, zorder=100)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    border = mpatches.Rectangle(
+        (0, 0), 1, 1, fill=False, edgecolor="black", linewidth=lw,
+        transform=ax.transAxes, clip_on=False, zorder=999,
     )
-    ax.spines["geo"].set_lw(rcMaps["coast_lw"])
-    ax.spines["geo"].set_zorder(5)
+    ax.add_patch(border)
+
 
     return {"ax": ax, "transform": crs.PlateCarree()}
 
@@ -145,18 +151,14 @@ def ndimage_fill_holes(da, shape=[1, 3, 3]):
     closing_structure = np.ones(shape)
     opening_structure = np.ones(shape)
 
-    closed = ndimage.binary_closing(
-        np.roll(da.values, 155, axis=-1), structure=closing_structure
-    )
+    closed = ndimage.binary_closing(np.roll(da.values, 155, axis=-1), structure=closing_structure)
     opened = ndimage.binary_opening(closed, structure=opening_structure)
 
     out = xr.DataArray(
         np.roll(opened, -155, axis=-1),
         dims=da.dims,
         coords=da.coords,
-        attrs=dict(
-            description="an extreme mask filtered so that the minimum duration of "
-        ),
+        attrs=dict(description="an extreme mask filtered so that the minimum duration of "),
     )
 
     return out
@@ -184,9 +186,7 @@ class Mapping(object):
         plot_kwargs = ["levels", "cmap", "vmin", "vmax"]
         da_props = {k: da.attrs[k] for k in plot_kwargs if k in da.attrs}
 
-        da = da.assign_coords(lon=lambda x: x[self._lon_name] % 360).sortby(
-            self._lon_name
-        )
+        da = da.assign_coords(lon=lambda x: x[self._lon_name] % 360).sortby(self._lon_name)
         da = fill_lon_gap(da)
 
         self._get_cbar_kwargs(kwargs)
@@ -227,9 +227,7 @@ class Mapping(object):
     def contour(self, **kwargs):
         return self._plot(**kwargs, plot_func="contour")
 
-    def _text(
-        self, s, x=90, y=50, ha="center", va="center", weight="bold", size=12, **props
-    ):
+    def _text(self, s, x=90, y=50, ha="center", va="center", weight="bold", size=12, **props):
         """
         Write a title to the map, rather than above the map.
         Will remove any axes titles. These can be returned with img.axes.set_title
@@ -252,7 +250,7 @@ class Mapping(object):
         from cartopy import crs
 
         kwargs = dict(transform=crs.PlateCarree(), zorder=30)
-        kwargs.update(**props, **dict(ha=ha, va=va, weight=weight, size=size))
+        kwargs = kwargs | props | dict(ha=ha, va=va, weight=weight, size=size)
         self.axes.set_title("")
         text = self.axes.text(x, y, s, **kwargs)
         return text
@@ -276,15 +274,11 @@ class Mapping(object):
         from cartopy.crs import PlateCarree
 
         x0, x1, y0, y1 = extent
-        return self.axes.plot(
-            [x0, x1], [y0, y1], lw=0, zorder=10, transform=PlateCarree()
-        )
+        return self.axes.plot([x0, x1], [y0, y1], lw=0, zorder=10, transform=PlateCarree())
 
     @staticmethod
     def _get_cbar_kwargs(kwargs):
-        cbar_defaults = {
-            k.split(".")[1]: v for k, v in rcMaps.items() if k.startswith("colorbar")
-        }
+        cbar_defaults = {k.split(".")[1]: v for k, v in rcMaps.items() if k.startswith("colorbar")}
         cbar_opts = cbar_defaults
         if kwargs.get("add_colorbar", True):
             if "cbar_kwargs" in kwargs:

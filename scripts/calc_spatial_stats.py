@@ -8,9 +8,9 @@ import compoundx_figs as cxf
 
 ROOT = cxf.get_project_root()
 
-FUNC_INTENSITY = cxf.suppress_warnings(cxf.stats.calc_intensity_mean_max)
-FUNC_SEVERITY = cxf.suppress_warnings(cxf.stats.calc_severity_sum_max)
-FUNC_DURATION = cxf.suppress_warnings(cxf.stats.calc_duration_ann_avg)
+FUNC_INTENSITY = cxf.suppress_warnings(cxf.sumstats.calc_intensity_mean_max)
+FUNC_SEVERITY = cxf.suppress_warnings(cxf.sumstats.calc_severity_sum_max)
+FUNC_DURATION = cxf.suppress_warnings(cxf.sumstats.calc_duration_ann_avg)
 
 UNITS_nMLKG = "nmol.kg$^{-1}$"
 CMAP_MHW = "Oranges"
@@ -61,7 +61,7 @@ def calc_stats(data: cxf.Datasets):
     stats_dict = {
         "mhw_I": calc_intensity(data.mhw.intensity, data.mhw.mask),
         "mhw_In": calc_intensity(data.mhw.intensity_norm, data.mhw.mask),
-        "mhw_Iann": cxf.stats.calc_intensity_ann_max(data.mhw.intensity, data.mhw.mask),
+        "mhw_Iann": cxf.sumstats.calc_intensity_ann_max(data.mhw.intensity, data.mhw.mask),
         "oax_I": calc_intensity(data.oax.intensity, data.oax.mask),
         "oax_In": calc_intensity(data.oax.intensity_norm, data.oax.mask),
         "cex_mhw_I": calc_intensity(data.mhw.intensity, data.cex.mask),

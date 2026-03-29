@@ -14,7 +14,7 @@ def suppress_warnings(func):
     return wrapper
 
 
-def get_project_root(ref_file="pyproject.toml"):
+def get_project_root(ref_file="pyproject.toml") -> pathlib.Path:
     """Get the project root directory."""
 
     fname = dotenv.find_dotenv(ref_file)
