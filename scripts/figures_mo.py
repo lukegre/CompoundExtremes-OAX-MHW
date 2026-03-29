@@ -1221,13 +1221,20 @@ def _(counts):
 @app.cell
 def _():
     df_timeseries = pd.read_csv("./data/sensitivities/cexTH_timeseries_extremes_for_sensitivities.csv")
-    df_timeseries['time'] = pd.to_datetime(df_timeseries.time)
+    df_timeseries["time"] = pd.to_datetime(df_timeseries.time)
     return (df_timeseries,)
 
 
 @app.cell
 def _(df_timeseries):
-    timeseries = df_timeseries.drop(columns=["Baseline"]).set_index(["Dataset", "Polynomial order", "Threshold percentile", "time"]).drop_duplicates().to_xarray().stack(Experiment=["Dataset", "Polynomial order", "Threshold percentile"]).num_extremes_timeseries.sortby('time')
+    timeseries = (
+        df_timeseries.drop(columns=["Baseline"])
+        .set_index(["Dataset", "Polynomial order", "Threshold percentile", "time"])
+        .drop_duplicates()
+        .to_xarray()
+        .stack(Experiment=["Dataset", "Polynomial order", "Threshold percentile"])
+        .num_extremes_timeseries.sortby("time")
+    )
     return (timeseries,)
 
 
