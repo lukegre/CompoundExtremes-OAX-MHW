@@ -78,9 +78,13 @@ for _ax_right in axs_ts[:, 1]:
         tick_inverter=lambda x: x / 100 * _total_ocean_mkm2,
     )
 
+for _ax in axs_ts[1, :]:
+    _ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+
 axs_ts[0, 0].legend()
 vis.line.set_fig_ylabel(axs_ts[:, 0].tolist(), "Area (Mkm$^2$)", x=-0.05)
 vis.line.set_fig_ylabel(axs_ts[:, 1].tolist(), "% Ocean area", x=0.97)
 
-fig_ts.savefig("/home/user/2025_CompoundExtremes_AGUadvances/scripts/test_output/test_timeseries_2x2.png", dpi=150)
+fig_ts.tight_layout()
+fig_ts.savefig("/home/user/2025_CompoundExtremes_AGUadvances/scripts/test_output/test_timeseries_2x2.png", dpi=150, bbox_inches="tight")
 print("Saved to scripts/test_output/test_timeseries_2x2.png")

@@ -1273,10 +1273,14 @@ def _(timeseries):
             tick_inverter=lambda x: x / 100 * _total_ocean_mkm2,
         )
 
+    for _ax in axs_ts[1, :]:
+        _ax.xaxis.set_major_locator(plt.MaxNLocator(5))
+
     axs_ts[0, 0].legend()
     vis.line.set_fig_ylabel(axs_ts[:, 0].tolist(), "Area (Mkm$^2$)", x=-0.05)
     vis.line.set_fig_ylabel(axs_ts[:, 1].tolist(), "% Ocean area", x=0.97)
 
+    fig_ts.tight_layout()
     fig_ts
     return (fig_ts,)
 
