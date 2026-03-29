@@ -1218,6 +1218,14 @@ def _(counts):
     return
 
 
+@app.cell(hide_code=True)
+def _():
+    mo.md(r"""
+    # Time series senesitivity
+    """)
+    return
+
+
 @app.cell
 def _():
     df_timeseries = pd.read_csv("./data/sensitivities/cexTH_timeseries_extremes_for_sensitivities.csv")
