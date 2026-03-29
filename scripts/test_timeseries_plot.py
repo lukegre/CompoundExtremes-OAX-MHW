@@ -59,7 +59,7 @@ _poly_orders = _ts["Polynomial order"].values
 _threshold_pcts = _ts["Threshold percentile"].values
 _total_ocean_mkm2 = 361.0
 
-fig_ts, axs_ts = plt.subplots(2, 2, figsize=(10, 6), sharex=True, sharey=True)
+fig_ts, axs_ts = plt.subplots(2, 2, figsize=(7.7, 4.5), sharex=True, sharey=True)
 
 for _i, (_ds, _poly) in enumerate([(_d, _p) for _d in _datasets for _p in _poly_orders]):
     _ax = axs_ts.flatten()[_i]
