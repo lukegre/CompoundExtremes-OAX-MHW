@@ -77,7 +77,10 @@ def set_fig_ylabel(axs: dict[str, Axes] | list[Axes], labels: str, x=-0.01, y=0.
     upper_y = max(ax.get_position().y1 for ax in axs)
     lower_y = min(ax.get_position().y0 for ax in axs)
     y = lower_y + y * (upper_y - lower_y)
-    x = axs[0].get_position().x0 + x
+    if x > 0.5:
+        x = axs[0].get_position().x1 + (x - 1)
+    else:
+        x = axs[0].get_position().x0 + x
 
     fig = axs[0].get_figure()
 
