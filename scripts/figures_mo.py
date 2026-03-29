@@ -1266,11 +1266,12 @@ def _(timeseries):
         _ax.set_xlabel("")
         _ax.set_ylabel("")
 
-    for _ax_right in axs_ts[:, 1]:
+    for _i, _ax_right in enumerate(axs_ts[:, 1]):
         _ax2 = vis.line.add_secondary_yaxis_with_custom_values(
             _ax_right,
             ticks=[5, 10, 15, 20],
             tick_inverter=lambda x: x / 100 * _total_ocean_mkm2,
+            label="% Ocean area" if _i == 0 else None,
         )
 
     for _ax in axs_ts[1, :]:
@@ -1279,7 +1280,6 @@ def _(timeseries):
     axs_ts[0, 0].legend()
     fig_ts.tight_layout()
     vis.line.set_fig_ylabel(axs_ts[:, 0].tolist(), "Area (Mkm$^2$)", x=-0.05)
-    vis.line.set_fig_ylabel(axs_ts[:, 1].tolist(), "% Ocean area", x=0.97)
 
     fig_ts
     return (fig_ts,)

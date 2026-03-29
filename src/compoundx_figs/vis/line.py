@@ -22,6 +22,7 @@ def add_secondary_yaxis_with_custom_values(
     color="#aaaaaa",
     ticks: ArrayLike | None = None,
     tick_inverter: Callable | None = None,
+    label: str | None = None,
 ) -> Axes:
     ax_second: Axes = ax.secondary_yaxis("right")  # type: ignore
     spine_props = {"visible": True, "linewidth": 0.5, "color": color}
@@ -30,6 +31,9 @@ def add_secondary_yaxis_with_custom_values(
 
     if ticks is not None and tick_inverter is not None:
         custom_tick_values(ax_second.yaxis, ticks, tick_inverter)
+
+    if label is not None:
+        ax_second.set_ylabel(label, color=color)
 
     return ax_second
 
