@@ -310,8 +310,8 @@ def smoothen_line(da: xr.DataArray, dim="time", resample_freq="1D", radius=7) ->
 
 
 def plot_ribbon_with_thick_y0(
-    y0,
-    y1,
+    y0: xr.DataArray,
+    y1: xr.DataArray,
     ax: Axes | None = None,
     color: str | None = None,
     zorder: int | None = None,
@@ -337,7 +337,9 @@ def plot_ribbon_with_thick_y0(
     return ax
 
 
-def plot_driver_magnitude_ribbon(magnitude, climatology, ax: Axes | None = None) -> Axes:
+def plot_driver_magnitude_ribbon(
+    magnitude: xr.DataArray, climatology: xr.DataArray, ax: Axes | None = None
+) -> Axes:
     if ax is None:
         fig, ax = plt.subplots(figsize=[7.5, 3])
 

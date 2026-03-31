@@ -1,15 +1,34 @@
+import os
 from string import ascii_lowercase as alphabet
 
 import matplotlib.axes
 import matplotlib.cm
 import seaborn as sns
 from loguru import logger
+from PIL import Image
 
 
 def _set_styles():
 
     sns.set_style("ticks")
     sns.set_palette("deep")
+
+
+def center_image(ax, ref_axs):
+    pos = ax.get_position()
+    width = pos.width
+    height = pos.height
+
+    ref_x0 = min([a.get_position().x0 for a in ref_axs])
+    ref_x1 = max([a.get_position().x1 for a in ref_axs])
+    center = (ref_x0 + ref_x1) / 2
+
+    y0 = pos.y0
+    x0 = center - width / 2
+
+    ax.set_position([x0, y0, width, height])
+
+    return x0, y0, width, height
 
 
 def set_props(artist, **props) -> None:
@@ -144,4 +163,48 @@ def save_figures_to_pdf(fig_list, pdf_name, **savefig_kwargs):
     plt.close("all")
 
 
-_set_styles()
+def combine_figures_vertically(fig1, fig2, save_path=None, **kwargs):
+    """
+    Combines two figures vertically and optionally saves the result to a file.
+    Parameters
+    ----------
+    fig1 : matplotlib.figure.Figure
+        The first figure to combine.
+    fig2 : matplotlib.figure.Figure
+        The second figure to combine.
+    save_path : str, optional
+        If provided, the path to save the combined figure to.
+    kwargs : key-value pairs passed to ``Figure.savefig`` when saving the combined figure
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        The combined figure.
+    """
+
+    # Save the figures to temporary files
+    fig1_path = "temp_fig1.png"
+    fig2_path = "temp_fig2.png"
+    fig1.savefig(fig1_path, **kwargs)
+    fig2.savefig(fig2_path, **kwargs)
+
+    # Open the images and combine them vertically
+    im1 = Image.open(fig1_path)
+    im2 = Image.open(fig2_path)
+
+    width = max(im1.width, im2.width)
+    total_height = im1.height + im2.height
+
+    new_im = Image.new("RGB", (width, total_height), color="#ffffff")
+    new_im.paste(im1, (0, 0))
+    new_im.paste(im2, (0, im1.height))
+
+    # Save the combined image if a save path is provided
+    if save_path:
+        new_im.save(save_path)
+
+    # remove temporary files
+    os.remove(fig1_path)
+    os.remove(fig2_path)
+
+    return new_im

@@ -63,7 +63,7 @@ def calc_sensitivities(
     sal: xr.DataArray,
     temp: xr.DataArray,
     normalize_to_sal: bool = True,
-    **kwargs
+    **kwargs,
 ) -> xr.Dataset:
     """
     Find the carbonate system sensitivities of pCO2, H+, Omega to

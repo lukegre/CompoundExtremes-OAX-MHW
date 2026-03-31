@@ -7,7 +7,8 @@ dotenv.load_dotenv()
 from . import extreme_summary_stats as sumstats  # noqa: E402
 from . import vis
 from .carbsys_sensitivities import calc_sensitivities
-from .io import Datasets
+from .disk_cache import disk_cache
+from .io import Datasets, get_oni_data
 from .utils import get_project_root, suppress_warnings
 
 __all__ = [
@@ -15,6 +16,8 @@ __all__ = [
     "sumstats",
     "suppress_warnings",
     "get_project_root",
+    "get_oni_data",
     "calc_sensitivities",
     "vis",
+    "disk_cache",
 ]

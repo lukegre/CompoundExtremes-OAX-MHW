@@ -57,7 +57,7 @@ class Datasets:
                 mhw=xr.open_zarr(fnames.mhw),
                 cex=xr.open_zarr(fnames.cex),
                 masks=xr.open_zarr(fnames.masks),
-                aux=xr.open_zarr(fnames.aux),
+                aux=xr.open_zarr(fnames.aux).reset_coords(drop=True),
             )
 
     @classmethod
@@ -82,3 +82,25 @@ class Datasets:
             masks=getattr(self.masks, func)(**kwargs),
             aux=getattr(self.aux, func)(**kwargs),
         )
+
+
+def get_oni_data():
+    import pandas as pd
+
+    df = pd.read_fwf(
+        "http://www.esrl.noaa.gov/psd/data/correlation/oni.data",
+        infer_nrows=10,
+        index_col=0,
+        names=range(1, 13),
+        skiprows=1,
+        na_values=99.9,
+    )
+    df = df.iloc[: 2025 - 1950].astype(float).T.unstack(level=0)
+
+    df = df.reset_index()
+    df.columns = ["year", "month", "oni"]
+    df = df.astype(dict(year=str, month=str, oni=float))
+    df["time"] = pd.to_datetime(df.year + "-" + df.month.str.zfill(2))
+    oni = df.set_index("time")["oni"].loc["1982":"2025"]
+
+    return oni

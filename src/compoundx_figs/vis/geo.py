@@ -116,19 +116,13 @@ def map_subplot(
         ne_feature = feature.NaturalEarthFeature
         ax.add_feature(ne_feature("physical", "land", coast_res, facecolor=land_color), zorder=4)
 
-    import matplotlib.patches as mpatches
-
     lw = float(rcMaps["coast_lw"])
     ax.coastlines(resolution=coast_res, color="black", linewidth=lw, zorder=100)
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-    border = mpatches.Rectangle(
-        (0, 0), 1, 1, fill=False, edgecolor="black", linewidth=lw,
-        transform=ax.transAxes, clip_on=False, zorder=999,
-    )
-    ax.add_patch(border)
-
+    for name, spine in ax.spines.items():
+        if name != "geo":
+            spine.set_visible(False)
+        else:
+            spine.set_linewidth(lw)
 
     return {"ax": ax, "transform": crs.PlateCarree()}
 
