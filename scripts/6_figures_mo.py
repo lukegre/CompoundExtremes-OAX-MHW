@@ -9,9 +9,8 @@ app = marimo.App(width="full")
 with app.setup:
     import marimo as mo
 
-    import pathlib
     import warnings
-    from typing import Any, Literal
+    from typing import Any
 
     import matplotlib.pyplot as plt
     import numpy as np
@@ -21,11 +20,9 @@ with app.setup:
     import seaborn as sns
     import xarray as xr
     from cartopy import crs, feature
-    from dask.diagnostics.progress import ProgressBar
     from dataclasses import dataclass
     from dataclasses import field as dataclass_field
-    from scipy.ndimage import label, binary_dilation
-    import copernicusmarine 
+    import copernicusmarine
 
     import compoundx_figs as cxf
     from compoundx_figs import vis
@@ -50,23 +47,12 @@ def _():
 
 @app.cell
 def load_data():
-    data = cxf.Datasets.from_yaml(root / "data/sources.yaml", with_cache=True)
-    ds_spatial_stats: xr.Dataset = xr.open_zarr(root / "data/derived/spatial_stats_top1000.zarr")
-    df_event_stats = pd.read_csv(root / "data/derived/event_stats.csv", index_col=0).assign(year_start=lambda x: x.year_start_decimal // 1)
-    drivers = ged.calc_drivers(data)
-    return data, df_event_stats, drivers, ds_spatial_stats
-
-
-@app.cell
-def _(data):
-    corr= xr.corr(data.mhw.intensity_norm, data.oax.intensity_norm, dim="time").compute()
-    corr_neg = corr > 0
-
-    pct_occurance = data.cex.mask.sum("time").compute() / data.cex.time.size * 100
-    da_ = pct_occurance.where(data.masks.regions_HL.load() == 2).compute().where(corr_neg)
-    da_.mean()
-    # da_.plot.imshow()
-    return
+    data = cxf.Datasets.from_yaml(root / "data/sources.yaml")
+    ds_spatial_stats: xr.Dataset = xr.open_zarr(root / "data/v2025/spatial_stats_top1000.zarr")
+    df_event_stats = pd.read_csv(root / "data/v2025/event_stats.csv", index_col=0).assign(year_start=lambda x: x.year_start_decimal // 1)
+    drivers = xr.open_zarr(root / "data/v2025/carbsys_drivers/carbsys_drivers_full_area.zarr/")
+    baseline_choices = xr.open_dataset(root / "data/v2025/cexTH_stats_for_baseline_choices.nc")
+    return baseline_choices, data, df_event_stats, drivers, ds_spatial_stats
 
 
 @app.cell(hide_code=True)
@@ -206,8 +192,8 @@ def _(ExtremeTimeseriesData, data, get_timeseries_exremes):
         )
 
     if "collapse_save_figure":
-        fig1.savefig(root / "figures/figure1_schematic_w5.2.png", dpi=300, transparent=True, bbox_inches="tight")
-        fig1.savefig(root / "figures/figure1_schematic_w5.2.pdf", bbox_inches="tight")
+        # fig1.savefig(root / "figures/figure1_schematic_w5.2.png", dpi=300, transparent=True, bbox_inches="tight")
+        # fig1.savefig(root / "figures/figure1_schematic_w5.2.pdf", bbox_inches="tight")
         ...
 
     fig1
@@ -491,7 +477,7 @@ def _(data):
 
 @app.cell
 def _(data, num_extremes_summer, num_extremes_winter):
-    num_extremes_summer.where(data.masks.regions_HL==2).mean() / num_extremes_winter.where(data.masks.regions_HL==2).mean()
+    num_extremes_summer.where(data.masks.regions_HL == 2).mean() / num_extremes_winter.where(data.masks.regions_HL == 2).mean()
     return
 
 
@@ -710,7 +696,7 @@ def _(df_event_stats):
         axs5 = axs5.T.flatten()
 
     if "collapse_plot_distributions":
-        axs5_props: dict[str, Any] = dict(annot=False, dist_func=dists.lognorm, lw=1, edgecolor='w')
+        axs5_props: dict[str, Any] = dict(annot=False, dist_func=dists.lognorm, lw=1, edgecolor="w")
         axs5[0] = plot_distribution(
             ax=axs5[0],
             bins=np.arange(0, 2.1, 0.1),
@@ -752,7 +738,7 @@ def _(df_event_stats):
     if "collapse_annotations":
         for i, a in enumerate(axs5):
             _d = a.description
-            s, loc, scale = _d['args']
+            s, loc, scale = _d["args"]
             mu = scale
             sigma = s
             txt = r"Log Norm ($\mu, \sigma$)" + "\n"
@@ -847,7 +833,6 @@ def plot_extreme_events_scatter(
             warnings.filterwarnings("ignore", category=UserWarning, message=".*colormapping.*")
 
             for _i in highlight_index:
-
                 df_sorted_highlighted = df_sorted.loc[[_i]]
 
                 _props.update(linewidth=3, zorder=5, c=c, edgecolor="w", marker="o")
@@ -857,27 +842,6 @@ def plot_extreme_events_scatter(
                 df_sorted_highlighted.plot.scatter(ax=ax, **_props)
 
     vis.scatter_extras.buffer_axis_limits(ax)
-
-
-@app.cell
-def _(data):
-    df_events = data.cex.stats.reset_coords(drop=True).to_series().unstack(0)
-    big_idx = df_events[(
-        # (df_events.area_max_Mkm2 > 1.5)
-        (df_events.duration_2sigma_mon > 2)
-    ) & (df_events['cex_intensity_norm_p95'] > 3.5)
-    & df_events.loc_basin.isin([1,2,3])].index
-
-    e = []
-    for k in big_idx:
-        e += (data.cex.blobs == k).sum("time").compute().expand_dims(event=[k]),
-
-    e = xr.concat(e, dim="event")
-
-    fg = e.where(e>0).plot.imshow(col_wrap=3, col="event", subplot_kws={"projection": crs.PlateCarree(205)}, cmap="turbo", aspect=2, size=2, transform=crs.PlateCarree())
-    [ax.coastlines() for ax in fg.axs.flat]
-    fg.fig
-    return
 
 
 @app.cell
@@ -892,7 +856,7 @@ def _(data, df_event_stats):
             dict(idx=350, text="South\nPacific\n(2015)", dx=0.4, dy=-0.8, ha="center"),
             dict(idx=26, text="Madagascar\n(1987)", dx=0.45, dy=0.45, ha="center"),
             dict(idx=435, text="Barrier\nReef\n(2022)", dx=0.2, dy=-0.45, ha="right"),
-            dict(idx=450, text="North\nAtlantic\n(2023)", dx=-.25, dy=0.2, ha="right"),
+            dict(idx=450, text="North\nAtlantic\n(2023)", dx=-0.25, dy=0.2, ha="right"),
             dict(idx=460, text="South\nAtlantic\n(2023)", dx=0.4, dy=0.6, ha="center"),
         ]
 
@@ -1013,11 +977,11 @@ def _(data, df_event_stats):
 
         _props = dict(transform=crs.PlateCarree(), va="center")
         axs6[1].text(-48, 45, "2023 ", **bf | _props | {"ha": "left", "va": "bottom"})
-        axs6[1].text(-48, 45, "North\nAtlantic", **sf | _props | dict(ha="left", va='top'))
+        axs6[1].text(-48, 45, "North\nAtlantic", **sf | _props | dict(ha="left", va="top"))
 
         _props = dict(transform=crs.PlateCarree(), va="center")
         axs6[1].text(-20, -30, "2023 ", **bf | _props | {"ha": "right", "va": "top"})
-        axs6[1].text(-20, -30, "South\nAtlantic", **sf | _props | dict(ha="left", va='top'))
+        axs6[1].text(-20, -30, "South\nAtlantic", **sf | _props | dict(ha="left", va="top"))
 
         _props = dict(transform=crs.PlateCarree(), va="center")
         axs6[1].text(120, -45, "2011 ", **bf | _props | dict(ha="right"))
@@ -1032,6 +996,7 @@ def _(data, df_event_stats):
 
     if "collapse_save_figure":
         # fig6.savefig(root / "figures/figure6-with_annotations.pdf", bbox_inches="tight")
+        fig6.savefig(root / "figures/figure6-with_annotations.png", bbox_inches="tight", dpi=120)
         ...
     fig6
     return event_idxs, fig6_chosen_events
@@ -1234,8 +1199,8 @@ def _(data):
 @app.cell
 def _(namhw_extreme):
     extreme = namhw_extreme
-    seas_ampl_drivers = extreme.drivers.groupby('time.month').mean().squeeze().compute().to_series().unstack(0)
-    seas_ampl_h = extreme.oax.data.groupby('time.month').mean().squeeze().compute().to_series()
+    seas_ampl_drivers = extreme.drivers.groupby("time.month").mean().squeeze().compute().to_series().unstack(0)
+    seas_ampl_h = extreme.oax.data.groupby("time.month").mean().squeeze().compute().to_series()
     (seas_ampl_drivers.max() - seas_ampl_drivers.min()), (seas_ampl_h.max() - seas_ampl_h.min())
     return
 
@@ -1392,6 +1357,7 @@ def _(data):
         percent = robust * 100
         return percent.assign_attrs(long_name=" (%)").compute()
 
+
     if "collapse_prep_data":
         detrended = data.aux - data.aux.map(eed.calc_trend)
         season_grp = detrended.groupby("time.month")
@@ -1445,13 +1411,13 @@ def _():
 
 @app.cell
 def _():
-    def smoothen_line(da, dim='time', resample_freq='1D', radius=7):
+    def smoothen_line(da, dim="time", resample_freq="1D", radius=7):
         """
         Make a low resolution time series and give it smooth corners
         """
         if isinstance(resample_freq, str):
             resampled = da.resample(**{dim: resample_freq})  # first make the data higher resolution
-            interpolated = resampled.interpolate(kind='linear')  # then interpolate nans to make continuous
+            interpolated = resampled.interpolate(kind="linear")  # then interpolate nans to make continuous
             smoothed = interpolated.rolling_exp(**{dim: radius, "center": True}).mean()  # make corners smooth with rolling exponential func
             smoothed = smoothed.assign_coords(time=interpolated.time)
 
@@ -1461,8 +1427,8 @@ def _():
             xd = resample_freq
 
             reindexed = da.reindex(time=np.arange(x0, x1, xd))
-            interpolated = reindexed.interpolate_na(dim=dim, method='linear')
-            smoothed = interpolated.rolling_exp(**{dim: radius, 'center': True}).mean()
+            interpolated = reindexed.interpolate_na(dim=dim, method="linear")
+            smoothed = interpolated.rolling_exp(**{dim: radius, "center": True}).mean()
 
         return smoothed
 
@@ -1477,7 +1443,9 @@ def _():
     ds_blob = xr.open_dataset(root / "data/raw/OceanSODA-ETHZ1v2025.OCADS-BlobCore_27N130W-1982_2024.nc")
 
     ds_cmems = copernicusmarine.open_dataset("cmems_obs-mob_glo_bgc-car_my_irr-i")
-    da_CMEMS_TA = ds_cmems.talk.sel(latitude=26.5, longitude=-129.5, method="nearest").compute().assign_coords(time=lambda x: x.time + pd.Timedelta(days=14))
+    da_CMEMS_TA = (
+        ds_cmems.talk.sel(latitude=26.5, longitude=-129.5, method="nearest").compute().assign_coords(time=lambda x: x.time + pd.Timedelta(days=14))
+    )
     da_CMEMS_sTA = da_CMEMS_TA / ds_blob.salinity * 34.5
 
     ds_blob["hplus"] = cxf.ph_to_hplus_nmol(ds_blob.ph_total)
@@ -1505,7 +1473,14 @@ def _():
     ax13.set_xlabel("")
     ax13.set_ylim(-1.3, 3.2)
 
-    ax13.legend(loc="upper left", frameon=True, fontsize=10, ncol=2, framealpha=1, facecolor="white", )
+    ax13.legend(
+        loc="upper left",
+        frameon=True,
+        fontsize=10,
+        ncol=2,
+        framealpha=1,
+        facecolor="white",
+    )
     ax13.set_title("")
 
     fig13.savefig(root / "figures/figure13_blob_drivers_normalized_intensity.pdf", bbox_inches="tight")
@@ -1726,7 +1701,6 @@ def _(data, plot_hist_bar_and_density, series_to_text):
         axsA8[1].text(x=0.6, s=series_to_text("OAX$\cap$MHW", summary.oax_cex.abs()), **props_text_oax)
         axsA8[1].text(x=0.9, s=series_to_text("OAX", summary.oax.abs()), **props_text_oax, alpha=0.5)
 
-
     if "collapse_labelling":
         [vis.utils.clear_labels(ax) for ax in axsA8]
         axsA8[0].set_ylabel("Frequency")
@@ -1744,7 +1718,7 @@ def _(data, plot_hist_bar_and_density, series_to_text):
 @app.cell(hide_code=True)
 def _():
     mo.md(r"""
-    ## A5, A6 Experiment violin plots
+    ## Experiment violin plots
     """)
     return
 
@@ -1757,12 +1731,12 @@ def _():
 
 
 @app.cell
-def _(ps):
+def _(baseline_choices, ps):
     if "collapse_data_prep":
         keys = ps.VIOLINPLOT_Y_KEYS
         colors = ps.COLORS
 
-        ds = ps.open_data()
+        ds = baseline_choices
         ds = ds.assign_coords({"Threshold percentile": [90, 95, 97.5]})
 
 
@@ -1776,8 +1750,8 @@ def _(ps):
             fig_sens_polyorder, axs_sens_polyorder = ps.plot_violinplots_2x2(ds, keys, suptitle_text="", hue=hue, legend_subplot="b")
             axs_sens_polyorder["b"].legend(ncol=2, title=hue, loc="upper right", edgecolor="#aaaaaa", frameon=True, facecolor="white", framealpha=1)
 
-            fig_sens_polyorder.savefig(root / "figures/figureA5_sensitivities_violins-hue_polyorder.pdf", bbox_inches="tight")
-            fig_sens_polyorder.savefig(root / "figures/figureA5_sensitivities_violins-hue_polyorder.png", bbox_inches="tight", dpi=300)
+            # fig_sens_polyorder.savefig(root / "figures/figureA5_sensitivities_violins-hue_polyorder.pdf", bbox_inches="tight")
+            # fig_sens_polyorder.savefig(root / "figures/figureA5_sensitivities_violins-hue_polyorder.png", bbox_inches="tight", dpi=300)
 
     if "collapse_plot_dataset_hue":
         with ps.color_context(colors[2:5:2][::-1]):
@@ -1786,8 +1760,8 @@ def _(ps):
             fig_sens_dataset, axs_sens_dataset = ps.plot_violinplots_2x2(ds, keys, suptitle_text="", hue=hue, legend_subplot="b")
             axs_sens_dataset["b"].legend(ncol=1, title=hue, loc="upper right", edgecolor="#aaaaaa", frameon=True, facecolor="white", framealpha=1)
 
-            fig_sens_dataset.savefig(root / "figures/figureA6_sensitivities_violins-hue_datasets.pdf", bbox_inches="tight")
-            fig_sens_dataset.savefig(root / "figures/figureA6_sensitivities_violins-hue_datasets.png", bbox_inches="tight", dpi=300)
+            # fig_sens_dataset.savefig(root / "figures/figureA6_sensitivities_violins-hue_datasets.pdf", bbox_inches="tight")
+            # fig_sens_dataset.savefig(root / "figures/figureA6_sensitivities_violins-hue_datasets.png", bbox_inches="tight", dpi=300)
     fig_sens_polyorder, fig_sens_dataset
     return
 
@@ -1801,9 +1775,9 @@ def _():
 
 
 @app.cell
-def _():
+def _(baseline_choices):
     if "collapse_prep_data":
-        ds_num_extremes = xr.open_dataset(root / "data/v2025/cexTH_stats_for_sensitivities_with_maps_and_timeseries.nc").num_extremes
+        ds_num_extremes = baseline_choices.num_extremes
 
         counts = (
             ds_num_extremes.squeeze(drop=True)
@@ -1855,8 +1829,8 @@ def _():
 
     if "collapse_save":
         ...
-        fig.savefig(root / "figures/figureA7_sensitivities_maps-num_compound_extreme_months.pdf", bbox_inches="tight")
-        fig.savefig(root / "figures/figureA7_sensitivities_maps-num_compound_extreme_months.png", bbox_inches="tight", dpi=300)
+        # fig.savefig(root / "figures/figureA7_sensitivities_maps-num_compound_extreme_months.pdf", bbox_inches="tight")
+        # fig.savefig(root / "figures/figureA7_sensitivities_maps-num_compound_extreme_months.png", bbox_inches="tight", dpi=300)
 
 
     fig
@@ -1872,13 +1846,9 @@ def _():
 
 
 @app.cell
-def _():
+def _(baseline_choices):
     if "collapse_prep_data":
-        # ds_num_extremes = xr.open_dataset(root / "data/v2025/cexTH_stats_for_sensitivities_with_maps_and_timeseries.nc").num_extremes
-        # df_timeseries = pd.read_csv("./data/sensitivities/cexTH_timeseries_extremes_for_sensitivities.csv")
-        # df_timeseries["time"] = pd.to_datetime(df_timeseries.time)
-
-        df_timeseries = xr.open_dataset(root / "data/v2025/cexTH_stats_for_sensitivities_with_maps_and_timeseries.nc").area_extremes.to_series().reset_index()
+        df_timeseries = baseline_choices.timeseries.to_series().reset_index()
 
         timeseries = (
             df_timeseries.drop(columns=["Baseline"])
@@ -1886,7 +1856,7 @@ def _():
             .drop_duplicates()
             .to_xarray()
             .stack(Experiment=["Polynomial order", "Dataset"])
-            .area_extremes.sortby("time")
+            .timeseries.sortby("time")
             .pipe(lambda x: x / 1e12)
             .assign_attrs(units="Mkm$^2$", long_name="Area")
         )
@@ -1915,8 +1885,8 @@ def _():
         vis.number_subplots(axs_sens_timeseries, labels, y=1)
 
     if "collapse_savefig":
-        fig_sens_timeseries.savefig(root / "figures/figureA8_sensitivities_timeseries-global_area.pdf", bbox_inches="tight")
-        fig_sens_timeseries.savefig(root / "figures/figureA8_sensitivities_timeseries-global_area.png", bbox_inches="tight", dpi=300)
+        # fig_sens_timeseries.savefig(root / "figures/figureA8_sensitivities_timeseries-global_area.pdf", bbox_inches="tight")
+        # fig_sens_timeseries.savefig(root / "figures/figureA8_sensitivities_timeseries-global_area.png", bbox_inches="tight", dpi=300)
 
         ...
     fig_sens_timeseries

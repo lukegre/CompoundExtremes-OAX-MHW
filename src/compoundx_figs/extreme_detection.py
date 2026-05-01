@@ -4,6 +4,7 @@ import pathlib
 import dotenv
 import numpy as np
 import xarray as xr
+from loguru import logger
 
 from .compound_extremes import get_compound_extremes  # noqa: F401
 
@@ -54,10 +55,10 @@ def get_extremes(
     )
 
     if os.path.isfile(fname) and (not overwrite):
-        print(f"Loading {fname}")
+        logger.info(f"Loading {fname}")
         return xr.open_dataset(fname, chunks={})
 
-    print(f"File will be written to {fname}")
+    logger.info(f"File will be written to {fname}")
 
     ds = detect_extremes(
         da, baseline_type, quantile=quantile, order=order, clim_agg_func=baseline_func
@@ -70,7 +71,7 @@ def get_extremes(
     ds["severity"] = calc_severity_rolling(ds.intensity.where(ds.mask))
     ds["severity_norm"] = calc_severity_rolling(ds.intensity_norm.where(ds.mask))
 
-    print("Writing file")
+    logger.info("Writing file")
     ds.to_netcdf(fname, encoding={k: dict(complevel=4, zlib=True) for k in ds})
 
     return ds
@@ -179,8 +180,6 @@ def detect_extremes(xda, baseline_type="fixed", quantile=0.95, verbose=True, **k
         order for detrending.
     quantile: float [0.95]
         A float between 0 and 1 to indicate the the extreme threshold
-    verbose: bool [True]
-        prints out progress
 
     Returns
     -------
@@ -193,11 +192,7 @@ def detect_extremes(xda, baseline_type="fixed", quantile=0.95, verbose=True, **k
     lagrangian_event_filter
     """
 
-    def vprint(*args, **kwargs):
-        if verbose:
-            print(*args, **kwargs)
-
-    vprint("Creating baseline climatology and thresholds")
+    logger.info("Creating baseline climatology and thresholds")
     if baseline_type == "fixed":
         xds = fixed_baseline(xda, quantile=quantile, **kwargs).compute()
     elif baseline_type == "shifting":
@@ -208,7 +203,7 @@ def detect_extremes(xda, baseline_type="fixed", quantile=0.95, verbose=True, **k
     # compute the intensity and magnitude of extremes
     xda = xda.compute()
 
-    vprint("Doing some extreme statistics")
+    logger.info("Doing some extreme statistics")
     magnitude = xda - xds.climatology
     intensity = xda - xds.threshold
     scaler = xds.threshold - xds.climatology
@@ -274,7 +269,7 @@ def lagrangian_event_filter(
     detect_extremes
     """
 
-    print("Tracking extreme events with OceTrack")
+    logger.info("Tracking extreme events with OceTrack")
     dims = masked_intensity.dims
     props = dict(
         radius=radius,
@@ -293,7 +288,7 @@ def lagrangian_event_filter(
     #         blobs = blobs.assign_attrs(
     #             description='Blobs are created using the `OceTrack` package.')
     #     except ValueError:
-    #         print('Failed to locate blobs with OceTrack, reverting to simpler '
+    #         logger.info('Failed to locate blobs with OceTrack, reverting to simpler '
     #               'method. Choosing top 1000 largest blobs')
     #         blobs = simple_blob_detection(masked_intensity.notnull())
 
@@ -339,7 +334,7 @@ def simple_blob_detection(bool_mask, n_largest=1_000):
     from scipy.ndimage import label
 
     blobs, n_blobs = label(bool_mask)
-    print(n_blobs, "blobs detected before filtering")
+    logger.info(f"{n_blobs} blobs detected before filtering")
 
     # returning the values and counts. Exclude the 1st value (not extremes)
     values, counts = np.array(np.unique(blobs, return_counts=True))[:, 1:]
@@ -378,7 +373,7 @@ def trend_poly(da, order=1, dim="time", verbose=True):
     order: int [1]
         The order of the polynomial fit that will define the trend
     verbose: bool [True]
-        if the input is a dataset, will print the variable keys
+        if the input is a dataset, will logger.info the variable keys
 
     Returns
     -------
@@ -406,7 +401,5 @@ def trend_poly(da, order=1, dim="time", verbose=True):
     elif isinstance(da, xr.Dataset):
         out = xr.Dataset()
         for key in da:
-            if verbose:
-                print(key, end=", ")
             out[key] = trend_poly(da[key], order=order)
         return out

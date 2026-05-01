@@ -1,0 +1,5 @@
+oax: data/v2025/ETHZ1v2025_hplus_Bmean_shift_poly2_p95.nc
+mhw: data/v2025/ETHZ1v2025_temperature_Bmean_shift_poly2_p95.nc
+cex: data/v2025/ETHZ1v2025_cexTH_shift_poly2_p95.nc
+masks: data/masks.nc
+aux: data/raw/OceanSODA_ETHZ-v2025.OCADS.01-1982-2024.nc

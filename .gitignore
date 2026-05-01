@@ -10,15 +10,21 @@ wheels/
 # Virtual environments
 .venv
 .env
+.DS_Store
 
 
+# manuscript and figures
+/overleaf/
+/figures/*
+
+# Data and figures
 **/data/*
 **/*.zarr/
 **/*cache*/
+
+# keep sources.yaml and masks.nc
 !/data/sources.yaml
+!/data/masks.nc
+!/figures/figure6-with_annotations.png
 
-/overleaf/
-/figures/
-
-!.gitkeep
-.DS_Store
+**/!.gitkeep

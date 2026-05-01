@@ -36,39 +36,6 @@ VIOLINPLOT_Y_KEYS = [
 ]
 
 
-def main() -> tuple[plt.Figure, plt.Figure]:
-    keys = VIOLINPLOT_Y_KEYS
-    colors = COLORS
-
-    ds = open_data()
-
-    with color_context(colors[:2]):  # first, color by polynomial order
-        hue = "Polynomial order"
-        suptitle_text = (
-            "Distributions of 12 x 500 most extreme events for CMEMS and ETHZ\n"
-            "showing the impact of threshold percentile (x-axis) and polynomial order (color)"
-        )
-        fig_hue_polyorder, axs = plot_violinplots_2x2(
-            ds, keys, suptitle_text=suptitle_text, hue=hue
-        )
-        axs["d"].legend(ncol=2, title=hue, loc=0, edgecolor="none")
-
-    with color_context(colors[2:5:2][::-1]):
-        hue = "Dataset"
-        suptitle_text = (
-            "Distributions of 12 x 500 most extreme events for CMEMS and ETHZ\n"
-            "showing the impact of threshold percentile (x-axis) and dataset (color)"
-        )
-        fig_hue_dataset, axs = plot_violinplots_2x2(ds, keys, suptitle_text=suptitle_text, hue=hue)
-        axs["d"].legend(ncol=1, title=hue, loc=0, edgecolor="none")
-    return fig_hue_polyorder, fig_hue_dataset
-
-
-def open_data():
-    fname = str(ROOT / "data/v2025/sensitivities/cexTH_stats_for_sensitivities.nc")
-    return xr.open_dataset(fname)
-
-
 def get_pretty_names():
 
     Q95 = r"^{\ Q95}"
@@ -170,6 +137,6 @@ def process_cex_nc(ds: xr.Dataset) -> xr.Dataset:
         "Threshold percentile": [ds["quantile"].compute().item() * 100],
     }
 
-    ds = ds[keep_vars].reset_coords(drop=True).expand_dims(attrs)
+    ds = ds[keep_vars].reset_coords(drop=True).expand_dims(attrs)  # type: ignore
 
     return ds

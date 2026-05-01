@@ -1,23 +1,26 @@
-import dotenv
+import pathlib
 
-dotenv.load_dotenv()
+import dotenv
 import pandas as pd
 import xarray as xr
 from loguru import logger
 
 import compoundx_figs as cxf
 
-ROOT = cxf.get_project_root()
+ROOT = pathlib.Path(dotenv.find_dotenv("pyproject.toml")).parent
+
+OUTPUT_FOLDER = ROOT / "data/v2025/"
 
 
 def main():
 
     data = open_data()
+
     df_event_stats = data.cex["stats"].to_series().unstack(0)
     df_event_stats = add_new_columns(df_event_stats, data.masks.regions_HL, data.masks.basins)
 
-    df_event_stats.to_csv(ROOT / "data/derived/event_stats.csv")
-    logger.success(f"Saved event stats to {ROOT / 'data/derived/event_stats.csv'}")
+    df_event_stats.to_csv(OUTPUT_FOLDER / "event_stats.csv")
+    logger.success(f"Saved event stats to {OUTPUT_FOLDER / 'event_stats.csv'}")
 
 
 def open_data():

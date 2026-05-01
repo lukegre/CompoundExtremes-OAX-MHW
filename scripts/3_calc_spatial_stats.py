@@ -1,16 +1,17 @@
+import pathlib
+
 import dotenv
-
-dotenv.load_dotenv()
-
 import xarray as xr
 
-import compoundx_figs as cxf
+import compoundx_figs as cf
 
-ROOT = cxf.get_project_root()
+ROOT = pathlib.Path(dotenv.find_dotenv("pyproject.toml")).parent
 
-FUNC_INTENSITY = cxf.suppress_warnings(cxf.sumstats.calc_intensity_mean_max)
-FUNC_SEVERITY = cxf.suppress_warnings(cxf.sumstats.calc_severity_sum_max)
-FUNC_DURATION = cxf.suppress_warnings(cxf.sumstats.calc_duration_ann_avg)
+OUTPUT_FOLDER = ROOT / "data/v2025/"
+
+FUNC_INTENSITY = cf.suppress_warnings(cf.sumstats.calc_intensity_mean_max)
+FUNC_SEVERITY = cf.suppress_warnings(cf.sumstats.calc_severity_sum_max)
+FUNC_DURATION = cf.suppress_warnings(cf.sumstats.calc_duration_ann_avg)
 
 UNITS_nMLKG = "nmol.kg$^{-1}$"
 CMAP_MHW = "Oranges"
@@ -38,7 +39,7 @@ PLOT_ARGS = {
 
 
 def main():
-    fname_out = ROOT / "data/derived/spatial_stats_top1000.zarr"
+    fname_out = OUTPUT_FOLDER / "spatial_stats_top1000.zarr"
 
     data = open_data()
     stats = calc_stats(data)
@@ -50,10 +51,10 @@ def main():
 
 def open_data():
     fname = str(ROOT / "data/sources.yaml")
-    return cxf.Datasets.from_yaml(fname, with_cache=False)
+    return cf.Datasets.from_yaml(fname, with_cache=False)
 
 
-def calc_stats(data: cxf.Datasets):
+def calc_stats(data: cf.Datasets):
     calc_intensity = FUNC_INTENSITY
     calc_severity = FUNC_SEVERITY
     calc_duration = FUNC_DURATION
@@ -61,7 +62,7 @@ def calc_stats(data: cxf.Datasets):
     stats_dict = {
         "mhw_I": calc_intensity(data.mhw.intensity, data.mhw.blobs.notnull()),
         "mhw_In": calc_intensity(data.mhw.intensity_norm, data.mhw.blobs.notnull()),
-        "mhw_Iann": cxf.sumstats.calc_intensity_ann_max(
+        "mhw_Iann": cf.sumstats.calc_intensity_ann_max(
             data.mhw.intensity, data.mhw.blobs.notnull()
         ),
         "oax_I": calc_intensity(data.oax.intensity, data.oax.blobs.notnull()),
@@ -89,7 +90,7 @@ def calc_stats(data: cxf.Datasets):
 def add_plot_attrs(ds: xr.Dataset):
     for var in ds.data_vars:
         if var in PLOT_ARGS:
-            ds[var].attrs.update(PLOT_ARGS[var])
+            ds[var].attrs.update(PLOT_ARGS[var])  # type: ignore
     return ds
 
 

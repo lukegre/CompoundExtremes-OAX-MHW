@@ -5,6 +5,7 @@ from typing import Literal, Self
 
 import xarray as xr
 import yaml
+from loguru import logger
 from zarr.errors import ZarrUserWarning
 
 
@@ -53,11 +54,11 @@ class Datasets:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ZarrUserWarning)
             return cls(
-                oax=xr.open_zarr(fnames.oax),
-                mhw=xr.open_zarr(fnames.mhw),
-                cex=xr.open_zarr(fnames.cex),
-                masks=xr.open_zarr(fnames.masks),
-                aux=xr.open_zarr(fnames.aux).reset_coords(drop=True),
+                oax=xr.open_dataset(fnames.oax, chunks="auto"),
+                mhw=xr.open_dataset(fnames.mhw, chunks="auto"),
+                cex=xr.open_dataset(fnames.cex, chunks="auto"),
+                masks=xr.open_dataset(fnames.masks, chunks="auto"),
+                aux=xr.open_dataset(fnames.aux, chunks="auto").reset_coords(drop=True),
             )
 
     @classmethod
@@ -82,6 +83,40 @@ class Datasets:
             masks=getattr(self.masks, func)(**kwargs),
             aux=getattr(self.aux, func)(**kwargs),
         )
+
+
+@dataclass
+class ExtremeVariableInput:
+    name: str
+    data: xr.DataArray
+    data_valid_range: tuple[float, float]
+
+    def __post_init__(self):
+        lower = self.data_valid_range[0]
+        upper = self.data_valid_range[1]
+        if lower >= upper:
+            raise ValueError("data_valid_range must be a tuple of (min, max) with min < max")
+
+        logger.info("Persisting data for faster computation")
+        self.data = self.data.compute()
+
+        self._validate_data(self.data, lower, upper)
+
+    def _validate_data(self, data: xr.DataArray, lower: float, upper: float):
+        name = data.name
+        logger.info(
+            f"Validating data for variable `{name}` against valid range ({lower}, {upper})..."
+        )
+
+        min = data.min().values
+        max = data.max().values
+
+        if not ((min >= lower) & (max <= upper)):
+            raise ValueError(
+                f"Data for variable `{name}` contains values "
+                f"outside the valid range ({lower}, {upper}). "
+                f"Found min: {min}, max: {max}"
+            )
 
 
 def get_oni_data():

@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from joblib import Parallel, delayed
+from loguru import logger
 from PyCO2SYS.api import CO2SYS_wrap
 
 CO2SYS_PARAMS = {"K1K2_constants": 10, "opt_buffers_mode": 1, "KSO4_constants": 1}
@@ -46,10 +47,10 @@ def get_sensitivities(
     )
 
     if os.path.isfile(fname) & (not overwrite):
-        print(f"Loading {fname}")
+        logger.info(f"Loading {fname}")
         return xr.open_dataset(fname, chunks={})
 
-    print(f"File will be written to {fname}")
+    logger.info(f"File will be written to {fname}")
 
     ds = calc_sensitivities(dic, alk, sal, temp, normalize_to_sal=normalize_to_sal)
     ds.to_netcdf(fname, encoding={k: dict(complevel=4, zlib=True) for k in ds})
@@ -191,7 +192,7 @@ def solve_carbsys(
         See the PyCO2SYS documentation to find the column names.
         Defaults to None, which returns all the variables
     verbose: bool = True
-        Will print out progress using joblib's parallel processing
+        Will logger.info out progress using joblib's parallel processing
     batch_size: int = 12
         The size of each batch along the parallel dimension (pardim)
     n_jobs: int = {N_CPUS}
@@ -231,7 +232,7 @@ def solve_carbsys(
 
     slices = [slice(t, t + s) for t in range(0, n, s)]
     if verbose:
-        print(
+        logger.info(
             f"CO2SYS will process the dataset {str(dic.shape)} in {len(slices)} parts with {n_jobs} workers. "
         )
 
@@ -299,7 +300,7 @@ class TemperatureSensitivity:
         z = self.temp_range
         zz, yy, xx = np.meshgrid(z, y, x, indexing="ij")
 
-        print(f"calculating sensitivity for n = {zz.size}")
+        logger.info(f"calculating sensitivity for n = {zz.size}")
         df = CO2SYS_wrap(temp_in=zz, dic=yy, alk=xx, verbose=False)
 
         out = xr.DataArray(
@@ -312,7 +313,7 @@ class TemperatureSensitivity:
 
         if "pH" in target:
             target = target.replace("pHin", "H+")
-            print(f"`target` ({target}) is now [H+] instead of pH (10**(-pH) * 1e9)")
+            logger.info(f"`target` ({target}) is now [H+] instead of pH (10**(-pH) * 1e9)")
             out = 10 ** (-out) * 1e9
         outL = np.log(out)
 

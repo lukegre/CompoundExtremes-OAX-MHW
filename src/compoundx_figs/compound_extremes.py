@@ -5,13 +5,11 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from dask.diagnostics import ProgressBar
+from loguru import logger
 from scipy.stats import mode
 
 ROOT = pathlib.Path(dotenv.find_dotenv("pyproject.toml")).parent
-PATH = ROOT / "data"
-FNAME_AREA = PATH / "masks/mask_area_per_pixel.nc"
-FNAME_REGIONS = PATH / "masks/mask_regions_Hseason_latBands.nc"
-FNAME_BASINS = PATH / "masks/mask_basins_reccap2.nc"
+FNAME_MASKS = ROOT / "data/masks.nc"
 
 START_TIME = "1982-01-01"
 VARIABLES = [
@@ -55,10 +53,10 @@ def get_compound_extremes(
     )
 
     if os.path.isfile(fname) and (not overwrite):
-        print(f"Loading {fname}")
+        logger.info(f"Loading {fname}")
         return xr.open_dataset(fname)
 
-    print(f"File will be written to {fname}")
+    logger.info(f"File will be written to {fname}")
     with ProgressBar():
         mhw = mhw.compute()
         oax = oax.compute()
@@ -102,10 +100,11 @@ def calc_compound_stats(blob_mask, **datasets):
 
     vars = VARIABLES
 
-    print("Fetching area, region, and basin masks...")
-    area = xr.open_dataarray(FNAME_AREA).compute()
-    region = xr.open_dataarray(FNAME_REGIONS).compute()
-    basins = xr.open_dataarray(FNAME_BASINS).compute()
+    logger.info("Fetching area, region, and basin masks...")
+    masks = xr.open_dataset(FNAME_MASKS).compute()
+    area = masks.area
+    region = masks.regions_HL
+    basins = masks.basins
 
     ds = xr.Dataset()
     ds["blobs"] = blob_mask
@@ -113,14 +112,14 @@ def calc_compound_stats(blob_mask, **datasets):
     ds["region"] = region
     ds["basin"] = basins
 
-    print("Combining datasets...")
+    logger.info("Combining datasets...")
     datasets_list = [add_prefix_suffix(v, k) for k, v in datasets.items()]
     datasets_list = [filter_vars(d, vars=vars) for d in datasets_list]
     ds = xr.merge([ds] + datasets_list, compat="override").compute()
 
-    print("Grouping by blobs...")
+    logger.info("Grouping by blobs...")
     groups = ds.groupby(ds.blobs)
-    print("Computing per-blob statistics...")
+    logger.info("Computing per-blob statistics...")
     info = groups.map(single_blob_stats)
     out = (
         info.to_array(dim="metric")

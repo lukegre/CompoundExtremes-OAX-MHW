@@ -1,67 +1,18 @@
 # import dotenv  # isort: skip
 
 # dotenv.load_dotenv()
-import pathlib
 from typing import Literal
 
 import numpy as np
 import xarray as xr
-from dask.diagnostics.progress import ProgressBar
 from loguru import logger
 from matplotlib import pyplot as plt
 from plot_extreme_event_drivers import (
-    calc_hplus_drivers,
     plot_driver_magnitude_ribbon,
     plot_ribbon_with_thick_y0,
 )
 
-import compoundx_figs as cxf
 from compoundx_figs.io import Datasets
-
-ROOT = cxf.get_project_root()
-
-
-def open_data() -> Datasets:
-    data = Datasets.from_yaml(ROOT / "data/data_fnames.yaml", with_cache=True)
-    return data
-
-
-def calc_drivers(data: Datasets) -> xr.DataArray:
-
-    fname_sens = pathlib.Path("./data/sensitivities/sensitivities_full_area.zarr")
-    fname_drivers = pathlib.Path("./data/sensitivities/drivers_full_area.zarr")
-
-    if fname_sens.exists():
-        sens = xr.open_zarr(fname_sens)
-    else:
-        sens = cxf.calc_sensitivities(
-            alk=data.aux.talk,
-            dic=data.aux.dic,
-            temp=data.aux.temperature,
-            sal=data.aux.salinity,
-            normalize_to_sal=True,
-            batch_size=6,
-            verbose=5,
-            n_jobs=4,
-        )
-
-        sens.to_zarr(fname_sens, zarr_format=2, mode="w")
-
-    if fname_drivers.exists():
-        event_drivers = xr.open_zarr(fname_drivers).Hplus_drivers
-    else:
-        with ProgressBar():
-            event_drivers = calc_hplus_drivers(
-                hplus=data.oax.data,
-                dic=data.aux.dic,
-                alk=data.aux.talk,
-                salinity=data.aux.salinity,
-                temp=data.aux.temperature,
-                sensitivities_beta=sens.beta,
-            ).compute()
-        event_drivers.to_dataset(name="Hplus_drivers").to_zarr(fname_drivers, mode="w")
-
-    return event_drivers
 
 
 def smooth_interp_monthly_clim(da: xr.DataArray, dim="time") -> xr.DataArray:
