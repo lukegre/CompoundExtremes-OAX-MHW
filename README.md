@@ -5,6 +5,7 @@
 | Journal      | Submitted to AGU Advances                                            |
 | Authors      | [Luke Gregor](https://orcid.org/0000-0001-6071-1857) and [Nicolas Gruber](https://orcid.org/0000-0002-2085-2310)|
 | Data product | https://oceanco2.github.io/co2-products/?product=oceansoda-ethzv1    |
+| MHW $\cap$ OAX | Marine Heatwaves that compound with Ocean Acidification Extremes
 
  ---
 
