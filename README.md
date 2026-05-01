@@ -1,8 +1,7 @@
 # Code for satellite-based compound MHWs and OAXs
 
-|              |                                                                      |
-|--------------|----------------------------------------------------------------------|
 | Title        | Recent history of surface ocean acidification extremes that compound marine heat waves |
+|--------------|----------------------------------------------------------------------|
 | Journal      | Submitted to AGU Advances                                            |
 | Authors      | Luke Gregor and Nicolas Gruber                                       |
 | Affiliations | Environmental Physics and Swiss Data Science Center                  |
