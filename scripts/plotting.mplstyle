@@ -30,4 +30,4 @@ figure.subplot.bottom: 0.075
 figure.subplot.top: 0.95
 
 savefig.dpi: 100
-figure.dpi: 100
+figure.dpi: 300

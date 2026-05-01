@@ -38,7 +38,7 @@ PLOT_ARGS = {
 
 
 def main():
-    fname_out = ROOT / "data/derived/spatial_stats.zarr"
+    fname_out = ROOT / "data/derived/spatial_stats_top1000.zarr"
 
     data = open_data()
     stats = calc_stats(data)
@@ -59,20 +59,22 @@ def calc_stats(data: cxf.Datasets):
     calc_duration = FUNC_DURATION
 
     stats_dict = {
-        "mhw_I": calc_intensity(data.mhw.intensity, data.mhw.mask),
-        "mhw_In": calc_intensity(data.mhw.intensity_norm, data.mhw.mask),
-        "mhw_Iann": cxf.sumstats.calc_intensity_ann_max(data.mhw.intensity, data.mhw.mask),
-        "oax_I": calc_intensity(data.oax.intensity, data.oax.mask),
-        "oax_In": calc_intensity(data.oax.intensity_norm, data.oax.mask),
-        "cex_mhw_I": calc_intensity(data.mhw.intensity, data.cex.mask),
-        "cex_mhw_S": calc_severity(data.mhw.intensity, data.cex.mask),
-        "cex_oax_I": calc_intensity(data.oax.intensity, data.cex.mask),
-        "cex_oax_S": calc_severity(data.oax.intensity, data.cex.mask),
-        "cex_I": calc_intensity(data.cex.intensity_norm, data.cex.mask),
-        "cex_S": calc_severity(data.cex.intensity_norm, data.cex.mask),
-        "mhw_D": calc_duration(data.mhw.mask),
-        "oax_D": calc_duration(data.oax.mask),
-        "cex_D": calc_duration(data.cex.mask),
+        "mhw_I": calc_intensity(data.mhw.intensity, data.mhw.blobs.notnull()),
+        "mhw_In": calc_intensity(data.mhw.intensity_norm, data.mhw.blobs.notnull()),
+        "mhw_Iann": cxf.sumstats.calc_intensity_ann_max(
+            data.mhw.intensity, data.mhw.blobs.notnull()
+        ),
+        "oax_I": calc_intensity(data.oax.intensity, data.oax.blobs.notnull()),
+        "oax_In": calc_intensity(data.oax.intensity_norm, data.oax.blobs.notnull()),
+        "cex_mhw_I": calc_intensity(data.mhw.intensity, data.cex.blobs.notnull()),
+        "cex_mhw_S": calc_severity(data.mhw.intensity, data.cex.blobs.notnull()),
+        "cex_oax_I": calc_intensity(data.oax.intensity, data.cex.blobs.notnull()),
+        "cex_oax_S": calc_severity(data.oax.intensity, data.cex.blobs.notnull()),
+        "cex_I": calc_intensity(data.cex.intensity_norm, data.cex.blobs.notnull()),
+        "cex_S": calc_severity(data.cex.intensity_norm, data.cex.blobs.notnull()),
+        "mhw_D": calc_duration(data.mhw.blobs.notnull()),
+        "oax_D": calc_duration(data.oax.blobs.notnull()),
+        "cex_D": calc_duration(data.cex.blobs.notnull()),
     }
 
     stats_list = [v.rename(k).compute() for k, v in stats_dict.items()]

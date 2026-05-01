@@ -65,7 +65,7 @@ def main() -> tuple[plt.Figure, plt.Figure]:
 
 
 def open_data():
-    fname = str(ROOT / "data/sensitivities/cexTH_stats_for_sensitivities.nc")
+    fname = str(ROOT / "data/v2025/sensitivities/cexTH_stats_for_sensitivities.nc")
     return xr.open_dataset(fname)
 
 
@@ -94,10 +94,7 @@ def get_pretty_names():
 def get_metric_data(ds, metric_name) -> pd.Series:
     key = metric_name
 
-    if key == "area_max_Mkm2":
-        ser = ds.sel(metric="area_max_km2").stats.rename(key).to_series() / 1e6
-    else:
-        ser = ds.sel(metric=key).stats.rename(key).to_series()
+    ser = ds.sel(metric=key).stats.rename(key).to_series()
     return ser
 
 

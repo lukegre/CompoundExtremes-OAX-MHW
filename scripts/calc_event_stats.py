@@ -13,7 +13,7 @@ ROOT = cxf.get_project_root()
 def main():
 
     data = open_data()
-    df_event_stats = data.cex["stats"].to_series().unstack()
+    df_event_stats = data.cex["stats"].to_series().unstack(0)
     df_event_stats = add_new_columns(df_event_stats, data.masks.regions_HL, data.masks.basins)
 
     df_event_stats.to_csv(ROOT / "data/derived/event_stats.csv")
@@ -32,8 +32,7 @@ def add_new_columns(
     dmax = df["duration_max_mon"]
     df["duration_2sigma_mon_clipped"] = df.duration_2sigma_mon.where(lambda x: x < dmax, dmax)
     df["year_start_decimal"] = year_start_decimal(df["month_start_sice_198201"])
-    df["area_max_km2"] = df["area_max_km2"] * 1e-06
-    df["area_max_scl"] = (df.area_max_km2 - df.area_max_km2.min() + 2.3) ** 2.6
+    df["area_max_scl"] = (df.area_max_Mkm2 - df.area_max_Mkm2.min() + 2.3) ** 2.6
     df["cex_intensity_norm_p95_clipped"] = df.cex_intensity_norm_p95.clip(0, 10)
 
     coords = df[["loc_lat_mode", "loc_lon_mode"]]

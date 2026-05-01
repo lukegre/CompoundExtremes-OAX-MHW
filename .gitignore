@@ -12,8 +12,13 @@ wheels/
 .env
 
 
-/data/*
+**/data/*
+**/*.zarr/
+**/*cache*/
 !/data/sources.yaml
 
 /overleaf/
 /figures/
+
+!.gitkeep
+.DS_Store

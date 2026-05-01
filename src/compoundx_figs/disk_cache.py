@@ -1,172 +1,166 @@
 """
-disk_cache.py
-=============
-A decorator that persists function outputs to disk as pickle files.
-Cache keys are derived from a fast hash of argument metadata — safe for
-stable scientific workflows where the same inputs reliably produce the
-same outputs.
+A simple disk cache decorator for Python functions that
+uses the same style as functools.lru_cache, but persists
+xarray results to disk as zarr. Cache keys are derived
+from a fast hash of argument metadata — safe for stable
+scientific workflows where the same inputs reliably
+produce the same outputs.
 
 Usage
 -----
-from disk_cache import disk_cache
+    from xrzarr import disk_cache
 
-@disk_cache(cache_dir="~/.cache/my_project")
-def compute_frac_robust(deseas, uncert, mask) -> xr.DataArray:
-    ...
+    @disk_cache(cache_dir="~/.cache/my_project")
+    def compute_frac_robust(deseas, uncert, mask) -> xr.DataArray:
+        ...
+
 """
+
+from __future__ import annotations
 
 import functools
 import hashlib
 import inspect
-import pickle
 from pathlib import Path
 from typing import Any, Callable
 
+import numpy as np
+import xarray as xr
 from loguru import logger
 
-# ---------------------------------------------------------------------------
-# Hashing helpers
-# ---------------------------------------------------------------------------
 
-
-def _hash_value(value: Any) -> str:
+class XRZarrCache:
     """
-    Return a hex-digest string for *value*.
+    Persist xarray function results to disk as zarr stores.
 
-    Strategy per type
-    -----------------
-    xarray.DataArray / Dataset
-        shape, dtype, dimension names, coordinate values, and attrs.
-        Fast — avoids loading the full underlying array into memory.
-    numpy.ndarray
-        shape, dtype, and the raw bytes of the array.
-    Anything else
-        repr() string — handles scalars, strings, slices, dicts, etc.
+    The instance itself is callable and can be used directly as a decorator.
+    Cache keys are derived from the wrapped function identity and a stable
+    hash of the bound arguments.
     """
-    h = hashlib.sha256()
 
-    type_name = type(value).__qualname__
-    h.update(type_name.encode())
+    _RESULT_TYPE_ATTR = "_xrzarr_cache_result_type"
+    _DATAARRAY_NAME_ATTR = "_xrzarr_cache_dataarray_name"
+    _DATAARRAY_DEFAULT_NAME = "__xrzarr_cache_dataarray__"
 
-    # ---- xarray ---------------------------------------------------------
-    try:
-        import xarray as xr  # only imported if present in the environment
+    def __init__(self, cache_dir: str | Path):
+        self.cache_dir = Path(cache_dir).expanduser().resolve()
 
-        if isinstance(value, (xr.DataArray, xr.Dataset)):
+    def __call__(self, fn: Callable) -> Callable:
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+            key = self.make_cache_key(fn, args, kwargs)
+            cache_path = self.cache_dir / key
+
+            if cache_path.exists():
+                try:
+                    logger.debug(f"Loading cached zarr result: {cache_path}")
+                    return self.load(cache_path)
+
+                except Exception as e:
+                    logger.warning(f"Error loading cached result: {e}")
+
+            result = fn(*args, **kwargs)
+            self.save(cache_path, result)
+            return result
+
+        setattr(wrapper, "cache_dir", self.cache_dir)
+        setattr(wrapper, "cache_backend", self)
+        return wrapper
+
+    @classmethod
+    def hash_value(cls, value: Any) -> str:
+        h = hashlib.sha256()
+        h.update(type(value).__qualname__.encode())
+
+        if isinstance(value, xr.DataArray):
             h.update(str(value.dims).encode())
             h.update(str(value.shape).encode())
-            if hasattr(value, "dtype"):  # DataArray
-                h.update(str(value.dtype).encode())
-            h.update(str(value.attrs).encode())
+            h.update(str(value.dtype).encode())
+            h.update(repr(value.name).encode())
+            h.update(repr(value.attrs).encode())
             for name, coord in value.coords.items():
                 h.update(str(name).encode())
-                h.update(str(coord.values.tobytes()).encode())
+                h.update(np.asarray(coord.values).tobytes())
             return h.hexdigest()
-    except ImportError:
-        pass
 
-    # ---- numpy ----------------------------------------------------------
-    try:
-        import numpy as np
+        if isinstance(value, xr.Dataset):
+            h.update(str(value.dims).encode())
+            h.update(repr(sorted(value.data_vars)).encode())
+            h.update(repr(value.attrs).encode())
+            for name, variable in value.data_vars.items():
+                h.update(str(name).encode())
+                h.update(str(variable.dims).encode())
+                h.update(str(variable.shape).encode())
+                h.update(str(variable.dtype).encode())
+            for name, coord in value.coords.items():
+                h.update(str(name).encode())
+                h.update(np.asarray(coord.values).tobytes())
+            return h.hexdigest()
 
         if isinstance(value, np.ndarray):
             h.update(str(value.shape).encode())
             h.update(str(value.dtype).encode())
             h.update(value.tobytes())
             return h.hexdigest()
-    except ImportError:
-        pass
 
-    # ---- fallback -------------------------------------------------------
-    h.update(repr(value).encode())
-    return h.hexdigest()
+        h.update(repr(value).encode())
+        return h.hexdigest()
+
+    @classmethod
+    def make_cache_key(cls, fn: Callable, args: tuple[Any, ...], kwargs: dict[str, Any]) -> str:
+        h = hashlib.sha256()
+        fn_module = getattr(fn, "__module__", type(fn).__module__)
+        fn_name = getattr(fn, "__qualname__", getattr(fn, "__name__", repr(fn)))
+        h.update(f"{fn_module}.{fn_name}".encode())
+
+        try:
+            signature = inspect.signature(fn)
+            bound = signature.bind(*args, **kwargs)
+            bound.apply_defaults()
+            items = bound.arguments.items()
+        except (TypeError, ValueError):
+            items = [*enumerate(args), *sorted(kwargs.items())]
+
+        for key, value in items:
+            h.update(str(key).encode())
+            h.update(cls.hash_value(value).encode())
+
+        return h.hexdigest()
+
+    def load(self, cache_path: str | Path) -> xr.DataArray | xr.Dataset:
+        cache_path = Path(cache_path)
+        ds = xr.open_zarr(cache_path)
+        result_type = ds.attrs.get(self._RESULT_TYPE_ATTR, "dataset")
+
+        if result_type == "dataarray":
+            name = ds.attrs.get(self._DATAARRAY_NAME_ATTR, self._DATAARRAY_DEFAULT_NAME)
+            return ds[name]
+
+        return ds
+
+    def save(self, cache_path: str | Path, result: xr.DataArray | xr.Dataset) -> Path:
+        cache_path = Path(cache_path)
+
+        if not isinstance(result, xr.DataArray | xr.Dataset):
+            raise TypeError("XRZarrCache only supports xarray DataArray or Dataset results")
+
+        if isinstance(result, xr.DataArray):
+            name = result.name or self._DATAARRAY_DEFAULT_NAME
+            ds = result.to_dataset(name=name)
+            ds.attrs = dict(ds.attrs)
+            ds.attrs[self._RESULT_TYPE_ATTR] = "dataarray"
+            ds.attrs[self._DATAARRAY_NAME_ATTR] = name
+        else:
+            ds = result.copy(deep=False)
+            ds.attrs = dict(ds.attrs)
+            ds.attrs[self._RESULT_TYPE_ATTR] = "dataset"
+
+        logger.debug(f"Caching zarr result to: {cache_path}")
+        ds.to_zarr(cache_path, mode="w", zarr_format=2)
+        return cache_path
 
 
-def _make_cache_key(fn: Callable, args: tuple, kwargs: dict) -> str:
-    """
-    Build a single SHA-256 hex digest that uniquely identifies a call to
-    *fn* with the given positional and keyword arguments.
-
-    The key encodes:
-        - the fully-qualified function name (module + qualname)
-        - each positional argument (via _hash_value)
-        - each keyword argument name and value (sorted for stability)
-    """
-    h = hashlib.sha256()
-
-    # Function identity
-    fn_id = f"{fn.__module__}.{fn.__qualname__}"
-    h.update(fn_id.encode())
-
-    # Normalise: bind *args + **kwargs to the function signature so that
-    #   fn(a, b=2)  and  fn(a, b=2)  always collide, even if one is passed
-    #   positionally and the other as a keyword.
-    try:
-        sig = inspect.signature(fn)
-        bound = sig.bind(*args, **kwargs)
-        bound.apply_defaults()
-        items = list(bound.arguments.items())
-    except (ValueError, TypeError):
-        # Fallback: treat positional and keyword args separately
-        items = list(enumerate(args)) + sorted(kwargs.items())
-
-    for key, value in items:
-        h.update(str(key).encode())
-        h.update(_hash_value(value).encode())
-
-    return h.hexdigest()
-
-
-# ---------------------------------------------------------------------------
-# Decorator
-# ---------------------------------------------------------------------------
-
-
-def disk_cache(cache_dir: str | Path):
-    """
-    Decorator factory — persist the return value of the wrapped function to
-    *cache_dir* as a pickle file named ``<sha256>.pkl``.
-
-    On subsequent calls with identical inputs the cached result is returned
-    without executing the function body.
-
-    Parameters
-    ----------
-    cache_dir : str | Path
-        Directory in which cache files are stored.  Created automatically if
-        it does not exist.  Supports ``~`` expansion.
-
-    Example
-    -------
-    >>> @disk_cache(cache_dir="~/.cache/my_project")
-    ... def compute_frac_robust(deseas, uncert, mask):
-    ...     ...
-    """
-    cache_path = Path(cache_dir).expanduser().resolve()
-
-    def decorator(fn: Callable) -> Callable:
-        @functools.wraps(fn)
-        def wrapper(*args, **kwargs):
-            cache_path.mkdir(parents=True, exist_ok=True)
-
-            key = _make_cache_key(fn, args, kwargs)
-            fpath = cache_path / f"{key}.pkl"
-
-            if fpath.exists():
-                logger.debug(f"Loading cached result: {fpath}")
-                with fpath.open("rb") as f:
-                    return pickle.load(f)
-
-            result = fn(*args, **kwargs)
-
-            with fpath.open("wb") as f:
-                logger.debug(f"Caching result to: {fpath}")
-                pickle.dump(result, f, protocol=pickle.HIGHEST_PROTOCOL)
-
-            return result
-
-        # Attach the resolved cache directory for easy inspection
-        wrapper.cache_dir = cache_path
-        return wrapper
-
-    return decorator
+def disk_cache(cache_dir: str | Path) -> XRZarrCache:
+    return XRZarrCache(cache_dir)
