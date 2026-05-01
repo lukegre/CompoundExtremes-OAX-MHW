@@ -8,7 +8,7 @@
 
  ---
 
-<div style="margin: auto; width:70%"><img src="figures/figure6-with_annotations.png"></div>
+<img src="figures/figure6-with_annotations.png" width=670>
 
 
 **Plain Language Summary**: This study examines the recent history of “compound extremes” in the ocean, where marine heatwaves and ocean acidification extremes occur simultaneously. Using observational data from 1982 to 2024, the research reveals that these compound events are happening more frequently than would be expected by chance, particularly in the low-to-mid latitudes. Conversely, they are rare in the Equatorial Pacific and polar regions. These compound events are most prevalent during summer and are influenced primarily by the El Niño/Southern Oscillation. While most of these events are relatively small and short-lived, there have been a few exceptionally large, long, and intense occurrences. Some of the most notable events include: "The Blob," in the Northeast Pacific in 2015; the longest-lasting event that occurred in the Southeast Asia region from 1998 to 1999; and the most intense event that occurred off Western Australia in 2011. These compound extremes happen in areas where the warming from a marine heatwave also leads to an increase in ocean acidity. This phenomenon is most common in regions of the ocean that are permanently stratified, meaning they have distinct layers of water that do not mix well.
