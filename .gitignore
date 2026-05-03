@@ -28,3 +28,4 @@ wheels/
 !/figures/figure6-with_annotations.png
 
 **/!.gitkeep
+notebook.ipynb
