@@ -29,3 +29,9 @@ wheels/
 
 **/!.gitkeep
 notebook.ipynb
+interactive/ETHZ1v2025_cexTH_shift_poly2_p95.nc
+interactive/event_footprints.npz
+interactive/event_stats.csv
+interactive/figure6_interactive.html
+interactive/figure6-with_annotations.png
+interactive/figure6_interactive_bk.html
