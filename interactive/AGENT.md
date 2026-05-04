@@ -35,24 +35,26 @@ Standalone interactive HTML dashboard replicating Figure 6 with linked behaviour
 | 450 | North Atlantic (2023) | 2023-04 |
 | 460 | South Atlantic (2023) | 2023-11 |
 
-## Layout (dark dashboard)
+## Layout (light/dark dashboard)
 CSS grid, two columns, max-width 1600px:
 - **Header bar**: title, subtitle, stat chips
+- **Header GitHub link**: chip-style link to `https://github.com/lukegre/2025_CompoundExtremes_AGUadvances`
+- **Header theme switcher**: manual Light/Dark override, with system preference as initial default
 - **Left column** (spans both rows): scatter plot card
 - **Right column top**: map card
 - **Right column bottom**: event details card (info grid + timeline sparkline)
 
 ## Visual theme
-| Element | Value |
-|---------|-------|
-| Body / plot bg | `#111827` |
-| Card bg | `#1e2436` |
-| Header bg | `#0d1425` |
-| Grid lines | `#2a3347` |
-| Ocean | `#0a1628` |
-| Land | `#2c2c2c` |
-| Text main | `#e5e7eb` |
-| Text dim | `#9ca3af` |
+| Element | Dark | Light |
+|---------|------|-------|
+| Body / plot bg | `#061f27` | `#eef6f8` body, `#ffffff` plot |
+| Card bg | `#0b303a` | `#f7fcfd` |
+| Header bg | `#04161d` | `#0b6573` |
+| Grid lines | `#1f4b58` | `#c7dde4` |
+| Ocean | `#06262f` | `#c8e8e6` |
+| Land | `#36545d` | `#efe0ad` |
+| Text main | `#f4fbfd` | `#0b2530` |
+| Text dim | `#b6cbd1` | `#315f6d` |
 
 **Scatter colormap**: `plasma` (dark purple → bright yellow), 10 discrete bins, 0–13 Mkm².
 
