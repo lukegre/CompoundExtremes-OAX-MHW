@@ -857,7 +857,7 @@ def _(data, df_event_stats):
             dict(idx=26, text="Madagascar\n(1987)", dx=0.45, dy=0.45, ha="center"),
             dict(idx=435, text="Barrier\nReef\n(2022)", dx=0.2, dy=-0.45, ha="right"),
             dict(idx=450, text="North\nAtlantic\n(2023)", dx=-0.25, dy=0.2, ha="right"),
-            dict(idx=460, text="South\nAtlantic\n(2023)", dx=0.4, dy=0.6, ha="center"),
+            dict(idx=460, text="Central\nAtlantic\n(2023)", dx=0.4, dy=0.6, ha="center"),
         ]
 
         event_idxs: list[int] = [v["idx"] for v in fig6_chosen_events]
@@ -981,7 +981,7 @@ def _(data, df_event_stats):
 
         _props = dict(transform=crs.PlateCarree(), va="center")
         axs6[1].text(-20, -30, "2023 ", **bf | _props | {"ha": "right", "va": "top"})
-        axs6[1].text(-20, -30, "South\nAtlantic", **sf | _props | dict(ha="left", va="top"))
+        axs6[1].text(-20, -30, "Central\nAtlantic", **sf | _props | dict(ha="left", va="top"))
 
         _props = dict(transform=crs.PlateCarree(), va="center")
         axs6[1].text(120, -45, "2011 ", **bf | _props | dict(ha="right"))
@@ -995,7 +995,7 @@ def _(data, df_event_stats):
         axs6[1].set_extent([-180, 180, -90, 90], crs=crs.PlateCarree())  # type: ignore
 
     if "collapse_save_figure":
-        # fig6.savefig(root / "figures/figure6-with_annotations.pdf", bbox_inches="tight")
+        fig6.savefig(root / "figures/figure6-with_annotations.pdf", bbox_inches="tight")
         fig6.savefig(root / "figures/figure6-with_annotations.png", bbox_inches="tight", dpi=120)
         ...
     fig6
