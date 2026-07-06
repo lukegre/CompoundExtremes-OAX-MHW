@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OAX ∩ MHW Mechanism Explorer v3</title>
+<style>
+  :root{
+    --bg:#f3eddd;
+    --paper:#fffaf0;
+    --ink:#122633;
+    --muted:#6f6b5e;
+    --red:#d55333;
+    --teal:#22a2ad;
+    --green:#5f8f54;
+    --yellow:#f0b24e;
+    --orange:#f28b1a;
+    --navy:#102631;
+    --line:#dfd3b8;
+    --shadow:0 10px 24px rgba(34,29,18,.08);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:#f3eddd;
+    color:var(--ink);
+  }
+
+  .wrap{max-width:1280px;margin:0 auto;padding:22px}
+  header{display:flex;gap:18px;align-items:center;margin-bottom:14px}
+  .badge{
+    width:84px;height:84px;border-radius:50%;
+    background:#333735;color:white;display:grid;place-items:center;
+    text-align:center;font-weight:900;letter-spacing:.02em;line-height:1.05;
+    text-transform:uppercase;flex:0 0 auto;box-shadow:var(--shadow);font-size:.72rem;
+  }
+  h1{
+    margin:0;font-size:clamp(1.8rem,4.5vw,3.75rem);
+    letter-spacing:.025em;line-height:.95;text-transform:uppercase;font-weight:950;
+  }
+  h1 .oax{color:var(--teal)}
+  h1 .mhw{color:var(--red)}
+  .subtitle{
+    margin-top:6px;color:#555b57;text-transform:uppercase;
+    font-weight:750;letter-spacing:.04em;font-size:clamp(.85rem,1.5vw,1.15rem);
+  }
+
+  .panel{
+    background:#fffaf0;
+    border:1px solid var(--line);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+
+  .topbar{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+    gap:16px;
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+  }
+
+  .regimeText{font-size:.86rem;color:var(--muted);line-height:1.28}
+  .regimeText strong{
+    display:block;color:var(--ink);font-size:.98rem;
+    text-transform:uppercase;letter-spacing:.035em;
+    font-family: Impact, "Arial Narrow", Inter, sans-serif;
+    font-weight:800;
+  }
+
+  .switch{
+    display:flex;align-items:center;gap:7px;background:#f0e7d2;
+    padding:7px;border-radius:999px;border:1px solid #d7c9a9;user-select:none;
+  }
+  .switch button{
+    border:0;cursor:pointer;border-radius:999px;padding:9px 13px;
+    font-weight:900;color:#68716d;background:transparent;
+    text-transform:uppercase;letter-spacing:.035em;font-size:.83rem;
+    min-height:40px;
+  }
+  .switch button.active.low{color:white;background:var(--red)}
+  .switch button.active.high{color:white;background:var(--teal)}
+  button:focus-visible,input:focus-visible{
+    outline:3px solid rgba(33,120,134,.34);
+    outline-offset:3px;
+  }
+
+  .main{display:grid;grid-template-columns:minmax(330px,.34fr) minmax(0,1fr);gap:0}
+  .controls{
+    padding:18px;border-right:1px solid var(--line);
+    background:#fbf5e6;
+    min-width:0;
+  }
+  .controls h2,.viz h2{
+    margin:0 0 12px;text-transform:uppercase;letter-spacing:.04em;font-size:1.05rem;
+    font-family: Impact, "Arial Narrow", Inter, sans-serif;
+    font-weight:800;
+  }
+
+  .sliderBox{
+    background:#fffaf0;
+    border:1px solid #ded4bb;
+    border-radius:7px;
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .sliderHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .sliderHead label{font-weight:900;font-size:.95rem;line-height:1.12}
+  .value{
+    color:#3f4744;font-weight:950;text-transform:uppercase;font-size:.78rem;
+    line-height:1.15;text-align:right;max-width:54%;
+  }
+  input[type=range]{width:100%;accent-color:var(--red)}
+  .hint{font-size:.8rem;color:var(--muted);line-height:1.32;margin-top:7px}
+
+  .stratGauge{
+    margin-top:10px;height:34px;border-radius:7px;border:1px solid #d6ccb2;
+    overflow:hidden;position:relative;background:linear-gradient(90deg,#7fb8c1 0%,#54a5b2 28%,#f2b24d 55%,#d65b3f 78%,#a43655 100%);
+  }
+  .stratGauge span{
+    position:absolute;top:8px;font-size:.64rem;font-weight:950;text-transform:uppercase;
+    letter-spacing:.02em;line-height:1;z-index:2;text-shadow:0 1px 8px rgba(255,255,255,.5);
+  }
+  .stratGauge .left{left:9px;color:#174d56;max-width:42%}
+  .stratGauge .right{right:9px;color:white;max-width:50%;text-align:right}
+  .gaugeMarker{
+    position:absolute;top:2px;bottom:2px;width:5px;border-radius:5px;background:#2f3332;
+    box-shadow:0 0 0 3px rgba(255,255,255,.65);
+    left:50%;z-index:1;
+  }
+
+  .presetRow{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 0}
+  .presetRow button{
+    border:1px solid #cec3aa;background:#fffaf0;border-radius:7px;
+    padding:8px 10px;cursor:pointer;color:#404844;font-weight:800;font-size:.78rem;
+    min-height:34px;
+  }
+
+  .noteBox{
+    margin-top:13px;padding:12px;border-radius:16px;background:#fff8e8;
+    border:1px dashed #cfc2a8;font-size:.82rem;line-height:1.36;color:#4d554f;
+  }
+
+  .regimeBox{
+    background:#fffaf0;
+    border:1px solid #ded4bb;
+    border-radius:7px;
+    padding:10px;
+    margin-bottom:10px;
+  }
+  .regimeBox .switch{margin-bottom:9px;justify-content:center}
+  .regimeMini{display:grid;gap:7px}
+  .regimeMini .regimeText{
+    border-top:1px solid rgba(214,204,178,.72);
+    padding-top:7px;
+  }
+
+  .viz{padding:18px;min-width:0}
+  .scoreGrid{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;margin-bottom:12px}
+  .scoreCard{
+    border:1px solid #ded4bb;border-radius:7px;padding:11px 12px;
+    background:#fffaf0;min-width:0;
+  }
+  .scoreLabel{
+    color:#6f796f;text-transform:uppercase;font-size:.68rem;letter-spacing:.06em;
+    font-family: Impact, "Arial Narrow", Inter, sans-serif;font-weight:800;line-height:1.1;
+  }
+  .scoreValue{
+    font-size:clamp(1.15rem,2.4vw,1.55rem);font-weight:950;margin-top:4px;line-height:1;
+    font-family: Impact, "Arial Narrow", Inter, sans-serif;letter-spacing:.02em;
+  }
+  .scoreNote{
+    color:var(--muted);
+    font-size:.7rem;
+    line-height:1.1;
+    margin-top:4px;
+    font-weight:750;
+  }
+  .scoreValue.red{color:var(--red)}
+  .scoreValue.teal{color:var(--teal)}
+  .scoreValue.green{color:var(--green)}
+
+  .canvasCard{
+    position:relative;border:1px solid #d7cdb3;border-radius:20px;
+    overflow:hidden;background:linear-gradient(180deg,#fffaf0,#f7eed5);
+  }
+  svg{display:block;width:100%;height:auto;min-height:300px}
+
+  .caption{
+    padding:14px 16px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.9fr);
+    gap:14px;border-top:1px solid #d7cdb3;background:#fffaf0;
+    align-items:start;
+  }
+  .outcome{
+    font-size:1.05rem;font-weight:950;text-transform:uppercase;letter-spacing:.035em;
+    font-family: Impact, "Arial Narrow", Inter, sans-serif;
+  }
+  .outcome.likely{color:var(--red)}
+  .outcome.rare{color:var(--teal)}
+  .explain{color:#505954;line-height:1.34;font-size:.88rem}
+  .equation{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background:#2f3332;color:#fff9e9;border-radius:14px;padding:12px;line-height:1.4;font-size:.8rem;
+    overflow-wrap:anywhere;
+  }
+  .equation .plus{color:#ffb08d}
+  .equation .minus{color:#9fe1e5}
+  .equation .net{color:#dce79b}
+
+  @media (max-width: 900px){
+    .main{grid-template-columns:1fr}
+    .controls{border-right:0;border-bottom:1px solid var(--line)}
+    .topbar{grid-template-columns:1fr}
+    .switch{justify-content:center}
+    .caption{grid-template-columns:1fr}
+    header{align-items:flex-start}
+  }
+
+  @media (min-width: 901px){
+    body{overflow:hidden}
+    .wrap{
+      width:1000px;
+      max-width:1000px;
+      height:500px;
+      padding:10px 12px;
+      overflow:hidden;
+    }
+    header{display:none}
+    .badge{width:56px;height:56px;font-size:.48rem;box-shadow:none}
+    h1{font-size:clamp(2rem,3.75vw,2.55rem);line-height:.9;letter-spacing:.018em}
+    .subtitle{margin-top:4px;font-size:.76rem;line-height:1.05;letter-spacing:.035em}
+    .panel{height:480px;border-radius:7px;border-color:#d8cdae;box-shadow:none}
+    .topbar{display:none}
+    .regimeText{font-size:.68rem;line-height:1.18}
+    .regimeText strong{font-size:.78rem;line-height:1.05}
+    .switch{padding:5px;gap:5px}
+    .switch button{min-height:32px;padding:7px 10px;font-size:.68rem}
+    .main{height:478px;grid-template-columns:280px minmax(0,1fr)}
+    .controls,.viz{padding:10px}
+    .controls{background:#fbf5e6}
+    .controls h2{
+      display:block;
+      margin:-10px -10px 8px;
+      padding:10px 12px 9px;
+      background:var(--navy);
+      color:#fffaf0;
+      font-size:.94rem;
+      line-height:1;
+      letter-spacing:.05em;
+    }
+    .viz h2{
+      display:block;
+      margin:-10px -10px 8px;
+      padding:10px 12px 9px;
+      background:var(--navy);
+      color:#fffaf0;
+      font-size:1.05rem;
+      line-height:1;
+      letter-spacing:.045em;
+      text-transform:none;
+    }
+    .viz h2::after{
+      content:"";
+      display:inline-block;
+      width:56px;
+      height:3px;
+      margin-left:10px;
+      vertical-align:middle;
+      background:var(--orange);
+    }
+    .regimeBox{padding:9px;margin-bottom:9px;border-radius:6px}
+    .regimeBox .switch{margin-bottom:7px}
+    .regimeMini{gap:6px}
+    .regimeMini .regimeText{padding-top:6px}
+    .sliderBox{padding:10px;border-radius:6px;margin-bottom:9px}
+    .sliderHead{margin-bottom:7px}
+    .sliderHead label{font-size:.82rem}
+    .value{font-size:.66rem;max-width:48%}
+    .stratGauge{height:28px;border-radius:6px}
+    .stratGauge span{top:7px;font-size:.54rem}
+    .hint{font-size:.68rem;line-height:1.22}
+    .presetRow{gap:6px;margin-top:9px}
+    .presetRow button{min-height:29px;padding:6px 8px;font-size:.66rem;border-radius:6px}
+    .noteBox{display:none}
+    .scoreGrid{gap:8px;margin-bottom:8px;grid-template-columns:repeat(4,minmax(0,1fr))}
+    .scoreCard{padding:7px 9px;border-radius:6px}
+    .scoreLabel{font-size:.55rem;letter-spacing:.05em}
+    .scoreValue{font-size:1.08rem;margin-top:3px}
+    .scoreNote{font-size:.58rem;margin-top:3px}
+    .canvasCard{border-radius:6px}
+    svg{height:auto;min-height:0}
+    .caption{
+      min-height:72px;
+      padding:8px 10px;
+      grid-template-columns:minmax(0,1fr) 300px;
+      gap:8px;
+      overflow:hidden;
+    }
+    .outcome{font-size:.8rem;line-height:1.05}
+    .explain{font-size:.68rem;line-height:1.18}
+    .equation{font-size:.6rem;line-height:1.22;padding:7px 9px;border-radius:10px}
+  }
+
+  @media (max-width: 680px){
+    .wrap{padding:14px}
+    header{display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px}
+    .badge{width:58px;height:58px;font-size:.5rem}
+    h1{font-size:clamp(1.6rem,9vw,2.4rem);line-height:.98}
+    .subtitle{font-size:.8rem;line-height:1.2}
+    .panel{border-radius:18px}
+    .scoreGrid{grid-template-columns:1fr}
+    .sliderHead{display:block}
+    .value{display:block;max-width:none;text-align:left;margin-top:4px}
+    .caption{padding:13px}
+    .equation{font-size:.76rem}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="badge">The<br>Mechanism</div>
+    <div>
+      <h1>Why <span class="oax">OAX</span> compounds <span class="mhw">Marine Heatwaves</span></h1>
+      <div class="subtitle">Interactive sketch: stratification controls whether warming and high [H⁺] align</div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <div class="main">
+      <aside class="controls">
+        <h2>Experiment</h2>
+
+        <div class="regimeBox">
+          <div class="switch" aria-label="Regime selector">
+            <button id="lowBtn" class="active low" aria-pressed="true">Low–mid</button>
+            <button id="highBtn" aria-pressed="false">High latitude</button>
+          </div>
+
+          <div class="regimeMini">
+            <div class="regimeText">
+              <strong>Low–mid latitude regime</strong>
+              Permanently stratified waters: warm anomalies can push [H⁺] above the extreme threshold.
+            </div>
+
+            <div class="regimeText">
+              <strong>High latitude regime</strong>
+              Warm anomalies strengthen stratification and suppress mixing-driven [H⁺] supply.
+            </div>
+          </div>
+        </div>
+
+        <div class="sliderBox">
+          <div class="sliderHead">
+            <label for="event">Heatwave state</label>
+          </div>
+          <input id="event" type="range" min="0" max="1" step="0.01" value="0.65">
+          <div class="stratGauge">
+            <span class="left">cool + mixed</span>
+            <span class="right">warm + stratified</span>
+            <div class="gaugeMarker" id="gaugeMarker"></div>
+          </div>
+        </div>
+
+        <div class="presetRow">
+          <button data-preset="blob">Blob-like</button>
+          <button data-preset="stratified">Strong stratification</button>
+          <button data-preset="highrare">High-latitude rare</button>
+          <button data-preset="highmixed">High-latitude mixed</button>
+          <button data-preset="reset">Reset</button>
+        </div>
+
+        <div class="noteBox">
+          Background mixing/upwelling is baked into each regime. It is still shown in the schematic, but no longer controlled by a separate slider.
+        </div>
+      </aside>
+
+      <main class="viz">
+        <h2>The mechanism: a tug-of-war</h2>
+
+        <div class="scoreGrid">
+          <div class="scoreCard">
+            <div class="scoreLabel">Temperature anomaly</div>
+            <div class="scoreValue red" id="tempScore">—</div>
+          </div>
+          <div class="scoreCard">
+            <div class="scoreLabel">[H⁺] anomaly</div>
+            <div class="scoreValue red" id="hplusScore">—</div>
+            <div class="scoreNote">nmol/kg, relative to normal</div>
+          </div>
+          <div class="scoreCard">
+            <div class="scoreLabel">Surface mixing</div>
+            <div class="scoreValue teal" id="mixScore">—</div>
+          </div>
+          <div class="scoreCard">
+            <div class="scoreLabel">Compound likelihood</div>
+            <div class="scoreValue green" id="compoundScore">—</div>
+          </div>
+        </div>
+
+        <div class="canvasCard">
+          <svg id="svg" viewBox="0 0 760 330" role="img" aria-label="Interactive schematic of stratification and compound extremes">
+            <defs>
+              <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#fff6df"/>
+                <stop offset="100%" stop-color="#f2e5c6"/>
+              </linearGradient>
+              <linearGradient id="hotOcean" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#e66f4a"/>
+                <stop offset="38%" stop-color="#c84f36"/>
+                <stop offset="62%" stop-color="#8c5b4c"/>
+                <stop offset="100%" stop-color="#176a78"/>
+              </linearGradient>
+              <linearGradient id="coolOcean" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#9dcfd0"/>
+                <stop offset="50%" stop-color="#3c94a0"/>
+                <stop offset="100%" stop-color="#145e6a"/>
+              </linearGradient>
+              <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="6" stdDeviation="6" flood-opacity=".16"/>
+              </filter>
+            </defs>
+
+            <rect x="0" y="0" width="760" height="330" fill="url(#sky)"/>
+
+            <circle id="sun" cx="70" cy="65" r="21" fill="#e6ad35"/>
+            <g id="sunRays" stroke="#e6ad35" stroke-width="3.5" stroke-linecap="round">
+              <line x1="70" y1="31" x2="70" y2="18"/>
+              <line x1="70" y1="99" x2="70" y2="112"/>
+              <line x1="36" y1="65" x2="23" y2="65"/>
+              <line x1="104" y1="65" x2="117" y2="65"/>
+              <line x1="46" y1="41" x2="36" y2="31"/>
+              <line x1="94" y1="89" x2="104" y2="99"/>
+              <line x1="94" y1="41" x2="104" y2="31"/>
+              <line x1="46" y1="89" x2="36" y2="99"/>
+            </g>
+
+            <text id="regimeTitle" x="720" y="42" text-anchor="end" font-size="23" font-weight="900" fill="#2f3332">LOW–MID LATITUDE: ANOMALIES ALIGN</text>
+            <text id="regimeSub" x="720" y="69" text-anchor="end" font-size="14" fill="#56605b">Permanent stratification limits exchange with deeper water</text>
+
+            <path id="waterTop" d="M0 135 C50 122 100 148 150 135 C200 122 250 148 300 135 C350 122 400 148 450 135 C500 122 550 148 600 135 C650 122 700 148 760 135 L760 330 L0 330 Z" fill="url(#hotOcean)" opacity=".98"/>
+            <path d="M0 190 C70 172 120 208 190 190 C260 172 310 208 380 190 C450 172 500 208 570 190 C640 172 690 208 760 190 L760 330 L0 330 Z" fill="#1b6570" opacity=".34"/>
+            <path d="M0 247 C70 230 120 265 190 247 C260 230 310 265 380 247 C450 230 500 265 570 247 C640 230 690 265 760 247 L760 330 L0 330 Z" fill="#0e4d59" opacity=".32"/>
+
+            <!-- stratification layer stack, shortened to avoid overlap with upwelling arrows -->
+            <g id="stratLayers">
+              <line id="layer1" x1="48" y1="174" x2="478" y2="174" stroke="#fff8e7" stroke-width="4" opacity=".88" stroke-dasharray="18 10"/>
+              <line id="layer2" x1="74" y1="200" x2="486" y2="200" stroke="#fff8e7" stroke-width="4" opacity=".72" stroke-dasharray="18 10"/>
+              <line id="layer3" x1="102" y1="226" x2="470" y2="226" stroke="#fff8e7" stroke-width="4" opacity=".52" stroke-dasharray="18 10"/>
+              <text id="stratLabel" x="270" y="162" text-anchor="middle" font-size="14" font-weight="900" fill="#fff8e7">STRATIFICATION BARRIER</text>
+            </g>
+
+            <!-- heat arrows -->
+            <g id="heatArrows" stroke="#c64a32" stroke-width="6.5" fill="none" stroke-linecap="round" filter="url(#softShadow)">
+              <path d="M142 116 C142 96 142 88 142 75"/>
+              <path d="M142 75 l-11 18 M142 75 l11 18"/>
+              <path d="M196 116 C196 96 196 88 196 75"/>
+              <path d="M196 75 l-11 18 M196 75 l11 18"/>
+              <path d="M250 116 C250 96 250 88 250 75"/>
+              <path d="M250 75 l-11 18 M250 75 l11 18"/>
+            </g>
+
+            <!-- upwelling arrows grouped on right, no stratification line overlap -->
+            <g id="upwellArrows" stroke="#e9fbfb" stroke-width="5" fill="none" stroke-linecap="round">
+              <path d="M555 288 L555 182"/>
+              <path d="M555 182 l-13 20 M555 182 l13 20"/>
+              <path d="M615 288 L615 165"/>
+              <path d="M615 165 l-13 20 M615 165 l13 20"/>
+              <path d="M675 288 L675 196"/>
+              <path d="M675 196 l-13 20 M675 196 l13 20"/>
+            </g>
+
+            <g id="blockedMix" opacity="0">
+              <circle cx="616" cy="230" r="49" fill="#fffaf0" opacity=".18"/>
+              <circle cx="616" cy="230" r="42" fill="none" stroke="#c64a32" stroke-width="9"/>
+              <line x1="587" y1="201" x2="645" y2="259" stroke="#c64a32" stroke-width="9" stroke-linecap="round"/>
+              <circle cx="616" cy="230" r="30" fill="#c64a32" opacity=".08"/>
+              <text x="616" y="290" text-anchor="middle" font-size="12" font-weight="950" letter-spacing=".04em" fill="#c64a32">MIXING SUPPRESSED</text>
+            </g>
+
+            <g id="dicDots" fill="#d8f4f2" opacity=".45"></g>
+
+          </svg>
+
+          <div class="caption">
+            <div>
+              <div id="outcomeHeading" class="outcome likely">OAX ∩ MHW likely</div>
+              <div id="outcomeExplain" class="explain">
+                In permanently stratified low–mid latitudes, warming directly raises [H⁺] and compensating exchange with deeper waters is weak.
+              </div>
+            </div>
+            <div class="equation">
+              <div><span class="plus">warming</span> directly raises surface [H⁺]</div>
+              <div><span class="minus">regime</span> controls background mixing/upwelling</div>
+              <div><span class="net">compound</span> requires both MHW and high [H⁺]</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+</div>
+
+<script>
+const state = { regime: "low", event: 0.65 };
+const el = id => document.getElementById(id);
+
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+
+function eventLabel(x){
+  if(x < 0.38) return "cool + mixed";
+  if(x < 0.52) return "near normal";
+  if(x < 0.72) return "warm + stratified";
+  return "very warm + stratified";
+}
+
+function regimeParams(){
+  if(state.regime === "low"){
+    return {
+      baseMix: 0.28,
+      tempToH: 1.06,
+      title: "LOW–MID LATITUDE: ANOMALIES ALIGN",
+      sub: "Permanent stratification limits exchange with deeper water"
+    };
+  }
+  return {
+    baseMix: 0.88,
+    tempToH: 0.50,
+    title: "HIGH LATITUDE: WARMING SUPPRESSES MIXING",
+    sub: "Warm anomalies strengthen stratification and reduce mixing-driven [H⁺] supply"
+  };
+}
+
+function calculate(){
+  const p = regimeParams();
+  const event = state.event;
+  const anomalyScale = event * 2 - 1;
+  const tempAnom = anomalyScale * 3.0;
+  const stratification = state.regime === "low"
+    ? 0.55 + event * 0.42
+    : 0.15 + event * 0.82;
+
+  const mixingSuppression = state.regime === "high" ? 0.93 : 0.82;
+  const surfaceMixing = p.baseMix * (1 - mixingSuppression * stratification);
+  const warmingHplus = tempAnom * p.tempToH;
+  const mixingHplusSupply = state.regime === "high" ? surfaceMixing * 1.15 : 0.2 * stratification;
+  const hplusAnomaly = state.regime === "low" ? anomalyScale : -anomalyScale;
+
+  let hplusLikelihood;
+  if(state.regime === "low"){
+    hplusLikelihood = clamp((warmingHplus - 0.55 + 0.2*stratification), 0, 2.2);
+  } else {
+    hplusLikelihood = clamp((warmingHplus * 0.35 + mixingHplusSupply - 0.55 * stratification), 0, 2.2);
+  }
+
+  const tempGate = tempAnom <= 0 ? 0 : clamp(tempAnom / 2.1, 0, 1);
+  const compoundIndex = tempGate * clamp(hplusLikelihood / 1.15, 0, 1);
+
+  return {event, tempAnom, stratification, surfaceMixing, warmingHplus, hplusAnomaly, compoundIndex};
+}
+
+function syncRegimeButtons(){
+  const isLow = state.regime === "low";
+  el("lowBtn").classList.toggle("active", isLow);
+  el("lowBtn").classList.toggle("low", isLow);
+  el("lowBtn").setAttribute("aria-pressed", String(isLow));
+  el("highBtn").classList.toggle("active", !isLow);
+  el("highBtn").classList.toggle("high", !isLow);
+  el("highBtn").setAttribute("aria-pressed", String(!isLow));
+}
+
+function setRegime(regime){
+  state.regime = regime;
+  syncRegimeButtons();
+  state.event = regime === "low" ? 0.65 : 0.70;
+  el("event").value = state.event;
+  update();
+}
+
+function renderDots(n){
+  const dots = el("dicDots");
+  dots.innerHTML = "";
+  for(let i=0; i<n; i++){
+    const x = 535 + Math.random()*175;
+    const y = 190 + Math.random()*82;
+    const r = 2 + Math.random()*3;
+    const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    circle.setAttribute("cx", x);
+    circle.setAttribute("cy", y);
+    circle.setAttribute("r", r);
+    dots.appendChild(circle);
+  }
+}
+
+function update(){
+  state.event = Number(el("event").value);
+  const c = calculate();
+  const p = regimeParams();
+  const isLow = state.regime === "low";
+
+  el("event").setAttribute("aria-valuetext", eventLabel(c.event));
+  el("gaugeMarker").style.left = `calc(${Math.round(c.stratification*100)}% - 2px)`;
+
+  el("tempScore").textContent = `${c.tempAnom >= 0 ? "+" : ""}${c.tempAnom.toFixed(1)} °C`;
+  el("tempScore").className = c.tempAnom < -0.05 ? "scoreValue teal" : c.tempAnom > 0.05 ? "scoreValue red" : "scoreValue green";
+  el("hplusScore").textContent = `${c.hplusAnomaly >= 0 ? "+" : ""}${c.hplusAnomaly.toFixed(1)} nmol/kg`;
+  el("hplusScore").className = c.hplusAnomaly < -0.05 ? "scoreValue teal" : c.hplusAnomaly > 0.05 ? "scoreValue red" : "scoreValue green";
+  el("mixScore").textContent = c.surfaceMixing < 0.18 ? "low" : c.surfaceMixing < 0.45 ? "moderate" : "high";
+  el("compoundScore").textContent = c.compoundIndex < 0.25 ? "rare" : c.compoundIndex < 0.55 ? "borderline" : "likely";
+  el("compoundScore").className = c.compoundIndex < 0.25 ? "scoreValue teal" : c.compoundIndex < 0.55 ? "scoreValue green" : "scoreValue red";
+
+  el("regimeTitle").textContent = p.title;
+  el("regimeSub").textContent = p.sub;
+  el("waterTop").setAttribute("fill", isLow ? "url(#hotOcean)" : "url(#coolOcean)");
+  el("stratLabel").textContent = c.stratification > 0.65 ? "STRONG STRATIFICATION BARRIER" : "WEAK / SEASONAL STRATIFICATION";
+
+  const sw = 2 + c.stratification * 6.5;
+  ["layer1","layer2","layer3"].forEach((id, idx) => {
+    const line = el(id);
+    line.setAttribute("stroke-width", Math.max(1.5, sw - idx*1.4));
+    line.setAttribute("opacity", clamp(0.20 + c.stratification - idx*.16, .16, .9));
+  });
+
+  el("heatArrows").setAttribute("opacity", clamp(c.event * 1.25, 0, 1));
+  el("upwellArrows").setAttribute("opacity", clamp(c.surfaceMixing * 1.35, .04, .9));
+
+  const blockOpacity = !isLow ? clamp((c.stratification - 0.42) * 1.75, 0, 1) : clamp((c.stratification - 0.84) * .28, 0, .14);
+  el("blockedMix").setAttribute("opacity", blockOpacity);
+
+  renderDots(Math.round(38 * c.surfaceMixing));
+
+  let heading, explain, className;
+  if(c.event <= 0.05){
+    heading = "No compound extreme";
+    className = "outcome";
+    explain = "At the cool/mixed end there is no marine heatwave, so OAX ∩ MHW cannot occur.";
+  } else if(c.compoundIndex > 0.55){
+    heading = "OAX ∩ MHW likely";
+    className = "outcome likely";
+    explain = isLow
+      ? "In permanently stratified low–mid latitudes, warming directly raises [H⁺] and compensating exchange with deeper waters is weak."
+      : "These settings still allow enough [H⁺] increase for a compound event.";
+  } else if(c.compoundIndex > 0.25){
+    heading = "Borderline compound risk";
+    className = "outcome";
+    explain = "A heatwave is present, but the [H⁺] pathway is only partly aligned.";
+  } else {
+    heading = "OAX ∩ MHW rare";
+    className = "outcome rare";
+    explain = isLow
+      ? "The heatwave is too weak, or the [H⁺] response is too small, to create a compound event."
+      : "Warm anomalies strengthen stratification and cut off the mixing/upwelling pathway that usually raises surface [H⁺].";
+  }
+
+  el("outcomeHeading").textContent = heading;
+  el("outcomeHeading").className = className;
+  el("outcomeExplain").textContent = explain;
+}
+
+el("lowBtn").addEventListener("click", () => setRegime("low"));
+el("highBtn").addEventListener("click", () => setRegime("high"));
+el("event").addEventListener("input", update);
+
+document.querySelectorAll("[data-preset]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const p = btn.dataset.preset;
+    if(p === "blob"){ state.regime="low"; state.event=.86; }
+    if(p === "stratified"){ state.regime="low"; state.event=.72; }
+    if(p === "highrare"){ state.regime="high"; state.event=.78; }
+    if(p === "highmixed"){ state.regime="high"; state.event=.30; }
+    if(p === "reset"){ state.regime="low"; state.event=.65; }
+
+    syncRegimeButtons();
+    el("event").value = state.event;
+    update();
+  });
+});
+
+syncRegimeButtons();
+update();
+</script>
+</body>
+</html>

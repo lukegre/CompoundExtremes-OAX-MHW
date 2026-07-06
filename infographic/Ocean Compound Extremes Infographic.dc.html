@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Caveat:wght@500;700&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<link rel="stylesheet" href="./ocean-infographic-base.css">
+<style>@keyframes ocxBlink{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes ocxPulse{0%,100%{box-shadow:0 2px 6px rgba(18,34,44,.35),0 0 0 0 rgba(200,83,31,.55)}50%{box-shadow:0 2px 6px rgba(18,34,44,.35),0 0 0 8px rgba(200,83,31,0)}}
+input[type=range].ocx-slider{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:6px;background:#e3d8bd;outline:none;cursor:pointer;margin:2px 0}
+input[type=range].ocx-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:26px;height:26px;border-radius:50%;background:#c8531f;border:3px solid #fff;box-shadow:0 2px 6px rgba(18,34,44,.35);cursor:grab;animation:ocxPulse 1.8s ease-out infinite}
+input[type=range].ocx-slider:hover::-webkit-slider-thumb,input[type=range].ocx-slider:active::-webkit-slider-thumb{animation:none}
+input[type=range].ocx-slider::-webkit-slider-thumb:active{cursor:grabbing;background:#a83f13}
+input[type=range].ocx-slider::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:#c8531f;border:3px solid #fff;box-shadow:0 2px 6px rgba(18,34,44,.35);cursor:grab;animation:ocxPulse 1.8s ease-out infinite}
+input[type=range].ocx-slider:hover::-moz-range-thumb{animation:none}
+input[type=range].ocx-slider::-moz-range-track{height:10px;border-radius:6px;background:#e3d8bd}
+.ocx-pill{position:relative}
+.ocx-pill::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);right:0;width:max-content;max-width:230px;background:#12222c;color:#f2f0e8;font-family:'Source Sans 3',sans-serif;font-weight:400;font-size:11.5px;letter-spacing:normal;text-transform:none;line-height:1.35;padding:7px 10px;border-radius:7px;box-shadow:0 6px 18px rgba(18,34,44,.28);opacity:0;transform:translateY(-3px);pointer-events:none;transition:opacity .15s,transform .15s;z-index:50;white-space:normal;text-align:left}
+.ocx-pill::before{content:'';position:absolute;top:calc(100% + 3px);right:15px;border:5px solid transparent;border-bottom-color:#12222c;opacity:0;transition:opacity .15s;pointer-events:none;z-index:50}
+.ocx-pill:hover::after,.ocx-pill:hover::before{opacity:1;transform:translateY(0)}</style>
+</helmet>
+<div ref="{{ rootRef }}" style="width:1200px;max-width:100%;margin:0 auto;padding:24px 24px 26px;background:#f4efe3;color:#1e2a30;position:relative;font-family:'Source Sans 3',sans-serif">
+
+  <!-- ============ ROW 1 : title + definitions ============ -->
+  <div data-tour="def" data-screen-label="Definitions" style="display: flex; flex-wrap: wrap; gap: 16px; align-items: stretch">
+    <div style="flex: 0 0 340px; min-width: 280px; background: #12222c; color: #fff; padding: 26px 28px; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; gap: 14px; z-index: 10; box-shadow: 7px 10px 12px 0px rgba(0, 0, 0, 0.15)">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;line-height:.94;letter-spacing:.01em;text-transform:uppercase;font-size:46px">
+        <div style="color:#fff">When Ocean</div>
+        <div style="color:#e8891c">Heatwaves</div>
+        <div style="color:#38b0b8">Turn Acidic</div>
+      </div>
+      <div style="height:3px;width:126px;background:#e8891c"></div>
+    </div>
+    <div style="flex: 1 1 500px; min-width: 340px; background: #faf6ec; border: 1px solid #e6ddc7; border-radius: 6px; padding: 20px 24px; display: flex; flex-direction: column; justify-content: center; gap: 15px">
+      <p style="margin:0;font-size:15px;line-height:1.5;color:#4a4636">Marine heatwaves and ocean‑acidification extremes increasingly strike the same waters at the same time — <b style="color:#12222c">compound extremes</b> that stress marine life far more than either event alone. Here is their recent history across the global ocean, <b style="color:#12222c">1982–2024</b>.</p>
+      <div style="height:1px;background:#e6ddc7"></div>
+      <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap">
+      <div style="flex:1 1 170px;min-width:160px;display:flex;gap:12px;align-items:center">
+        <svg width="26" height="40" viewBox="0 0 30 46" style="flex:0 0 auto"><rect x="11" y="4" width="8" height="26" rx="4" fill="#e6e0d0" stroke="#c94b2a" stroke-width="2"></rect><circle cx="15" cy="36" r="8" fill="#c94b2a"></circle><rect x="13" y="16" width="4" height="20" rx="2" fill="#c94b2a"></rect></svg>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#c94b2a;line-height:1.05">Marine Heatwave <span style="color:#7a6f57;font-weight:600">(MHW)</span></div>
+          <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Sea-surface temperature in the top 5% of its historical record.</p>
+        </div>
+      </div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;color:#b7ab8d;font-weight:600">+</div>
+      <div style="flex:1 1 170px;min-width:160px;display:flex;gap:12px;align-items:center">
+        <svg width="34" height="34" viewBox="0 0 40 40" style="flex:0 0 auto"><circle cx="20" cy="20" r="18" fill="#1f9aa6"></circle><text x="20" y="26" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="19" fill="#fff">H⁺</text></svg>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#177f8a;line-height:1.05">Ocean Acidification Extreme <span style="color:#7a6f57;font-weight:600">(OAX)</span></div>
+          <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Hydrogen-ion concentration [H⁺] in the top 5% of its record.</p>
+        </div>
+      </div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;color:#b7ab8d;font-weight:600">=</div>
+      <div style="flex:1 1 170px;min-width:160px;display:flex;gap:12px;align-items:center">
+        <svg width="42" height="31" viewBox="0 0 46 34" style="flex:0 0 auto"><circle cx="18" cy="17" r="14" fill="#5aa469" fill-opacity="0.75"></circle><circle cx="28" cy="17" r="14" fill="#1f9aa6" fill-opacity="0.7"></circle></svg>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#3f7a4c;line-height:1.05">Compound Extreme <span style="color:#7a6f57;font-weight:600">(OAX ∩ MHW)</span></div>
+          <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">When both extremes strike the same place at the same time.</p>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ROW 2 : map (full width) ============ -->
+  <div data-tour="map" data-screen-label="World map" style="position: relative; border-radius: 8px; overflow: hidden; margin-bottom: 15px; z-index: 0; margin-top: 16px">
+    <div ref="{{ mapWrapRef }}" style="position:relative;width:100%;aspect-ratio:1000/475">
+      <div ref="{{ mapRef }}" style="position:absolute;inset:0"></div>
+      <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 90px; pointer-events: none; background: linear-gradient(to right,#f4efe3,rgba(244,239,227,0))"></div>
+      <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 90px; pointer-events: none; background: linear-gradient(to left,#f4efe3,rgba(244,239,227,0))"></div>
+      <div ref="{{ markersRef }}" style="position: absolute; inset: 0; pointer-events: none"></div>
+      <!-- Year badge: shows the field currently on the map (the summed total, or a single year on bar hover) -->
+      <div ref="{{ yearBadgeRef }}" style="position:absolute;top:12px;left:14px;z-index:6;pointer-events:none;background:rgba(18,34,44,.82);color:#f2b45a;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;padding:4px 11px;border-radius:20px;box-shadow:0 2px 8px rgba(18,34,44,.18)">TOTAL · 1982–2024</div>
+    </div>
+    <div class="ocx-pill" data-tip="Hover or tap any circle to see that event's area, intensity and duration." style="position:absolute;top:12px;right:14px;z-index:6;display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.85);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE
+    </div>
+  </div>
+
+  <!-- ============ ROW 3 : caption strip — where + how often (borderless) ============ -->
+  <div data-tour="freq" data-screen-label="Frequency" style="margin-top: -51px; display: flex; flex-wrap: wrap; gap: 26px; align-items: stretch; padding: 2px 4px 0; z-index: 1; position: relative; top: 0px">
+    <div style="flex:2 1 560px;min-width:340px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:#12222c;line-height:1">WHERE DO COMPOUND EXTREMES HAPPEN?</div>
+      <p style="margin: 5px 0 12px; font-size: 13px; line-height: 1.4; color: #5a5540; max-width: 640px; background-color: #F4EFE3; width: 560px">Total months in a compound (OAX&nbsp;∩&nbsp;MHW) extreme at each location, summed over 1982–2024. <b style="color:#12222c">Hover a year's bar below</b> to switch the map to that single year.</p>
+      <div ref="{{ legendSwatchRef }}" style="display:grid;grid-template-columns:repeat(7,1fr);height:15px;border-radius:3px;overflow:hidden;max-width:560px">
+        <span style="background:#fce8c8"></span><span style="background:#f6c886"></span><span style="background:#eda44e"></span><span style="background:#e07b2e"></span><span style="background:#c8531f"></span><span style="background:#a5281a"></span><span style="background:#6b1710"></span>
+      </div>
+      <div style="position:relative;height:14px;max-width:560px;margin-top:4px;font-size:10.5px;font-weight:600;color:#4a4636">
+        <span style="position:absolute;left:0;white-space:nowrap">0</span>
+        <span style="position:absolute;left:14.286%;transform:translateX(-50%);white-space:nowrap">1</span>
+        <span style="position:absolute;left:28.571%;transform:translateX(-50%);white-space:nowrap">2</span>
+        <span style="position:absolute;left:42.857%;transform:translateX(-50%);white-space:nowrap">4</span>
+        <span style="position:absolute;left:57.143%;transform:translateX(-50%);white-space:nowrap">8</span>
+        <span style="position:absolute;left:71.429%;transform:translateX(-50%);white-space:nowrap">16</span>
+        <span style="position:absolute;left:85.714%;transform:translateX(-50%);white-space:nowrap">32</span>
+        <span style="position:absolute;left:100%;transform:translateX(-100%);white-space:nowrap">&gt;32</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#8a836c;margin-top:2px;max-width:560px"><span>fewer extreme-months</span><span>more extreme-months</span></div>
+      
+    </div>
+    <div style="width:1px;align-self:stretch;background:#d8cfb8"></div>
+    <div style="flex: 1 1 300px; min-width: 280px; display: flex; flex-direction: column; justify-content: center; position: relative">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding-top:10px;margin-top:-10px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:#12222c">More common than chance</div>
+        <div class="ocx-pill" data-tip="Hover the Low-to-mid-lat. or High-latitudes stat to spotlight those regions on the map above." style="flex:0 0 auto;display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.85);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+      </div>
+      <div style="font-family: 'Barlow Condensed',sans-serif; font-weight: 700; font-size: 16px; letter-spacing: .05em; text-transform: uppercase; color: #12222c; margin-bottom: 10px; padding-top: 10px; margin-top: -10px; background-color: #F4EFE3; display:none">More common than chance</div>
+      <div style="display:flex;gap:12px;text-align:center">
+        <div onMouseEnter="{{ hlLowOn }}" onMouseLeave="{{ hlOff }}" style="flex:1;cursor:pointer;border-radius:6px;padding:6px 4px" style-hover="background:#efe7d5">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#5a6b73">Low– to mid–lat.</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:38px;line-height:.9;color:#c8531f;margin-top:2px">3–4×</div>
+          <div style="font-size:10px;line-height:1.22;color:#5a6b73;margin-top:3px">more frequent than by chance</div>
+        </div>
+        <div style="width:1px;background:#d8cfb8"></div>
+        <div onMouseEnter="{{ hlHighOn }}" onMouseLeave="{{ hlOff }}" style="flex:1;cursor:pointer;border-radius:6px;padding:6px 4px" style-hover="background:#efe7d5">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#5a6b73">High latitudes</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:38px;line-height:.9;color:#3b6fa0;margin-top:2px">~4×</div>
+          <div style="font-size:10px;line-height:1.22;color:#5a6b73;margin-top:3px"><b>less</b> frequent than by chance</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ROW 4 : El Niño bars + largest-events table ============ -->
+  <div data-tour="years" data-screen-label="Years and events" style="margin-top:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:stretch">
+    <div style="flex:1.25 1 460px;min-width:340px;position:relative;background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:18px 22px;display:flex;flex-direction:column">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:#12222c">El Niño – La Niña connection</div>
+      <p style="margin:6px 0 4px;font-size:12.5px;line-height:1.4;color:#5a5540">Compound area peaks at the end of — or just after — El&nbsp;Niño events, often during the following La&nbsp;Niña. <b style="color:#12222c">Hover a bar</b> to trace that year in the table &amp; map.</p>
+      <div ref="{{ lineRef }}" style="width:100%;margin-top:auto"></div>
+      <div class="ocx-pill" data-tip="Hover any year's bar to trace that year across the table and map." style="position:absolute;top:12px;right:14px;display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.85);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+    </div>
+    <div style="flex:1 1 360px;min-width:320px;position:relative;background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:18px 24px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:#12222c">The largest compound events</div>
+      <p style="margin:5px 0 0;font-size:12px;line-height:1.35;color:#5a5540"><b style="color:#12222c">Hover a row</b> to locate it on the map and highlight its year in the chart.</p>
+      <table ref="{{ tableRef }}" style="width:100%;border-collapse:collapse;margin-top:8px;font-size:12px">
+        <thead>
+          <tr style="text-align:left;color:#8a836c;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-bottom:1.5px solid #ddd2b8">
+            <th data-sort="name" style="padding:5px 6px 6px 0;font-weight:700;cursor:pointer;user-select:none" style-hover="color:#12222c">Event<span data-arrow="name" style="opacity:0;margin-left:3px">↕</span></th>
+            <th data-sort="year" style="padding:5px 6px 6px 0;font-weight:700;cursor:pointer;user-select:none" style-hover="color:#12222c">Year<span data-arrow="year" style="opacity:0;margin-left:3px">↕</span></th>
+            <th data-sort="area" style="padding:5px 6px 6px 0;font-weight:700;text-align:right;cursor:pointer;user-select:none" style-hover="color:#12222c"><span data-arrow="area" style="opacity:0;margin-right:3px">↕</span>Area&nbsp;(Mkm²)</th>
+            <th data-sort="dur" style="padding:5px 0 6px 6px;font-weight:700;text-align:right;cursor:pointer;user-select:none" style-hover="color:#12222c"><span data-arrow="dur" style="opacity:0;margin-right:3px">↕</span>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-key="blob" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#8c1d13;margin-right:7px;vertical-align:middle"></span>The Blob <span style="color:#8a836c">(NE Pacific)</span></td><td style="padding:6px 6px 6px 0">2015</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">12.6</td><td style="padding:6px 0 6px 6px;text-align:right">12 mo</td></tr>
+          <tr data-key="catl" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#b0331a;margin-right:7px;vertical-align:middle"></span>Central Atlantic</td><td style="padding:6px 6px 6px 0">2023</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">12.5</td><td style="padding:6px 0 6px 6px;text-align:right">14 mo</td></tr>
+          <tr data-key="seasia" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e8a13a;margin-right:7px;vertical-align:middle"></span>Southeast Asia</td><td style="padding:6px 6px 6px 0">1998</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">7.5</td><td style="padding:6px 0 6px 6px;text-align:right"><b>20 mo</b></td></tr>
+          <tr data-key="natl" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c8531f;margin-right:7px;vertical-align:middle"></span>North Atlantic</td><td style="padding:6px 6px 6px 0">2023</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">6.9</td><td style="padding:6px 0 6px 6px;text-align:right">11 mo</td></tr>
+          <tr data-key="spac" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#c05a1e;margin-right:7px;vertical-align:middle"></span>South Pacific</td><td style="padding:6px 6px 6px 0">2016</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">4.0</td><td style="padding:6px 0 6px 6px;text-align:right">8 mo</td></tr>
+          <tr data-key="gbr" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#e8a13a;margin-right:7px;vertical-align:middle"></span>Great Barrier Reef</td><td style="padding:6px 6px 6px 0">2022</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">3.3</td><td style="padding:6px 0 6px 6px;text-align:right">9 mo</td></tr>
+          <tr data-key="med" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#b0331a;margin-right:7px;vertical-align:middle"></span>Mediterranean Sea</td><td style="padding:6px 6px 6px 0">2003</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">1.3</td><td style="padding:6px 0 6px 6px;text-align:right">4 mo</td></tr>
+          <tr data-key="mad" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#b0331a;margin-right:7px;vertical-align:middle"></span>Madagascar</td><td style="padding:6px 6px 6px 0">1987</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">1.0</td><td style="padding:6px 0 6px 6px;text-align:right">8 mo</td></tr>
+          <tr data-key="waus" style="border-bottom:1px solid #ece3cd" style-hover="background:#f2ead6"><td style="padding:6px 6px 6px 0"><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#8c1d13;margin-right:7px;vertical-align:middle"></span>Western Australia <span style="color:#c8531f;font-weight:600">★ most intense</span></td><td style="padding:6px 6px 6px 0">2011</td><td style="padding:6px 6px 6px 0;text-align:right;font-weight:700">0.7</td><td style="padding:6px 0 6px 6px;text-align:right">6 mo</td></tr>
+        </tbody>
+      </table>
+      
+      <div class="ocx-pill" data-tip="Hover a row to locate the event on the map, or click a column heading to sort." style="position:absolute;top:12px;right:14px;display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.85);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+    </div>
+  </div>
+
+  <!-- ============ ROW 5 : size distribution + season ============ -->
+  <div data-tour="dist" data-screen-label="Size and season" style="margin-top:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch">
+    <div style="position:relative;background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:18px 20px;display:flex;flex-direction:column">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:#12222c">Most events are small</div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+        <div ref="{{ donutRef }}" style="flex:0 0 128px;width:128px"></div>
+        <div style="font-size:12px;line-height:1.4;color:#4a4636">
+          <div style="display:flex;gap:7px;align-items:center;margin-bottom:5px"><span style="width:11px;height:11px;border-radius:2px;background:#1f9aa6"></span><b>75%</b>&nbsp;&lt; 1M km²</div>
+          <div style="display:flex;gap:7px;align-items:center;margin-bottom:5px"><span style="width:11px;height:11px;border-radius:2px;background:#e6a54e"></span><b>16%</b>&nbsp;1–2M km²</div>
+          <div style="display:flex;gap:7px;align-items:center"><span style="width:11px;height:11px;border-radius:2px;background:#c8531f"></span><b>9%</b>&nbsp;&gt; 2M km²</div>
+        </div>
+      </div>
+      <p style="margin:10px 0 0;font-size:12px;line-height:1.4;color:#5a5540">Most common size <b style="color:#c8531f">~500,000 km²</b> — roughly the area of Spain — lasting a single month.</p>
+      
+    </div>
+    <div style="background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;gap:5px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:#12222c">But a few giants dominate</div>
+      <p style="margin:7px 0 8px;font-size:12px;line-height:1.4;color:#5a5540">The largest <b>20%</b> of events contribute more than</p>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:52px;line-height:.85;color:#c8531f">50%</div>
+        <div ref="{{ dotsRef }}" style="flex:1;min-width:120px"></div>
+      </div>
+      <p style="margin:8px 0 0;font-size:12px;line-height:1.4;color:#5a5540">of the total compound-event area in the global ocean.</p>
+    </div>
+    <div style="background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;align-items:flex-start;gap:8px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;color:#12222c">Summer is the danger season</div>
+      <div style="display:flex;align-items:stretch;justify-content:center;gap:16px;margin:10px auto 4px">
+        <svg width="52" height="52" viewBox="0 0 52 52"><g stroke="#e8891c" stroke-width="3" stroke-linecap="round"><line x1="26" y1="4" x2="26" y2="12"></line><line x1="26" y1="40" x2="26" y2="48"></line><line x1="4" y1="26" x2="12" y2="26"></line><line x1="40" y1="26" x2="48" y2="26"></line><line x1="10" y1="10" x2="16" y2="16"></line><line x1="36" y1="36" x2="42" y2="42"></line><line x1="42" y1="10" x2="36" y2="16"></line><line x1="16" y1="36" x2="10" y2="42"></line></g><circle cx="26" cy="26" r="10" fill="#e8891c"></circle></svg>
+        <div style="text-align:center"><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:40px;line-height:.9;color:#12222c">2×</div><div style="font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#8a836c;font-weight:700">summer vs winter</div></div>
+        <svg width="48" height="48" viewBox="0 0 48 48"><g stroke="#3b6fa0" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="4" x2="24" y2="44"></line><line x1="6" y1="14" x2="42" y2="34"></line><line x1="42" y1="14" x2="6" y2="34"></line><line x1="24" y1="4" x2="19" y2="9"></line><line x1="24" y1="4" x2="29" y2="9"></line><line x1="24" y1="44" x2="19" y2="39"></line><line x1="24" y1="44" x2="29" y2="39"></line></g></svg>
+      </div>
+      <p style="margin:4px 0 0;font-size:12px;line-height:1.4;color:#5a5540">Compound extremes occur nearly twice as often in summer. Their latitude range expands poleward in summer and contracts toward the tropics in winter.</p>
+    </div>
+  </div>
+
+  <!-- ============ ROW 6 : the mechanism (interactive, full width) ============ -->
+  <div data-tour="mech" data-screen-label="Mechanism" style="margin-top:16px;position:relative;background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:22px 26px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.03em;text-transform:uppercase;color:#12222c;line-height:1">The mechanism: a tug-of-war</div>
+    <p style="margin:6px 0 14px;font-family:'Source Sans 3',sans-serif;font-size:14px;line-height:1.5;color:#3a4147;max-width:820px">During marine heatwaves, warming raises <b style="color:#12222c">[H⁺]</b>. Whether an acidification extreme also occurs depends on the regime and the strength of the heatwave. <b style="color:#12222c">Drag the controls</b> to play out the tug-of-war between warming and mixing.</p>
+
+    <div ref="{{ mechRef }}" style="display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:stretch;margin-top:2px">
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:14px 16px;background:#fbf6ea;border:1px solid #e0d5ba;border-radius:8px">
+        <div style="display:flex;align-items:center;gap:7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:#c8531f"><svg width="13" height="13" viewBox="0 0 24 24" fill="#c8531f"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>Experiment &mdash; your controls</div>
+
+        <div style="display:flex;gap:6px;background:#efe7d5;padding:5px;border-radius:8px;border:1px solid #ddd0b0">
+          <button data-m="lowBtn" type="button" style="flex:1;border:0;cursor:pointer;border-radius:6px;padding:8px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;background:#c8531f;color:#fff">Stratified<br>low–mid</button>
+          <button data-m="highBtn" type="button" style="flex:1;border:0;cursor:pointer;border-radius:6px;padding:8px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;background:transparent;color:#6f7873">Upwelling<br>high-lat.</button>
+        </div>
+
+        <div data-m="regimeDesc" style="font-family:'Source Sans 3',sans-serif;font-size:12px;line-height:1.4;color:#5a5540">Permanently stratified waters: warm anomalies push [H⁺] above the extreme threshold, and exchange with deeper water is weak.</div>
+
+        <div style="margin-top:2px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
+            <label for="mech-event" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;color:#12222c;white-space:nowrap">Heatwave state <span style="color:#c8531f">&#8596;</span></label>
+          </div>
+          <input id="mech-event" class="ocx-slider" data-m="event" type="range" min="0" max="1" step="0.01">
+          <div style="position:relative;height:14px;border-radius:4px;margin-top:6px;overflow:hidden;background:linear-gradient(90deg,#7ba3c9,#38b0b8 30%,#e8b25c 58%,#c8531f 82%,#8c1d13)">
+            <div data-m="gaugeMarker" style="position:absolute;top:2px;bottom:2px;width:4px;border-radius:3px;background:#12222c;box-shadow:0 0 0 2px rgba(255,255,255,.7);left:50%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:'Source Sans 3',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.02em;color:#8a836c;margin-top:3px"><span>cool + mixed</span><span>warm + stratified</span></div>
+        </div>
+
+        <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;margin-top:2px">Jump to a scenario</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          <button data-preset="blob" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">The Blob</button>
+          <button data-preset="highrare" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">High-lat. rare</button>
+          <button data-preset="highmixed" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">Cold upwelling</button>
+          <button data-preset="reset" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">Reset</button>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+          <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Temp. anomaly</div>
+            <div data-m="tempScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+2.0 °C</div>
+          </div>
+          <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">[H⁺] anomaly</div>
+            <div data-m="hplusScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+0.3</div>
+            <div style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">nmol/kg vs normal</div>
+          </div>
+          <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Surface mixing</div>
+            <div data-m="mixScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#1f9aa6">low</div>
+          </div>
+          <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Compound risk</div>
+            <div data-m="compoundScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">likely</div>
+          </div>
+        </div>
+
+        <div style="border:1px solid #d7cdb3;border-radius:8px;overflow:hidden;background:#eef4f8">
+          <svg viewBox="0 12 760 284" style="display:block;width:100%;height:auto" role="img" aria-label="Interactive schematic of stratification and compound extremes">
+            <defs>
+              <linearGradient id="mechSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#eef4f8"></stop><stop offset="100%" stop-color="#dbe8f0"></stop></linearGradient>
+              <linearGradient id="mechHot" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#e66f4a"></stop><stop offset="38%" stop-color="#c84f36"></stop><stop offset="62%" stop-color="#7d6f74"></stop><stop offset="100%" stop-color="#2f6aa0"></stop></linearGradient>
+              <linearGradient id="mechCool" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#9dc7d0"></stop><stop offset="50%" stop-color="#4f8fb0"></stop><stop offset="100%" stop-color="#255f86"></stop></linearGradient>
+              <filter id="mechShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-opacity=".18"></feDropShadow></filter>
+            </defs>
+            <rect x="0" y="0" width="760" height="330" fill="url(#mechSky)"></rect>
+            <circle cx="70" cy="60" r="20" fill="#f2b45a"></circle>
+            <g stroke="#e8a13a" stroke-width="3.5" stroke-linecap="round">
+              <line x1="70" y1="28" x2="70" y2="16"></line><line x1="70" y1="92" x2="70" y2="104"></line>
+              <line x1="38" y1="60" x2="26" y2="60"></line><line x1="102" y1="60" x2="114" y2="60"></line>
+              <line x1="47" y1="37" x2="38" y2="28"></line><line x1="93" y1="83" x2="102" y2="92"></line>
+              <line x1="93" y1="37" x2="102" y2="28"></line><line x1="47" y1="83" x2="38" y2="92"></line>
+            </g>
+            <text data-m="regimeTitle" x="726" y="40" text-anchor="end" font-family="'Barlow Condensed',sans-serif" font-size="24" font-weight="700" letter-spacing=".02em" fill="#12222c">STRATIFIED LOW–MID LATITUDES</text>
+            <text data-m="regimeSub" x="726" y="64" text-anchor="end" font-family="'Source Sans 3',sans-serif" font-size="14" fill="#56605b">Permanent stratification limits exchange with deeper water</text>
+            <path data-m="waterTop" d="M0 135 C50 122 100 148 150 135 C200 122 250 148 300 135 C350 122 400 148 450 135 C500 122 550 148 600 135 C650 122 700 148 760 135 L760 330 L0 330 Z" fill="url(#mechHot)"></path>
+            <path d="M0 190 C70 172 120 208 190 190 C260 172 310 208 380 190 C450 172 500 208 570 190 C640 172 690 208 760 190 L760 330 L0 330 Z" fill="#1b4f70" opacity=".30"></path>
+            <path d="M0 247 C70 230 120 265 190 247 C260 230 310 265 380 247 C450 230 500 265 570 247 C640 230 690 265 760 247 L760 330 L0 330 Z" fill="#12384f" opacity=".30"></path>
+            <g>
+              <line data-m="layer1" x1="48" y1="174" x2="478" y2="174" stroke="#fff8e7" stroke-width="4" opacity=".88" stroke-dasharray="18 10"></line>
+              <line data-m="layer2" x1="74" y1="200" x2="486" y2="200" stroke="#fff8e7" stroke-width="4" opacity=".72" stroke-dasharray="18 10"></line>
+              <line data-m="layer3" x1="102" y1="226" x2="470" y2="226" stroke="#fff8e7" stroke-width="4" opacity=".52" stroke-dasharray="18 10"></line>
+              <text data-m="stratLabel" x="270" y="162" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="700" letter-spacing=".03em" fill="#fff8e7">STRONG STRATIFICATION</text>
+            </g>
+            <g data-m="heatArrows" stroke="#b23b1c" stroke-width="6.5" fill="none" stroke-linecap="round" filter="url(#mechShadow)">
+              <path d="M142 116 C142 96 142 88 142 75"></path><path d="M142 75 l-11 18 M142 75 l11 18"></path>
+              <path d="M196 116 C196 96 196 88 196 75"></path><path d="M196 75 l-11 18 M196 75 l11 18"></path>
+              <path d="M250 116 C250 96 250 88 250 75"></path><path d="M250 75 l-11 18 M250 75 l11 18"></path>
+            </g>
+            <g data-m="upwellArrows" stroke="#dff6f6" stroke-width="5" fill="none" stroke-linecap="round">
+              <path d="M555 288 L555 182"></path><path d="M555 182 l-13 20 M555 182 l13 20"></path>
+              <path d="M615 288 L615 165"></path><path d="M615 165 l-13 20 M615 165 l13 20"></path>
+              <path d="M675 288 L675 196"></path><path d="M675 196 l-13 20 M675 196 l13 20"></path>
+            </g>
+            <g data-m="blockedMix" opacity="0">
+              <circle cx="616" cy="230" r="42" fill="none" stroke="#b23b1c" stroke-width="9"></circle>
+              <line x1="587" y1="201" x2="645" y2="259" stroke="#b23b1c" stroke-width="9" stroke-linecap="round"></line>
+              <text x="616" y="292" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="13" font-weight="700" letter-spacing=".04em" fill="#b23b1c" style="paint-order: stroke; text-shadow: 0px 0px 5px #FFFFFF">MIXING SUPPRESSED</text>
+            </g>
+            <g data-m="dicDots" fill="#dff4f2" opacity=".5"></g>
+          </svg>
+        </div>
+
+        <div>
+          <div data-m="outcomeHeading" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.02em;text-transform:uppercase;color:#c8531f;line-height:1.05">OAX ∩ MHW likely</div>
+          <div data-m="outcomeExplain" style="font-family:'Source Sans 3',sans-serif;font-size:12.5px;line-height:1.4;color:#4a4636;margin-top:2px">In permanently stratified low–mid latitudes, warming directly raises [H⁺] and exchange with deeper water is too weak to offset it.</div>
+        </div>
+      </div>
+    </div>
+    <div class="ocx-pill" data-tip="Switch the ocean regime, drag the heatwave slider, or pick a preset to see when a compound extreme forms." style="position:absolute;top:14px;right:16px;display:inline-flex;align-items:center;gap:6px;background:#12222c;color:#f2b45a;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.09em;padding:5px 12px 5px 9px;border-radius:20px;box-shadow:0 2px 8px rgba(18,34,44,.22)"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f2b45a"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE MODEL</div>
+  </div>
+
+  <!-- footer -->
+  <div style="margin-top:16px;padding:12px 16px;background:#12222c;border-radius:6px;color:#aebac0;font-size:11.5px;line-height:1.5;display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center">
+    <span><b style="color:#fff">OAX</b> Ocean Acidification Extreme</span>
+    <span><b style="color:#fff">MHW</b> Marine Heatwave</span>
+    <span><b style="color:#fff">DIC</b> Dissolved Inorganic Carbon</span>
+    <span><b style="color:#fff">[H⁺]</b> Hydrogen-ion concentration</span>
+    <span style="margin-left:auto;color:#7f8c93">Source: Gregor &amp; Gruber, <i>AGU Advances</i> (2025) · Data: <a href="https://opensciencedata.esa.int/products/ocean-soda-ethz/ocean-soda-zarr" target="_blank" rel="noopener" style="color:#cdd8dc;text-decoration:underline">OceanSODA-ETHZ, 1982–2024</a></span>
+  </div>
+
+  <button ref="{{ tourBtnRef }}" type="button" onClick="{{ startTour }}" style="position:fixed;bottom:22px;right:22px;z-index:60;display:inline-flex;align-items:center;gap:8px;background:#12222c;color:#fff;border:0;border-radius:24px;padding:11px 18px 11px 14px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14.5px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 6px 20px rgba(18,34,44,.3);transition:opacity .2s ease" style-hover="background:#1d3644">
+    <svg width="17" height="17" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#e8891c"></circle><path d="M10 8l6 4-6 4z" fill="#12222c"></path></svg>
+    Guided tour
+  </button>
+
+  <div ref="{{ tipRef }}" class="oce-tip"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:2450},&quot;rasterOpacity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.9,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Raster&quot;},&quot;intensityScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;warm&quot;,&quot;reds&quot;,&quot;orangeRed&quot;,&quot;yellowOrangeBrown&quot;,&quot;inferno&quot;,&quot;magma&quot;,&quot;plasma&quot;,&quot;turbo&quot;,&quot;viridis&quot;,&quot;cividis&quot;,&quot;spectral&quot;],&quot;default&quot;:&quot;warm&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;circleScale&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.2,&quot;min&quot;:0.6,&quot;max&quot;:1.8,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;circleOpacity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.9,&quot;min&quot;:0.2,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;showTooltips&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;spotlightStrength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.68,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.02,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Spotlight&quot;},&quot;spotlightFadeMs&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:620,&quot;min&quot;:0,&quot;max&quot;:1200,&quot;step&quot;:20,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Spotlight&quot;}}">
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  mapRef = React.createRef();
+  lineRef = React.createRef();
+  donutRef = React.createRef();
+  dotsRef = React.createRef();
+  tableRef = React.createRef();
+  tipRef = React.createRef();
+  mapWrapRef = React.createRef();
+  markersRef = React.createRef();
+  legendSwatchRef = React.createRef();
+  mechRef = React.createRef();
+  tourBtnRef = React.createRef();
+  yearBadgeRef = React.createRef();
+  _mech = { regime:'low', event:0.72 };
+  _tour = { active:false, i:0 };
+
+  // Bump _ASSET_V whenever ocean-map-helpers.js / ocean-map-draw.js change, so browsers don't
+  // serve a stale cached copy of a shared module against a newer page (which blanks the map+charts).
+  static _ASSET_V = '20260706d';
+  // Append the asset version to an annual/ image URL so a re-baked image never serves stale from cache.
+  _ver(u){ return u ? (u + (u.includes('?') ? '&' : '?') + 'v=' + Component._ASSET_V) : u; }
+  _helpers(){ return import('./ocean-map-helpers.js?v=' + Component._ASSET_V); }
+  get events(){ return this._H ? this._H.EVENTS : []; }
+  get _yearArea(){ return this._H ? this._H.YEAR_AREA : {}; }
+  get _ninoYears(){ return this._H ? this._H.NINO_YEARS : new Set(); }
+  get _ninaYears(){ return this._H ? this._H.NINA_YEARS : new Set(); }
+
+  renderVals() {
+    return {
+      rootRef:this.rootRef, mapRef:this.mapRef, lineRef:this.lineRef,
+      donutRef:this.donutRef, dotsRef:this.dotsRef, tableRef:this.tableRef, tipRef:this.tipRef,
+      mapWrapRef:this.mapWrapRef, markersRef:this.markersRef, legendSwatchRef:this.legendSwatchRef,
+      mechRef:this.mechRef, tourBtnRef:this.tourBtnRef, yearBadgeRef:this.yearBadgeRef,
+      startTour:()=>this.startTour(),
+      hlLowOn:()=>this._mapHighlight('high'),
+      hlHighOn:()=>this._mapHighlight('min'),
+      hlOff:()=>this._mapHighlight(null)
+    };
+  }
+
+  async componentDidMount(){
+    // Each load is isolated: a failure loading the shared module, d3/topojson, or the manifest must
+    // NOT abort the whole mount (that would blank the map AND every chart). Draw whatever we can.
+    try{ this._H = await this._helpers(); }catch(e){ console.warn('helpers import failed',e); }
+    await Promise.allSettled([this._libs(), this._loadManifest()]);
+    try{ await this._drawMap(); }catch(e){ console.warn('map',e); }
+    try{ this._drawDonut(); }catch(e){ console.warn('donut',e); }
+    try{ this._drawDots(); }catch(e){ console.warn('dots',e); }
+    try{ this._drawLine(); }catch(e){ console.warn('line',e); }
+    try{ this._wireTable(); }catch(e){ console.warn('table',e); }
+    try{ this._mechInit(); }catch(e){ console.warn('mech',e); }
+    this._maybeAutoTour();
+    this._tourBtnVis=()=>this._updateTourBtnVisibility();
+    window.addEventListener('scroll',this._tourBtnVis,{passive:true});
+    window.addEventListener('resize',this._tourBtnVis);
+    this._updateTourBtnVisibility();
+  }
+  componentWillUnmount(){
+    this._endTour(false); if(this._tourTimer) clearTimeout(this._tourTimer);
+    if(this._tourBtnVis){ window.removeEventListener('scroll',this._tourBtnVis); window.removeEventListener('resize',this._tourBtnVis); }
+  }
+  // Hide the fixed guided-tour button whenever its corner would sit on top of
+  // the map (so it never covers a marker) or any other tour section it overlaps.
+  _updateTourBtnVisibility(){
+    const btn=this.tourBtnRef.current; if(!btn || (this._tour&&this._tour.active)) return;
+    const root=this.rootRef.current; if(!root) return;
+    const bRect=btn.getBoundingClientRect();
+    const sections=root.querySelectorAll('[data-tour]');
+    let overlap=false;
+    sections.forEach(sec=>{
+      const r=sec.getBoundingClientRect();
+      if(bRect.left<r.right && bRect.right>r.left && bRect.top<r.bottom && bRect.bottom>r.top) overlap=true;
+    });
+    btn.style.opacity=overlap?'0.12':'1';
+    btn.style.pointerEvents=overlap?'none':'';
+  }
+  componentDidUpdate(){ if(window.d3){ try{ this._drawMap(); }catch(e){} } }
+
+  // Wait for the d3 + topojson CDN scripts, but give up after ~10s so a blocked CDN degrades to
+  // "charts that need d3 fail in their own try/catch" instead of hanging the whole mount forever.
+  _libs(){ return new Promise((res,rej)=>{ const t0=Date.now(); const c=()=>{ if(window.d3&&window.topojson) return res(); if(Date.now()-t0>10000) return rej(new Error('d3/topojson not loaded')); setTimeout(c,60); }; c(); }); }
+
+  // Load the annual/ manifest (levels, colors, labels, year list, file templates) and preload
+  // every field image so hovering a bar swaps the map instantly. Default field is the total.
+  async _loadManifest(){
+    if(this._manifest) return;
+    try{
+      const H=this._H || await this._helpers();
+      if(!H || !H.loadManifest) return;      // stale/missing module — leave map field empty, don't throw
+      const m=await H.loadManifest();
+      if(!m) return;
+      this._manifest=m;
+      this._curYear=null;                    // null => the summed total
+      // preload total + each year + the two spotlight region images
+      const dir='./annual/';
+      const urls=[dir+m.total, dir+m.regionHigh, dir+m.regionLow, ...m.years.map(y=>H.fieldImageUrl(m,y,dir))].map(u=>this._ver(u));
+      this._imgCache=urls.map(u=>{ const im=new Image(); im.src=u; return im; });
+    }catch(e){ console.warn('manifest load failed',e); }
+  }
+
+  get ROTATE(){ return this._H ? this._H.ROTATE : 150; }
+
+  _fieldUrl(year){ return this._H ? this._ver(this._H.fieldImageUrl(this._manifest, year)) : null; }
+
+  // Paint the legend swatches + the map subtitle/caption directly from the manifest colours.
+  _syncLegend(){
+    const m=this._manifest, el=this.legendSwatchRef.current;
+    if(!m || !el) return;
+    const spans=el.querySelectorAll('span');
+    m.colors.forEach((c,i)=>{ if(spans[i]) spans[i].style.background=c; });
+  }
+
+  // Swap the ocean field shown on the map: a specific year, or null for the summed total.
+  // Also updates the small badge over the map. Safe to call before the map/manifest are ready.
+  _setMapYear(year){
+    if(!this._manifest) return;
+    const el=this.mapRef.current;
+    const url=this._fieldUrl(year==null?null:year);
+    if(el && el.__oceSetField && url) el.__oceSetField(url);
+    this._curYear=year==null?null:year;
+    const badge=this.yearBadgeRef.current;
+    if(badge) badge.textContent = year==null ? ('TOTAL · '+this._manifest.years[0]+'–'+this._manifest.years[this._manifest.years.length-1]) : String(year);
+  }
+
+  _colorScale(){
+    if(!this._H) return window.d3.scaleSequential(window.d3.interpolateYlOrRd).domain([2.5,4.05]);
+    return this._H.circleColorScale(window.d3, this.props.intensityScale);
+  }
+
+  _tip(html,ev){
+    const t=this.tipRef.current; if(!t) return;
+    if(html===null){ t.style.opacity=0; return; }
+    t.innerHTML=html; t.style.maxWidth='280px'; t.style.opacity=1;
+    t.style.left=Math.min(ev.clientX+14,(window.innerWidth||1200)-292)+'px';
+    t.style.top=Math.min(ev.clientY+14,(window.innerHeight||900)-150)+'px';
+  }
+  _tipHtml(e){ return this._H ? this._H.tipHtml(e) : ''; }
+
+  async _drawMap(){
+    const d3=window.d3, topojson=window.topojson, el=this.mapRef.current;
+    if(!el || !this._H) return;
+    const Draw=this._Draw || (this._Draw = await import('./ocean-map-draw.js?v=' + Component._ASSET_V));
+    if(!this._world) this._world=await Draw.loadWorld(topojson);
+    const self=this;
+    this._syncLegend();
+    const dir='./annual/';
+    const m=this._manifest;
+    Draw.drawMap({
+      d3, topojson, el, markersEl:this.markersRef.current, world:this._world,
+      rotate:this.ROTATE,
+      bgPageColor:'#f4efe3', landColor:'#e6ddc7', borderColor:'#b7ab8d',
+      fieldImageUrl:this._fieldUrl(this._curYear ?? null),
+      regionHighUrl:m?this._ver(dir+m.regionHigh):null, regionLowUrl:m?this._ver(dir+m.regionLow):null,
+      events:this.events, colorScale:this._colorScale(), circleScale:this.props.circleScale,
+      circleOpacity:this.props.circleOpacity ?? 0.9,
+      rasterOpacity:this.props.rasterOpacity ?? 0.9,
+      showTooltips:this.props.showTooltips, tipHtml:e=>this._tipHtml(e),
+      onHover:(key,on)=>self._setActive(key,on), onTip:(html,ev)=>self._tip(html,ev)
+    });
+    // re-assert the current year badge (componentDidUpdate re-runs _drawMap)
+    this._setMapYear(this._curYear ?? null);
+  }
+
+  _drawDonut(){
+    const d3=window.d3, el=this.donutRef.current; if(!el) return; el.innerHTML='';
+    const self=this;
+    const data=[{v:75,c:'#1f9aa6',label:'&lt; 1 million km&sup2;'},{v:16,c:'#e6a54e',label:'1&ndash;2 million km&sup2;'},{v:9,c:'#c8531f',label:'&gt; 2 million km&sup2;'}];
+    const S=148, svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${S} ${S}`).attr('width','100%');
+    const g=svg.append('g').attr('transform',`translate(${S/2},${S/2})`);
+    const arc=d3.arc().innerRadius(44).outerRadius(70).padAngle(0.015).cornerRadius(2);
+    const arcHover=d3.arc().innerRadius(44).outerRadius(75).padAngle(0.015).cornerRadius(2);
+    const pie=d3.pie().sort(null).value(d=>d.v);
+    g.selectAll('path').data(pie(data)).join('path').attr('d',arc).attr('fill',d=>d.data.c).style('cursor','pointer')
+      .on('mouseenter',function(ev,d){ d3.select(this).transition().duration(140).attr('d',arcHover); })
+      .on('mousemove',function(ev,d){ if(self.props.showTooltips!==false) self._tip(`<b>${d.data.v}%</b> of events<br>${d.data.label}`,ev); })
+      .on('mouseleave',function(ev,d){ d3.select(this).transition().duration(140).attr('d',arc); self._tip(null); });
+    g.append('text').attr('text-anchor','middle').attr('dy','-0.1em').attr('font-family','Barlow Condensed,sans-serif').attr('font-weight',700).attr('font-size',12).attr('letter-spacing','0.04em').attr('fill','#12222c').text('SIZE OF');
+    g.append('text').attr('text-anchor','middle').attr('dy','1em').attr('font-family','Barlow Condensed,sans-serif').attr('font-weight',700).attr('font-size',12).attr('letter-spacing','0.04em').attr('fill','#12222c').text('EVENT');
+  }
+
+  _drawDots(){
+    const d3=window.d3, el=this.dotsRef.current; if(!el) return; el.innerHTML='';
+    const cols=20, rows=5, gap=13.5, r=3.6, pad=5;
+    const W=pad*2+(cols-1)*gap, H=pad*2+(rows-1)*gap;
+    const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%');
+    let i=0;
+    for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){
+      const giant=i<20;
+      svg.append('circle').attr('cx',pad+x*gap).attr('cy',pad+y*gap).attr('r',giant?r+0.8:r).attr('fill',giant?'#c8531f':'#c3bda8');
+      i++;
+    }
+  }
+
+  _drawLine(){
+    const d3=window.d3, el=this.lineRef.current; if(!el) return; el.innerHTML='';
+    const self=this;
+    const W=420,H=190,m={t:18,r:8,b:34,l:50};
+    const svg=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%');
+    const years=d3.range(1982,2025);
+    const areaMap=this._yearArea, nino=this._ninoYears, nina=this._ninaYears;
+    const x=d3.scaleBand().domain(years).range([m.l,W-m.r]).paddingInner(0.24);
+    const y=d3.scaleLinear().domain([0,37]).range([H-m.b,m.t]);
+    svg.append('line').attr('x1',m.l).attr('y1',H-m.b).attr('x2',W-m.r).attr('y2',H-m.b).attr('stroke','#c7bfa6');
+    [0,10,20,30].forEach(v=>{ svg.append('text').attr('x',m.l-4).attr('y',y(v)+3.5).attr('text-anchor','end').attr('font-size',10).attr('fill','#9a927a').text(v); });
+    svg.append('text').attr('transform',`translate(12,${(m.t+(H-m.b))/2}) rotate(-90)`).attr('text-anchor','middle').attr('font-family',"'Barlow Condensed',sans-serif").attr('font-size',10).attr('font-weight',400).attr('letter-spacing','.03em').attr('fill','#7a725c').text('% of ocean area');
+    svg.append('text').attr('x',m.l).attr('y',H-3).attr('text-anchor','start').attr('font-size',10).attr('font-weight',400).attr('fill','#7a725c').text('1982');
+    svg.append('text').attr('x',W-m.r).attr('y',H-3).attr('text-anchor','end').attr('font-size',10).attr('font-weight',400).attr('fill','#7a725c').text('2024');
+    const colFor=yr=> nino.has(yr) ? '#c0392b' : (nina.has(yr) ? '#2f6fae' : '#c7bfa6');
+    const plotTop=m.t, plotBot=H-m.b, step=x.step(), gap=step-x.bandwidth();
+    const gHi=svg.append('g').attr('data-role','col-hi');   // faint full-column highlight (behind bars)
+    const gb=svg.append('g').attr('data-role','bars');       // the visible bars
+    const gHit=svg.append('g').attr('data-role','hit');      // transparent full-height/width hover targets (front)
+    years.forEach(yr=>{
+      const v=areaMap[yr]||0.3;
+      const cx=x(yr)-gap/2;                                  // full column spans bar + surrounding gap (no dead zones)
+      // faint column shade that fades in on hover \u2014 the visual cue for the whole-column hit area
+      const hi=gHi.append('rect').attr('x',cx).attr('y',plotTop).attr('width',step).attr('height',plotBot-plotTop)
+        .attr('fill','#12222c').attr('opacity',0).style('transition','opacity 160ms ease').style('pointer-events','none');
+      const bar=gb.append('rect')
+        .attr('class','oce-bar').attr('data-year',yr)
+        .attr('x',x(yr)).attr('y',y(v)).attr('width',x.bandwidth()).attr('height',plotBot-y(v))
+        .attr('rx',1).attr('fill',colFor(yr)).attr('fill-opacity',0.85)
+        .style('transition','fill-opacity 160ms ease').style('pointer-events','none');
+      // hit target: full plot height, full column width \u2014 hovering anywhere in the column triggers the year.
+      // (No data-year here: handlers close over `yr`, and it keeps _setActive's rect[data-year] styling to the bars only.)
+      gHit.append('rect').attr('x',cx).attr('y',plotTop).attr('width',step).attr('height',plotBot-plotTop)
+        .attr('fill','transparent').style('cursor','pointer')
+        .on('mouseenter',function(){ bar.attr('fill-opacity',1).attr('stroke','#12222c').attr('stroke-width',1); hi.attr('opacity',0.05); self._setActiveYear(yr,true); self._setMapYear(yr); })
+        .on('mousemove',function(ev){ if(self.props.showTooltips!==false){ const phase=nino.has(yr)?'El Ni\u00F1o':(nina.has(yr)?'La Ni\u00F1a':'Neutral'); self._tip(`<b>${yr}</b> &middot; ${phase}<br>${v.toFixed(1)}% of ocean area`,ev); } })
+        .on('mouseleave',function(){ bar.attr('fill-opacity',0.85).attr('stroke','none'); hi.attr('opacity',0); self._setActiveYear(yr,false); self._setMapYear(null); self._tip(null); });
+    });
+    const lg=svg.append('g').attr('transform',`translate(${m.l+4},${m.t+2})`);
+    lg.append('rect').attr('x',0).attr('y',-7).attr('width',10).attr('height',9).attr('rx',1.5).attr('fill','#c0392b');
+    lg.append('text').attr('x',15).attr('y',1).attr('font-size',10).attr('fill','#c0392b').attr('font-weight',400).text('El Ni\u00F1o');
+    lg.append('rect').attr('x',0).attr('y',7).attr('width',10).attr('height',9).attr('rx',1.5).attr('fill','#2f6fae');
+    lg.append('text').attr('x',15).attr('y',15).attr('font-size',10).attr('fill','#2f6fae').attr('font-weight',400).text('La Ni\u00F1a');
+  }
+
+  _mapHighlight(mode){
+    const el=this.mapRef.current;
+    if(el && el.__oceHighlight) el.__oceHighlight(mode,{ strength:this.props.spotlightStrength ?? 0.78, fadeMs:this.props.spotlightFadeMs ?? 220, rasterOpacity:this.props.rasterOpacity ?? 0.85 });
+  }
+  _setActive(key,on){
+    const ev=this.events.find(e=>e.key===key); if(!ev) return;
+    const map=this.markersRef.current||this.mapRef.current;
+    if(map){ const g=map.querySelector(`g[data-key="${key}"]`); if(g){ const c=g.querySelector('.oce-c'); if(c){ c.setAttribute('stroke',on?'#12222c':'#fff'); c.setAttribute('stroke-width',on?'3.5':'1.6'); } } }
+    const tb=this.tableRef.current;
+    if(tb){ const row=tb.querySelector(`tr[data-key="${key}"]`); if(row){ row.style.background=on?'#f2ead6':''; } }
+    const line=this.lineRef.current;
+    if(line){ line.querySelectorAll(`rect[data-year="${ev.year}"]`).forEach(b=>{ if(on){ b.setAttribute('stroke','#12222c'); b.setAttribute('stroke-width',1); b.setAttribute('fill-opacity',1); } else { b.setAttribute('stroke','none'); b.setAttribute('fill-opacity',0.85); } }); }
+  }
+  _setActiveYear(year,on){
+    const keys=this.events.filter(e=>e.year===year).map(e=>e.key);
+    keys.forEach(k=>this._setActive(k,on));
+    const line=this.lineRef.current;
+    if(line){ line.querySelectorAll(`rect[data-year="${year}"]`).forEach(b=>{ if(on){ b.setAttribute('fill-opacity',1); } }); }
+  }
+  _wireSort(){
+    const tb=this.tableRef.current; if(!tb) return; const self=this;
+    const tbody=tb.querySelector('tbody'); if(!tbody) return;
+    const val=(row,type)=>{
+      const tds=row.querySelectorAll('td');
+      if(type==='name') return tds[0].textContent.trim().toLowerCase();
+      if(type==='year') return parseFloat(tds[1].textContent)||0;
+      if(type==='area') return parseFloat(tds[2].textContent)||0;
+      if(type==='dur')  return parseFloat(tds[3].textContent)||0;
+      return 0;
+    };
+    this._sort={col:null,dir:1};
+    tb.querySelectorAll('th[data-sort]').forEach(th=>{
+      th.addEventListener('click',()=>{
+        const col=th.getAttribute('data-sort');
+        // numeric columns default to descending (largest first); name defaults ascending
+        if(self._sort.col===col){ self._sort.dir*=-1; }
+        else { self._sort.col=col; self._sort.dir=(col==='name')?1:-1; }
+        const dir=self._sort.dir;
+        const rows=[...tbody.querySelectorAll('tr')];
+        rows.sort((a,b)=>{ const va=val(a,col), vb=val(b,col); if(va<vb) return -1*dir; if(va>vb) return 1*dir; return 0; });
+        rows.forEach(r=>tbody.appendChild(r));
+        // update arrow indicators
+        tb.querySelectorAll('span[data-arrow]').forEach(s=>{ s.style.opacity=0; s.textContent='↕'; });
+        const arrow=tb.querySelector(`span[data-arrow="${col}"]`);
+        if(arrow){ arrow.style.opacity=1; arrow.textContent=dir>0?'▲':'▼'; }
+      });
+    });
+  }
+  _wireTable(){
+    const tb=this.tableRef.current; if(!tb) return; const self=this;
+    this._wireSort();
+    tb.querySelectorAll('tr[data-key]').forEach(row=>{
+      const key=row.getAttribute('data-key');
+      const e=self.events.find(x=>x.key===key);
+      row.style.cursor='pointer';
+      row.addEventListener('mouseenter',()=>self._setActive(key,true));
+      row.addEventListener('mousemove',ev=>{ if(self.props.showTooltips!==false && e) self._tip(self._tipHtml(e),ev); });
+      row.addEventListener('mouseleave',()=>{ self._setActive(key,false); self._tip(null); });
+    });
+  }
+
+  // ---- interactive "tug-of-war" mechanism explorer ----
+  _mechClamp(x,a,b){ return Math.max(a,Math.min(b,x)); }
+  _mechEventLabel(x){ if(x<0.38) return 'cool + mixed'; if(x<0.52) return 'near normal'; if(x<0.72) return 'warm + stratified'; return 'very warm + stratified'; }
+  _mechParams(){
+    if(this._mech.regime==='low') return {baseMix:0.28,tempToH:1.06,title:'STRATIFIED LOW–MID LATITUDES',sub:'Permanent stratification limits exchange with deeper water',desc:'Permanently stratified waters: warm anomalies push [H⁺] above the extreme threshold, and exchange with deeper water is weak.'};
+    return {baseMix:0.88,tempToH:0.50,title:'UPWELLING: HIGH-LAT. & E. EQ. PACIFIC',sub:'Warming strengthens stratification and cuts mixing-driven [H⁺] supply',desc:'Warm anomalies strengthen stratification and suppress the upwelling/mixing that usually raises surface [H⁺].'};
+  }
+  _mechCalc(){
+    const p=this._mechParams(), event=this._mech.event, isLow=this._mech.regime==='low';
+    const anomalyScale=event*2-1, tempAnom=anomalyScale*3.0;
+    const stratification=isLow?0.55+event*0.42:0.15+event*0.82;
+    const mixingSuppression=isLow?0.82:0.93;
+    const surfaceMixing=p.baseMix*(1-mixingSuppression*stratification);
+    const warmingHplus=tempAnom*p.tempToH;
+    const mixingHplusSupply=isLow?0.2*stratification:surfaceMixing*1.15;
+    const hplusAnomaly=isLow?anomalyScale:-anomalyScale;
+    let hplusLikelihood=isLow
+      ? this._mechClamp(warmingHplus-0.55+0.2*stratification,0,2.2)
+      : this._mechClamp(warmingHplus*0.35+mixingHplusSupply-0.55*stratification,0,2.2);
+    const tempGate=tempAnom<=0?0:this._mechClamp(tempAnom/2.1,0,1);
+    const compoundIndex=tempGate*this._mechClamp(hplusLikelihood/1.15,0,1);
+    return {event,tempAnom,stratification,surfaceMixing,hplusAnomaly,compoundIndex};
+  }
+  _mechRenderDots(n){
+    const g=this.mechRef.current&&this.mechRef.current.querySelector('[data-m="dicDots"]'); if(!g) return;
+    g.innerHTML='';
+    for(let i=0;i<n;i++){ const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('cx',535+Math.random()*175); c.setAttribute('cy',190+Math.random()*82); c.setAttribute('r',2+Math.random()*3); g.appendChild(c); }
+  }
+  _mechUpdate(){
+    const root=this.mechRef.current; if(!root) return;
+    const q=s=>root.querySelector(`[data-m="${s}"]`);
+    const slider=q('event'); if(slider) this._mech.event=Number(slider.value);
+    const c=this._mechCalc(), p=this._mechParams(), isLow=this._mech.regime==='low';
+    const RED='#c8531f', TEAL='#1f9aa6', GREEN='#3f7a4c', AMBER='#c07a1e';
+
+    const low=q('lowBtn'), high=q('highBtn');
+    if(low){ low.style.background=isLow?RED:'transparent'; low.style.color=isLow?'#fff':'#6f7873'; }
+    if(high){ high.style.background=!isLow?TEAL:'transparent'; high.style.color=!isLow?'#fff':'#6f7873'; }
+    const desc=q('regimeDesc'); if(desc) desc.textContent=p.desc;
+
+    const elbl=q('eventLabel'); if(elbl) elbl.textContent=this._mechEventLabel(c.event);
+    const gm=q('gaugeMarker'); if(gm) gm.style.left=`calc(${Math.round(c.stratification*100)}% - 2px)`;
+
+    const ts=q('tempScore'); if(ts){ ts.textContent=`${c.tempAnom>=0?'+':''}${c.tempAnom.toFixed(1)} °C`; ts.style.color=c.tempAnom<-0.05?TEAL:c.tempAnom>0.05?RED:GREEN; }
+    const hs=q('hplusScore'); if(hs){ hs.textContent=`${c.hplusAnomaly>=0?'+':''}${c.hplusAnomaly.toFixed(1)}`; hs.style.color=c.hplusAnomaly<-0.05?TEAL:c.hplusAnomaly>0.05?RED:GREEN; }
+    const ms=q('mixScore'); if(ms) ms.textContent=c.surfaceMixing<0.18?'low':c.surfaceMixing<0.45?'moderate':'high';
+    const cs=q('compoundScore'); if(cs){ cs.textContent=c.compoundIndex<0.25?'rare':c.compoundIndex<0.55?'borderline':'likely'; cs.style.color=c.compoundIndex<0.25?TEAL:c.compoundIndex<0.55?GREEN:RED; }
+
+    const rt=q('regimeTitle'); if(rt) rt.textContent=p.title;
+    const rs=q('regimeSub'); if(rs) rs.textContent=p.sub;
+    const wt=q('waterTop'); if(wt) wt.setAttribute('fill', isLow?'url(#mechHot)':'url(#mechCool)');
+    const sl=q('stratLabel'); if(sl) sl.textContent=c.stratification>0.65?'STRONG STRATIFICATION':'WEAK / SEASONAL STRATIFICATION';
+
+    const sw=2+c.stratification*6.5;
+    ['layer1','layer2','layer3'].forEach((id,idx)=>{ const line=q(id); if(line){ line.setAttribute('stroke-width',Math.max(1.5,sw-idx*1.4)); line.setAttribute('opacity',this._mechClamp(0.20+c.stratification-idx*.16,.16,.9)); } });
+
+    const ha=q('heatArrows'); if(ha) ha.setAttribute('opacity',this._mechClamp(c.event*1.25,0,1));
+    const ua=q('upwellArrows'); if(ua) ua.setAttribute('opacity',this._mechClamp(c.surfaceMixing*1.35,.04,.9));
+    const bm=q('blockedMix'); if(bm) bm.setAttribute('opacity', !isLow?this._mechClamp((c.stratification-0.42)*1.75,0,1):this._mechClamp((c.stratification-0.84)*.28,0,.14));
+
+    this._mechRenderDots(Math.round(38*c.surfaceMixing));
+
+    let heading,explain,color;
+    if(c.event<=0.05){ heading='No compound extreme'; color='#5a6b73'; explain='At the cool/mixed end there is no marine heatwave, so OAX ∩ MHW cannot occur.'; }
+    else if(c.compoundIndex>0.55){ heading='OAX ∩ MHW likely'; color=RED; explain=isLow?'In permanently stratified low–mid latitudes, warming directly raises [H⁺] and exchange with deeper water is too weak to offset it.':'These settings still allow enough [H⁺] increase for a compound event.'; }
+    else if(c.compoundIndex>0.25){ heading='Borderline compound risk'; color=AMBER; explain='A heatwave is present, but the [H⁺] pathway is only partly aligned.'; }
+    else { heading='OAX ∩ MHW rare'; color=TEAL; explain=isLow?'The heatwave is too weak, or the [H⁺] response too small, to create a compound event.':'Warming strengthens stratification and cuts off the upwelling of high-DIC water that usually raises surface [H⁺].'; }
+    const oh=q('outcomeHeading'); if(oh){ oh.textContent=heading; oh.style.color=color; }
+    const oe=q('outcomeExplain'); if(oe) oe.textContent=explain;
+  }
+  _mechSetRegime(r){
+    this._mech.regime=r; this._mech.event=r==='low'?0.72:0.70;
+    const s=this.mechRef.current&&this.mechRef.current.querySelector('[data-m="event"]'); if(s) s.value=this._mech.event;
+    this._mechUpdate();
+  }
+  _mechInit(){
+    const root=this.mechRef.current; if(!root) return;
+    const low=root.querySelector('[data-m="lowBtn"]'), high=root.querySelector('[data-m="highBtn"]'), slider=root.querySelector('[data-m="event"]');
+    if(slider) slider.value=this._mech.event;
+    if(low) low.addEventListener('click',()=>this._mechSetRegime('low'));
+    if(high) high.addEventListener('click',()=>this._mechSetRegime('high'));
+    if(slider) slider.addEventListener('input',()=>this._mechUpdate());
+    root.querySelectorAll('[data-preset]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const pr=btn.dataset.preset;
+        if(pr==='blob'){ this._mech.regime='low'; this._mech.event=.86; }
+        else if(pr==='highrare'){ this._mech.regime='high'; this._mech.event=.78; }
+        else if(pr==='highmixed'){ this._mech.regime='high'; this._mech.event=.30; }
+        else { this._mech.regime='low'; this._mech.event=.65; }
+        if(slider) slider.value=this._mech.event;
+        this._mechUpdate();
+      });
+    });
+    this._mechUpdate();
+  }
+
+  // ---- guided spotlight tour ----
+  _tourSteps(){
+    return [
+      {sel:'[data-tour="def"]',  t:'Start here — the two extremes', b:'A marine heatwave (MHW) and an ocean-acidification extreme (OAX) can strike the same place at once. When they do, it\u2019s a compound extreme.'},
+      {sel:'[data-tour="map"]',  t:'The world map', b:'Every circle is a major recorded compound event; the shaded ocean shows how often they happen relative to chance. Hover or tap a circle to explore one.'},
+      {sel:'[data-tour="freq"]', t:'How often, and where', b:'Warm shades mean more frequent than chance, cool shades less. Globally, compound extremes are about 2.5× more common than chance would predict.'},
+      {sel:'[data-tour="years"]',t:'Timing & the biggest events', b:'The bars track compound area year by year against El Ni\u00F1o / La Ni\u00F1a. Hover a bar or a table row — they light each other up, and the map too.'},
+      {sel:'[data-tour="dist"]', t:'Size & season', b:'Most events are small, but a handful of giants dominate the total area — and they strike about twice as often in summer.'},
+      {sel:'[data-tour="mech"]', t:'Why it happens', b:'A tug-of-war between warming and mixing. Switch the regime and drag the heatwave slider to see when a compound extreme actually forms.'}
+    ];
+  }
+  _maybeAutoTour(){
+    let seen=false; try{ seen=!!localStorage.getItem('ocx_tour_seen'); }catch(e){}
+    if(!seen) this._tourTimer=setTimeout(()=>this.startTour(),700);
+  }
+  _ensureTourDom(){
+    if(this._tourHole) return;
+    const root=this.rootRef.current||document.body;
+    const hole=document.createElement('div');
+    hole.style.cssText='position:fixed;left:0;top:0;width:0;height:0;border-radius:10px;border:2px solid #e8891c;box-shadow:0 0 0 9999px rgba(12,20,26,.62);z-index:9998;pointer-events:none;transition:left .3s cubic-bezier(.4,0,.2,1),top .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1),opacity .2s;opacity:0';
+    root.appendChild(hole); this._tourHole=hole;
+    const pop=document.createElement('div');
+    pop.style.cssText="position:fixed;z-index:9999;width:min(330px,86vw);background:#12222c;color:#fff;border-radius:12px;padding:16px 18px 15px;box-shadow:0 18px 50px rgba(0,0,0,.4);font-family:'Source Sans 3',sans-serif;opacity:0;transition:left .3s cubic-bezier(.4,0,.2,1),top .3s cubic-bezier(.4,0,.2,1),opacity .2s;pointer-events:auto";
+    pop.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span data-tp="count" style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:12px;letter-spacing:.14em;color:#f2b45a"></span><button data-tp="skip" type="button" style="background:none;border:0;color:#8ea0a8;cursor:pointer;font-size:12px;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 4px">Skip \u00D7</button></div><div data-tp="title" style="font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:21px;line-height:1.05;letter-spacing:.01em;margin-bottom:6px"></div><p data-tp="body" style="margin:0 0 14px;font-size:13.5px;line-height:1.5;color:#cdd8dc"></p><div style="display:flex;gap:8px;justify-content:flex-end;align-items:center"><button data-tp="back" type="button" style="background:none;border:1px solid #3a4b54;color:#cdd8dc;border-radius:7px;padding:7px 14px;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase">Back</button><button data-tp="next" type="button" style="background:#e8891c;border:0;color:#12222c;border-radius:7px;padding:7px 16px;cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase">Next</button></div>';
+    root.appendChild(pop); this._tourPop=pop;
+    pop.querySelector('[data-tp="skip"]').addEventListener('click',()=>this._endTour(true));
+    pop.querySelector('[data-tp="back"]').addEventListener('click',()=>this._tourGo(this._tour.i-1));
+    pop.querySelector('[data-tp="next"]').addEventListener('click',()=>{ if(this._tour.i>=this._tourSteps().length-1) this._endTour(true); else this._tourGo(this._tour.i+1); });
+    this._tourReposition=()=>this._positionTour();
+    this._tourKey=(e)=>{ if(!this._tour.active) return; if(e.key==='Escape'){ this._endTour(true); } else if(e.key==='ArrowRight'||e.key==='Enter'){ if(this._tour.i>=this._tourSteps().length-1) this._endTour(true); else this._tourGo(this._tour.i+1); } else if(e.key==='ArrowLeft'){ this._tourGo(this._tour.i-1); } };
+  }
+  startTour(){
+    this._ensureTourDom();
+    if(this._tourTimer){ clearTimeout(this._tourTimer); this._tourTimer=null; }
+    this._tour={active:true,i:0};
+    const btn=this.tourBtnRef.current; if(btn) btn.style.display='none';
+    window.addEventListener('scroll',this._tourReposition,{passive:true});
+    window.addEventListener('resize',this._tourReposition);
+    window.addEventListener('keydown',this._tourKey);
+    this._tourHole.style.opacity='1'; this._tourPop.style.opacity='1';
+    this._tourGo(0);
+  }
+  _tourGo(i){
+    const steps=this._tourSteps(); i=Math.max(0,Math.min(steps.length-1,i)); this._tour.i=i;
+    const s=steps[i], target=(this.rootRef.current||document).querySelector(s.sel); this._tourTarget=target;
+    const pop=this._tourPop;
+    pop.querySelector('[data-tp="count"]').textContent=`STEP ${i+1} / ${steps.length}`;
+    pop.querySelector('[data-tp="title"]').textContent=s.t;
+    pop.querySelector('[data-tp="body"]').textContent=s.b;
+    pop.querySelector('[data-tp="back"]').style.visibility=i===0?'hidden':'visible';
+    pop.querySelector('[data-tp="next"]').textContent=i>=steps.length-1?'Done':'Next';
+    if(target){ const r=target.getBoundingClientRect(); const absTop=window.scrollY+r.top; const desired=Math.max(0,absTop-Math.max(80,(window.innerHeight-r.height)/2)); window.scrollTo({top:desired,behavior:'smooth'}); }
+    this._positionTour();
+    clearInterval(this._tourRepoTimer);
+    let n=0; this._tourRepoTimer=setInterval(()=>{ this._positionTour(); if(++n>20) clearInterval(this._tourRepoTimer); },40);
+  }
+  _positionTour(){
+    const target=this._tourTarget, hole=this._tourHole, pop=this._tourPop; if(!target||!hole) return;
+    const r=target.getBoundingClientRect(); const pad=8;
+    hole.style.left=(r.left-pad)+'px'; hole.style.top=(r.top-pad)+'px'; hole.style.width=(r.width+pad*2)+'px'; hole.style.height=(r.height+pad*2)+'px';
+    const vw=window.innerWidth, vh=window.innerHeight; const pw=pop.offsetWidth||320, ph=pop.offsetHeight||170;
+    let px=Math.min(Math.max(12,r.left),vw-pw-12), py;
+    if(r.bottom+14+ph<vh){ py=r.bottom+14; }
+    else if(r.top-14-ph>0){ py=r.top-14-ph; }
+    else { py=vh-ph-16; px=Math.max(12,vw-pw-16); }
+    pop.style.left=px+'px'; pop.style.top=Math.max(12,py)+'px';
+  }
+  _endTour(seen){
+    this._tour.active=false;
+    clearInterval(this._tourRepoTimer);
+    if(this._tourReposition){ window.removeEventListener('scroll',this._tourReposition); window.removeEventListener('resize',this._tourReposition); }
+    if(this._tourKey) window.removeEventListener('keydown',this._tourKey);
+    if(this._tourHole) this._tourHole.style.opacity='0';
+    if(this._tourPop) this._tourPop.style.opacity='0';
+    const btn=this.tourBtnRef.current; if(btn) btn.style.display='';
+    if(seen){ try{ localStorage.setItem('ocx_tour_seen','1'); }catch(e){} }
+  }
+}
+</script>
+</body>
+</html>

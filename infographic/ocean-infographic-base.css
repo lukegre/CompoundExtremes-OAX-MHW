@@ -1,0 +1,5 @@
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:#e5dece;font-family:'Source Sans 3',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.oce-tip{position:fixed;pointer-events:none;z-index:80;background:#12222c;color:#fff;padding:8px 11px;border-radius:6px;font:600 12px/1.4 'Source Sans 3',sans-serif;opacity:0;transition:opacity .12s;box-shadow:0 8px 22px rgba(0,0,0,.28);max-width:210px}
+.oce-tip b{color:#f2b45a}
