@@ -80,5 +80,16 @@
   "yearFmt": "year_{year}.png",
   "regionHigh": "region_high.png",
   "regionLow": "region_low.png",
-  "unit": "extreme-months"
+  "unit": "extreme-months",
+  "events": {
+    "seasia": "events/seasia.png",
+    "med": "events/med.png",
+    "waus": "events/waus.png",
+    "blob": "events/blob.png",
+    "spac": "events/spac.png",
+    "mad": "events/mad.png",
+    "gbr": "events/gbr.png",
+    "natl": "events/natl.png",
+    "catl": "events/catl.png"
+  }
 }
