@@ -430,7 +430,10 @@ class Component extends DCLogic {
       this._curYear=null;                    // null => the summed total
       // preload total + each year + the two spotlight region images
       const dir='./annual/';
-      const urls=[dir+m.total, dir+m.regionHigh, dir+m.regionLow, ...m.years.map(y=>H.fieldImageUrl(m,y,dir))].map(u=>this._ver(u));
+      const eventFiles=m.events ? Object.values(m.events) : [];
+      const urls=[dir+m.total, dir+m.regionHigh, dir+m.regionLow,
+                  ...m.years.map(y=>H.fieldImageUrl(m,y,dir)),
+                  ...eventFiles.map(f=>dir+f)].map(u=>this._ver(u));
       this._imgCache=urls.map(u=>{ const im=new Image(); im.src=u; return im; });
     }catch(e){ console.warn('manifest load failed',e); }
   }
@@ -438,6 +441,12 @@ class Component extends DCLogic {
   get ROTATE(){ return this._H ? this._H.ROTATE : 150; }
 
   _fieldUrl(year){ return this._H ? this._ver(this._H.fieldImageUrl(this._manifest, year)) : null; }
+
+  _eventUrl(key){
+    if(!this._manifest || !this._manifest.events) return null;
+    const f=this._manifest.events[key];
+    return f ? this._ver('./annual/'+f) : null;
+  }
 
   // Paint the legend swatches + the map subtitle/caption directly from the manifest colours.
   _syncLegend(){
@@ -457,6 +466,25 @@ class Component extends DCLogic {
     this._curYear=year==null?null:year;
     const badge=this.yearBadgeRef.current;
     if(badge) badge.textContent = year==null ? ('TOTAL · '+this._manifest.years[0]+'–'+this._manifest.years[this._manifest.years.length-1]) : String(year);
+  }
+
+  // Swap the map field to a single event's footprint on hover; restore to the
+  // currently-selected field (year or total) on mouse-out. Independent of the
+  // year-bar swap path (_setMapYear/_setActiveYear), which it must not disturb.
+  _setEventField(key,on){
+    if(!this._manifest) return;
+    const el=this.mapRef.current;
+    const badge=this.yearBadgeRef.current;
+    if(on){
+      const url=this._eventUrl(key);
+      if(!url) return;                       // no footprint for this key -> leave field as-is
+      if(el && el.__oceSetField) el.__oceSetField(url);
+      const ev=this.events.find(e=>e.key===key);
+      if(badge && ev) badge.textContent = ev.name.toUpperCase()+' · '+ev.year;
+    } else {
+      // restore whatever field/badge the current year selection implies
+      this._setMapYear(this._curYear==null?null:this._curYear);
+    }
   }
 
   _colorScale(){
@@ -492,7 +520,7 @@ class Component extends DCLogic {
       circleOpacity:this.props.circleOpacity ?? 0.9,
       rasterOpacity:this.props.rasterOpacity ?? 0.9,
       showTooltips:this.props.showTooltips, tipHtml:e=>this._tipHtml(e),
-      onHover:(key,on)=>self._setActive(key,on), onTip:(html,ev)=>self._tip(html,ev)
+      onHover:(key,on)=>{ self._setActive(key,on); self._setEventField(key,on); }, onTip:(html,ev)=>self._tip(html,ev)
     });
     // re-assert the current year badge (componentDidUpdate re-runs _drawMap)
     this._setMapYear(this._curYear ?? null);
@@ -628,9 +656,9 @@ class Component extends DCLogic {
       const key=row.getAttribute('data-key');
       const e=self.events.find(x=>x.key===key);
       row.style.cursor='pointer';
-      row.addEventListener('mouseenter',()=>self._setActive(key,true));
+      row.addEventListener('mouseenter',()=>{ self._setActive(key,true); self._setEventField(key,true); });
       row.addEventListener('mousemove',ev=>{ if(self.props.showTooltips!==false && e) self._tip(self._tipHtml(e),ev); });
-      row.addEventListener('mouseleave',()=>{ self._setActive(key,false); self._tip(null); });
+      row.addEventListener('mouseleave',()=>{ self._setActive(key,false); self._setEventField(key,false); self._tip(null); });
     });
   }
 
