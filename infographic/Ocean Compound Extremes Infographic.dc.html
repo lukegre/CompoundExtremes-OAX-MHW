@@ -475,6 +475,10 @@ class Component extends DCLogic {
     if(!this._manifest) return;
     const el=this.mapRef.current;
     const badge=this.yearBadgeRef.current;
+    // Fade the active marker so its footprint raster shows through underneath (the dark highlight
+    // ring from _setActive stays, so the location is still marked). Restore the base fill on leave.
+    const map=this.markersRef.current||this.mapRef.current;
+    if(map){ const g=map.querySelector(`g[data-key="${key}"]`); if(g){ const c=g.querySelector('.oce-c'); if(c) c.setAttribute('fill-opacity', on ? 0.3 : (this.props.circleOpacity ?? 0.9)); } }
     if(on){
       const url=this._eventUrl(key);
       if(!url) return;                       // no footprint for this key -> leave field as-is
@@ -519,8 +523,12 @@ class Component extends DCLogic {
       events:this.events, colorScale:this._colorScale(), circleScale:this.props.circleScale,
       circleOpacity:this.props.circleOpacity ?? 0.9,
       rasterOpacity:this.props.rasterOpacity ?? 0.9,
-      showTooltips:this.props.showTooltips, tipHtml:e=>this._tipHtml(e),
-      onHover:(key,on)=>{ self._setActive(key,on); self._setEventField(key,on); }, onTip:(html,ev)=>self._tip(html,ev)
+      showTooltips:this.props.showTooltips,
+      onHover:(key,on)=>{ self._setActive(key,on); self._setEventField(key,on); },
+      // Event tooltip is click-toggled (not hover): click a marker to show it, click it again / another
+      // marker / empty map to hide. key==null (empty-map click) always dismisses. Table-row hover still
+      // shows the tooltip via _wireTable (that tooltip follows the cursor over the table, not the map).
+      onClick:(key,ev)=>{ if(key==null || self._openTipKey===key){ self._openTipKey=null; self._tip(null); } else { self._openTipKey=key; const e=self.events.find(x=>x.key===key); if(e) self._tip(self._tipHtml(e),ev); } }
     });
     // re-assert the current year badge (componentDidUpdate re-runs _drawMap)
     this._setMapYear(this._curYear ?? null);
