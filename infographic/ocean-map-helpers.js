@@ -87,7 +87,7 @@ export function circleColorScale(d3, intensityScale){
 
 export function tipHtml(e){
   const row=(l,v)=>`<tr><td style="color:#9fb0b8;padding:1px 10px 1px 0;white-space:nowrap">${l}</td><td style="white-space:nowrap">${v}</td></tr>`;
-  return `<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:#f2b45a;letter-spacing:.02em">${e.name.toUpperCase()} &middot; ${e.year}</div>`+
+  return `<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;line-height:1.2;color:#f2b45a;letter-spacing:.06em">${e.name.toUpperCase()} &middot; ${e.year}</div>`+
     `<div style="height:1px;background:rgba(255,255,255,.2);margin:5px 0"></div>`+
     `<table style="font-size:11.5px;line-height:1.45;color:#e7ecee;border-collapse:collapse">`+
     row('Area', `${e.areaAvg} avg &middot; <b>${e.area} max</b> M km\u00B2`)+

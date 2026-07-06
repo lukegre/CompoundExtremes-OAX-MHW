@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Caveat:wght@500;700&amp;display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
-<link rel="stylesheet" href="./ocean-infographic-base.css">
+<link rel="stylesheet" href="./ocean-infographic-base.css?v=20260706h">
 <style>@keyframes ocxBlink{0%,100%{opacity:.5}50%{opacity:1}}
 @keyframes ocxPulse{0%,100%{box-shadow:0 2px 6px rgba(18,34,44,.35),0 0 0 0 rgba(200,83,31,.55)}50%{box-shadow:0 2px 6px rgba(18,34,44,.35),0 0 0 8px rgba(200,83,31,0)}}
 input[type=range].ocx-slider{-webkit-appearance:none;appearance:none;width:100%;height:10px;border-radius:6px;background:#e3d8bd;outline:none;cursor:pointer;margin:2px 0}
@@ -79,7 +79,7 @@ input[type=range].ocx-slider::-moz-range-track{height:10px;border-radius:6px;bac
       <div style="position: absolute; top: 0; right: 0; bottom: 0; width: 90px; pointer-events: none; background: linear-gradient(to left,#f4efe3,rgba(244,239,227,0))"></div>
       <div ref="{{ markersRef }}" style="position: absolute; inset: 0; pointer-events: none"></div>
       <!-- Year badge: shows the field currently on the map (the summed total, or a single year on bar hover) -->
-      <div ref="{{ yearBadgeRef }}" style="position:absolute;top:12px;left:14px;z-index:6;pointer-events:none;background:rgba(18,34,44,.82);color:#f2b45a;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;padding:4px 11px;border-radius:20px;box-shadow:0 2px 8px rgba(18,34,44,.18)">TOTAL · 1982–2024</div>
+      <div ref="{{ yearBadgeRef }}" class="oce-ev-badge" style="position:absolute;top:12px;left:14px;z-index:6;pointer-events:none;background:rgba(18,34,44,.82);color:#f2b45a;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;padding:4px 11px;border-radius:13px;box-shadow:0 2px 8px rgba(18,34,44,.18)">TOTAL · 1982–2024</div>
     </div>
     <div class="ocx-pill" data-tip="Hover or tap any circle to see that event's area, intensity and duration." style="position:absolute;top:12px;right:14px;z-index:6;display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.85);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE
@@ -353,7 +353,7 @@ class Component extends DCLogic {
 
   // Bump _ASSET_V whenever ocean-map-helpers.js / ocean-map-draw.js change, so browsers don't
   // serve a stale cached copy of a shared module against a newer page (which blanks the map+charts).
-  static _ASSET_V = '20260706d';
+  static _ASSET_V = '20260706h';
   // Append the asset version to an annual/ image URL so a re-baked image never serves stale from cache.
   _ver(u){ return u ? (u + (u.includes('?') ? '&' : '?') + 'v=' + Component._ASSET_V) : u; }
   _helpers(){ return import('./ocean-map-helpers.js?v=' + Component._ASSET_V); }
@@ -456,16 +456,28 @@ class Component extends DCLogic {
     m.colors.forEach((c,i)=>{ if(spans[i]) spans[i].style.background=c; });
   }
 
-  // Swap the ocean field shown on the map: a specific year, or null for the summed total.
-  // Also updates the small badge over the map. Safe to call before the map/manifest are ready.
-  _setMapYear(year){
+  // The badge's resting label: the current year, or TOTAL · <range> when no year is selected.
+  _restingBadgeText(){
+    const m=this._manifest;
+    if(this._curYear!=null) return String(this._curYear);
+    return m ? ('TOTAL · '+m.years[0]+'–'+m.years[m.years.length-1]) : 'TOTAL · 1982–2024';
+  }
+  // Restore the ocean field the current year selection implies (year, or the summed total).
+  _restoreField(){
     if(!this._manifest) return;
     const el=this.mapRef.current;
-    const url=this._fieldUrl(year==null?null:year);
+    const url=this._fieldUrl(this._curYear==null?null:this._curYear);
     if(el && el.__oceSetField && url) el.__oceSetField(url);
+  }
+  // Swap the ocean field shown on the map: a specific year, or null for the summed total.
+  // Also updates the small badge over the map. Safe to call before the map/manifest are ready.
+  // Leaves the badge alone while it's expanded into an event info box (event hover owns it then).
+  _setMapYear(year){
+    if(!this._manifest) return;
     this._curYear=year==null?null:year;
+    this._restoreField();
     const badge=this.yearBadgeRef.current;
-    if(badge) badge.textContent = year==null ? ('TOTAL · '+this._manifest.years[0]+'–'+this._manifest.years[this._manifest.years.length-1]) : String(year);
+    if(badge && !badge.classList.contains('oce-ev-box')) badge.textContent=this._restingBadgeText();
   }
 
   // Swap the map field to a single event's footprint on hover; restore to the
@@ -474,21 +486,60 @@ class Component extends DCLogic {
   _setEventField(key,on){
     if(!this._manifest) return;
     const el=this.mapRef.current;
-    const badge=this.yearBadgeRef.current;
-    // Fade the active marker so its footprint raster shows through underneath (the dark highlight
-    // ring from _setActive stays, so the location is still marked). Restore the base fill on leave.
+    // Make the active marker's fill fully transparent so its footprint raster shows through underneath
+    // (the dark highlight ring from _setActive stays, so the location is still marked). Restore the base
+    // fill on leave. While transparent, flip the in-circle number to dark ('.oce-num') so it stays
+    // legible against the light footprint — the event LABEL text (name/year, outside the circle) is untouched.
     const map=this.markersRef.current||this.mapRef.current;
-    if(map){ const g=map.querySelector(`g[data-key="${key}"]`); if(g){ const c=g.querySelector('.oce-c'); if(c) c.setAttribute('fill-opacity', on ? 0.3 : (this.props.circleOpacity ?? 0.9)); } }
+    if(map){ const g=map.querySelector(`g[data-key="${key}"]`); if(g){
+      const c=g.querySelector('.oce-c'); if(c) c.setAttribute('fill-opacity', on ? 0 : (this.props.circleOpacity ?? 0.9));
+      g.querySelectorAll('.oce-num').forEach(t=>t.setAttribute('fill', on ? '#12222c' : '#fff'));
+    } }
     if(on){
       const url=this._eventUrl(key);
       if(!url) return;                       // no footprint for this key -> leave field as-is
       if(el && el.__oceSetField) el.__oceSetField(url);
-      const ev=this.events.find(e=>e.key===key);
-      if(badge && ev) badge.textContent = ev.name.toUpperCase()+' · '+ev.year;
     } else {
-      // restore whatever field/badge the current year selection implies
-      this._setMapYear(this._curYear==null?null:this._curYear);
+      // restore the field only; the badge is collapsed + re-labelled by _setEventBadge (which animates it)
+      this._restoreField();
     }
+  }
+
+  // The top-left badge doubles as an event info panel. On MARKER hover (expand=true) it grows from a
+  // pill into a full info box holding the event's stats (same content as the click tooltip). On TABLE
+  // hover (expand=false) it just shows the event name as a pill — the floating cursor tooltip carries
+  // the detail there. on=false collapses it back to the resting label (TOTAL/year). Every transition
+  // is size-animated by _animateBadge so it visibly expands/collapses.
+  _setEventBadge(key,on,expand){
+    const badge=this.yearBadgeRef.current; if(!badge) return;
+    const from=badge.getBoundingClientRect();   // FLIP: capture the size BEFORE the content/class swap
+    if(on){
+      const ev=this.events.find(e=>e.key===key); if(!ev) return;
+      if(expand){ badge.classList.add('oce-ev-box'); badge.innerHTML=this._tipHtml(ev); }
+      else { badge.classList.remove('oce-ev-box'); badge.textContent=ev.name.toUpperCase()+' · '+ev.year; }
+    } else {
+      badge.classList.remove('oce-ev-box');
+      badge.textContent=this._restingBadgeText();
+    }
+    this._animateBadge(badge,from);
+  }
+  // FLIP-animate the badge between its pill and info-box sizes: measure the natural target size after
+  // the content swap, pin the pre-swap size, force a reflow, then transition width+height+padding to
+  // the target. overflow:hidden (set in CSS) clips the content so it reveals/hides as the box resizes.
+  _animateBadge(badge,from){
+    if(this._badgeDone) this._badgeDone();      // wrap up any in-flight animation first
+    badge.style.transition='none';
+    badge.style.width=''; badge.style.height='';            // settle at the natural target size
+    const to=badge.getBoundingClientRect();
+    if(Math.abs(to.width-from.width)<0.5 && Math.abs(to.height-from.height)<0.5){ badge.style.transition=''; return; }
+    badge.style.width=from.width+'px'; badge.style.height=from.height+'px';
+    void badge.offsetWidth;                                 // force reflow so the start size sticks
+    badge.style.transition='width .2s ease, height .2s ease, padding .2s ease';
+    badge.style.width=to.width+'px'; badge.style.height=to.height+'px';
+    const done=()=>{ badge.style.transition=''; badge.style.width=''; badge.style.height=''; badge.removeEventListener('transitionend',done); if(this._badgeTimer){ clearTimeout(this._badgeTimer); this._badgeTimer=null; } this._badgeDone=null; };
+    this._badgeDone=done;
+    badge.addEventListener('transitionend',done);
+    this._badgeTimer=setTimeout(done,280);                  // fallback in case transitionend doesn't fire
   }
 
   _colorScale(){
@@ -523,12 +574,8 @@ class Component extends DCLogic {
       events:this.events, colorScale:this._colorScale(), circleScale:this.props.circleScale,
       circleOpacity:this.props.circleOpacity ?? 0.9,
       rasterOpacity:this.props.rasterOpacity ?? 0.9,
-      showTooltips:this.props.showTooltips,
-      onHover:(key,on)=>{ self._setActive(key,on); self._setEventField(key,on); },
-      // Event tooltip is click-toggled (not hover): click a marker to show it, click it again / another
-      // marker / empty map to hide. key==null (empty-map click) always dismisses. Table-row hover still
-      // shows the tooltip via _wireTable (that tooltip follows the cursor over the table, not the map).
-      onClick:(key,ev)=>{ if(key==null || self._openTipKey===key){ self._openTipKey=null; self._tip(null); } else { self._openTipKey=key; const e=self.events.find(x=>x.key===key); if(e) self._tip(self._tipHtml(e),ev); } }
+      // Markers are hover-only: hover expands the info box + swaps the footprint. No click interaction.
+      onHover:(key,on)=>{ self._setActive(key,on); self._setEventField(key,on); self._setEventBadge(key,on,true); }
     });
     // re-assert the current year badge (componentDidUpdate re-runs _drawMap)
     this._setMapYear(this._curYear ?? null);
@@ -664,9 +711,9 @@ class Component extends DCLogic {
       const key=row.getAttribute('data-key');
       const e=self.events.find(x=>x.key===key);
       row.style.cursor='pointer';
-      row.addEventListener('mouseenter',()=>{ self._setActive(key,true); self._setEventField(key,true); });
+      row.addEventListener('mouseenter',()=>{ self._setActive(key,true); self._setEventField(key,true); self._setEventBadge(key,true,false); });
       row.addEventListener('mousemove',ev=>{ if(self.props.showTooltips!==false && e) self._tip(self._tipHtml(e),ev); });
-      row.addEventListener('mouseleave',()=>{ self._setActive(key,false); self._setEventField(key,false); self._tip(null); });
+      row.addEventListener('mouseleave',()=>{ self._setActive(key,false); self._setEventField(key,false); self._setEventBadge(key,false); self._tip(null); });
     });
   }
 

@@ -71,14 +71,11 @@ export async function loadWorld(topojson){
 //   events             — array of event records (lon/lat/area/I/name/year/sub/dir/key)
 //   colorScale         — d3 sequential scale for the event-circle fill (by compound intensity)
 //   circleScale        — numeric multiplier on circle radius (tweakable)
-//   showTooltips       — boolean
 //   onHover(key, on)   — called on enter/leave of an event circle (swaps the footprint + cross-highlights)
-//   onClick(key, ev)   — called when an event circle is clicked (key) or empty map is clicked (null),
-//                         for click-toggling the event tooltip; the consumer builds the tooltip markup
 export function drawMap({
   d3, topojson, el, markersEl, world, rotate, bgPageColor, landColor, borderColor,
   fieldImageUrl, regionHighUrl, regionLowUrl,
-  events, colorScale, circleScale, circleOpacity, rasterOpacity, showTooltips, onHover, onClick
+  events, colorScale, circleScale, circleOpacity, rasterOpacity, onHover
 }){
   if(!el) return;
   el.innerHTML = '';
@@ -91,9 +88,6 @@ export function drawMap({
     // edges) rather than letterboxing with empty space above/below the map.
     .attr('preserveAspectRatio', 'xMidYMid slice')
     .style('display', 'block').style('border-radius', '4px');
-  // Click on empty ocean/land (anything but an event marker) dismisses an open event tooltip.
-  // Markers live in a separate overlay SVG, so their clicks never reach this handler.
-  svg.on('click', ev => { if (onClick) onClick(null, ev); });
 
   // PROJECTION: always geoEquirectangular (== PlateCarree). This is what lets the pre-baked field
   // images overlay directly — under equirectangular, screen x/y are linear in lon/lat, so a single
@@ -237,9 +231,11 @@ export function drawMap({
     // here are just the visual finish (white ring around each dot).
     grp.append('circle').attr('class', 'oce-c').attr('r', r).attr('fill', colorScale(e.I)).attr('fill-opacity', circleOpacity ?? 0.9).attr('stroke', '#fff').attr('stroke-width', 1.6);
     // in-circle area number: only shown once the circle is big enough (r>=15) to fit it legibly
+    // in-circle texts carry class 'oce-num' so the consumer can flip them to dark on hover (when the
+    // circle fades to let the footprint read through, white-on-light becomes illegible \u2014 see _setEventField)
     if (r >= 15) {
-      grp.append('text').attr('text-anchor', 'middle').attr('dy', '0.02em').attr('font-family', 'Barlow Condensed,sans-serif').attr('font-weight', 700).attr('font-size', r > 22 ? 18 : 14).attr('fill', '#fff').text(e.area);
-      grp.append('text').attr('text-anchor', 'middle').attr('dy', '1.15em').attr('font-family', 'Source Sans 3,sans-serif').attr('font-size', 8.5).attr('fill', '#fff').attr('fill-opacity', 0.9).text('M km\u00B2');
+      grp.append('text').attr('class', 'oce-num').attr('text-anchor', 'middle').attr('dy', '0.02em').attr('font-family', 'Barlow Condensed,sans-serif').attr('font-weight', 700).attr('font-size', r > 22 ? 18 : 14).attr('fill', '#fff').text(e.area);
+      grp.append('text').attr('class', 'oce-num').attr('text-anchor', 'middle').attr('dy', '1.15em').attr('font-family', 'Source Sans 3,sans-serif').attr('font-size', 8.5).attr('fill', '#fff').attr('fill-opacity', 0.9).text('M km\u00B2');
     }
     // EVENT LABEL (name + year, placed outside the circle): position is driven by each event's
     // `dir` field in EVENTS (ocean-map-helpers.js) — 'N' puts the label above, 'W'/'E' puts it to
@@ -253,11 +249,10 @@ export function drawMap({
     lab.append('tspan').attr('x', lx).attr('font-weight', 700).attr('font-size', 11.5).attr('fill', '#1e2a30').text(e.name);         // event name line
     lab.append('tspan').attr('x', lx).attr('dy', '1.15em').attr('font-size', 10).attr('font-weight', 600).attr('fill', '#5a6b73').text(e.year + (e.sub ? '  \u00B7 ' + e.sub : ''));  // year + sub-label line
 
-    // Hover swaps the ocean field to this event's footprint (via onHover) and fades the circle so
-    // the footprint reads through; the tooltip is CLICK-driven (onClick toggles it) so it doesn't
-    // block the map on hover. Leaving the marker does NOT clear the tooltip — a click does.
+    // Hover swaps the ocean field to this event's footprint (via onHover), fades the circle so the
+    // footprint reads through, and expands the info box (all in the consumer's onHover). Markers are
+    // hover-only — there is no click interaction.
     grp.on('mouseenter', function () { d3.select(this).select('.oce-c').transition().duration(120).attr('r', rF(e.area) + 3); if (onHover) onHover(e.key, true); })
-       .on('click', function (ev) { if (showTooltips !== false && onClick) onClick(e.key, ev); })
        .on('mouseleave', function () { d3.select(this).select('.oce-c').transition().duration(120).attr('r', rF(e.area)); if (onHover) onHover(e.key, false); });
   });
 }
