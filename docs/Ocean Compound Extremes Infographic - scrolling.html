@@ -37,10 +37,10 @@ input[type=range].ocx-slider::-moz-range-track{height:10px;border-radius:6px;bac
 .ocx-flow-branch,.ocx-flow-stem{transition:stroke-width .16s ease}
 .ocx-flow-card:hover .ocx-flow-branch,.ocx-flow-card:focus-visible .ocx-flow-branch,.ocx-flow-card:hover .ocx-flow-stem,.ocx-flow-card:focus-visible .ocx-flow-stem{stroke-width:4.5}
 .ocx-flow-card:hover .ocx-flow-arrowhead,.ocx-flow-card:focus-visible .ocx-flow-arrowhead{animation:ocxArrowNudge .55s ease-in-out infinite alternate}
-html{height:auto!important;min-height:100%;scroll-snap-type:none;scroll-padding-top:0;overscroll-behavior:none;overflow-x:clip}
-body{height:auto!important;min-height:100vh!important;overscroll-behavior:none;overflow-x:clip}
+html{height:auto!important;min-height:100%;scroll-snap-type:none;scroll-padding-top:0;overscroll-behavior:none;overflow-x:auto}
+body{height:auto!important;min-height:100vh!important;min-width:1400px!important;overscroll-behavior:none;overflow-x:visible}
 #dc-root,#dc-root>.sc-host{height:auto!important;min-height:100vh!important;max-height:none!important;overflow:visible}
-[data-ocx-root]{height:auto!important;min-height:100vh!important;box-sizing:border-box}
+[data-ocx-root]{height:auto!important;min-height:100vh!important;min-width:1400px;box-sizing:border-box}
 [data-ocx-root]{background:transparent!important}
 [data-ocx-root]::before{content:'';position:absolute;z-index:0;top:0;bottom:0;left:0;width:calc(66.666% - 12px);background:#f4efe3}
 [data-ocx-root]>*{position:relative;z-index:1}
@@ -103,10 +103,20 @@ body{background:#ded7c9}
 [data-ocx-mech-visual]>:first-child{grid-template-columns:repeat(4,minmax(0,1fr))!important}
 [data-ocx-mech-controls]{order:1;display:flex!important;flex-direction:column;gap:11px!important;align-items:stretch;width:auto;max-width:100%;min-width:0}
 [data-ocx-mech-controls]>*{grid-column:auto!important;grid-row:auto!important}
+.ocx-viewport-warning{display:none;position:fixed;right:18px;bottom:18px;z-index:1000;width:min(420px,calc(100vw - 36px));align-items:flex-start;gap:12px;background:#12222c;color:#fff;border:1px solid rgba(242,180,90,.55);border-radius:10px;padding:14px 15px;box-shadow:0 14px 38px rgba(12,20,26,.38)}
+.ocx-viewport-warning[hidden]{display:none!important}
+.ocx-viewport-warning-icon{flex:0 0 auto;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:#f2b45a;color:#12222c;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:700;line-height:1}
+.ocx-viewport-warning-copy{flex:1 1 auto;min-width:0}
+.ocx-viewport-warning-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;line-height:1.1;letter-spacing:.03em;text-transform:uppercase;color:#f2b45a}
+.ocx-viewport-warning-text{margin:4px 0 10px;font-size:13px;line-height:1.4;color:#d6e0e4}
+.ocx-viewport-warning-dismiss{border:1px solid #667780;border-radius:6px;background:transparent;color:#fff;padding:6px 10px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.ocx-viewport-warning-dismiss:hover,.ocx-viewport-warning-dismiss:focus-visible{background:#fff;color:#12222c;outline:none}
 @media(min-width:901px){
-  [data-ocx-definitions] [data-definition="mhw"]{padding-left:45px;padding-right:45px}
-  [data-ocx-definitions] [data-definition="oax"]{padding:9px 33px}
-  [data-ocx-definitions] [data-definition="cex"]{padding-left:35px;padding-right:35px}
+  [data-ocx-definitions] .ocx-def-card{justify-content:center}
+  [data-ocx-definitions] [data-definition="oax"]{padding-block:9px}
+}
+@media(max-width:1399px){
+  .ocx-viewport-warning{display:flex}
 }
 @media(max-width:900px){
   html{scroll-snap-type:none;scroll-padding-top:0}
@@ -127,6 +137,15 @@ body{background:#ded7c9}
   <div data-ocx-title style="width:100%;background:#12222c;color:#fff;padding:18px 28px 20px;border-radius:6px;margin-bottom:24px;box-shadow:7px 10px 12px rgba(0,0,0,.15);overflow:hidden">
     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;line-height:1;letter-spacing:.01em;text-transform:uppercase;font-size:clamp(20px,4.15vw,64px);white-space:nowrap">
       <span>When Ocean </span><span style="color:#e8891c">Heatwaves </span><span style="color:#38b0b8">Turn Acidic</span>
+    </div>
+  </div>
+
+  <div ref="{{ viewportWarningRef }}" class="ocx-viewport-warning" role="alert" aria-live="polite">
+    <div class="ocx-viewport-warning-icon" aria-hidden="true">!</div>
+    <div class="ocx-viewport-warning-copy">
+      <div class="ocx-viewport-warning-title">Best viewed at 1400 px or wider</div>
+      <p class="ocx-viewport-warning-text">Your window is narrower than this infographic’s recommended width. You can keep browsing and scroll horizontally to see the full experience.</p>
+      <button class="ocx-viewport-warning-dismiss" type="button" onClick="{{ dismissViewportWarning }}">Continue browsing</button>
     </div>
   </div>
 
@@ -198,7 +217,7 @@ body{background:#ded7c9}
   <!-- ============ ROW 3 (left part) : map legend — stays with the map ============ -->
   <div style="margin-top: -34px; padding: 2px 4px 0; z-index: 1; position: relative">
     <div style="width:50%;min-width:320px">
-      <div ref="{{ legendTitleRef }}" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:#12222c;line-height:1">WHERE DO COMPOUND EXTREMES HAPPEN?</div>
+      <div ref="{{ legendTitleRef }}" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:#12222c;line-height:1;white-space:nowrap;overflow:visible">WHERE DO COMPOUND EXTREMES HAPPEN?</div>
       <p ref="{{ legendCaptionRef }}" style="margin:5px 0 12px;font-size:13px;line-height:1.4;color:#5a5540;background-color:#f4efe3;white-space:nowrap;overflow:visible">Total months spent in a compound (OAX&nbsp;∩&nbsp;MHW) extreme at each location.</p>
       <div ref="{{ legendSwatchRef }}" style="display:grid;grid-template-columns:repeat(7,1fr);height:15px;border-radius:3px;overflow:hidden">
         <span style="background:#fce8c8"></span><span style="background:#f6c886"></span><span style="background:#eda44e"></span><span style="background:#e07b2e"></span><span style="background:#c8531f"></span><span style="background:#a5281a"></span><span style="background:#6b1710"></span>
@@ -546,6 +565,7 @@ class Component extends DCLogic {
   legendCaptionRef = React.createRef();
   mechRef = React.createRef();
   yearBadgeRef = React.createRef();
+  viewportWarningRef = React.createRef();
   _mech = { regime:'low', event:0.72 };
 
   // Bump _ASSET_V whenever ocean-map-helpers.js / ocean-map-draw.js change, so browsers don't
@@ -565,7 +585,8 @@ class Component extends DCLogic {
       donutRef:this.donutRef, dotsRef:this.dotsRef, tableRef:this.tableRef, tipRef:this.tipRef,
       mapWrapRef:this.mapWrapRef, markersRef:this.markersRef, legendSwatchRef:this.legendSwatchRef,
       legendTitleRef:this.legendTitleRef, legendCaptionRef:this.legendCaptionRef,
-      mechRef:this.mechRef, yearBadgeRef:this.yearBadgeRef,
+      mechRef:this.mechRef, yearBadgeRef:this.yearBadgeRef, viewportWarningRef:this.viewportWarningRef,
+      dismissViewportWarning:()=>{ if(this.viewportWarningRef.current) this.viewportWarningRef.current.hidden=true; },
       defMhwOn:()=>this._setDefinitionField('mhw',true),
       defMhwOff:()=>this._setDefinitionField('mhw',false),
       defOaxOn:()=>this._setDefinitionField('oax',true),
