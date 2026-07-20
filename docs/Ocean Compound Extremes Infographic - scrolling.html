@@ -38,7 +38,7 @@ input[type=range].ocx-slider::-moz-range-track{height:10px;border-radius:6px;bac
 .ocx-flow-card:hover .ocx-flow-branch,.ocx-flow-card:focus-visible .ocx-flow-branch,.ocx-flow-card:hover .ocx-flow-stem,.ocx-flow-card:focus-visible .ocx-flow-stem{stroke-width:4.5}
 .ocx-flow-card:hover .ocx-flow-arrowhead,.ocx-flow-card:focus-visible .ocx-flow-arrowhead{animation:ocxArrowNudge .55s ease-in-out infinite alternate}
 html{height:auto!important;min-height:100%;scroll-snap-type:none;scroll-padding-top:0;overscroll-behavior:none;overflow-x:auto}
-body{height:auto!important;min-height:100vh!important;min-width:1400px!important;overscroll-behavior:none;overflow-x:visible}
+body{height:auto!important;min-height:100vh!important;min-width:1400px!important;max-width:2000px!important;margin:0 auto!important;overscroll-behavior:none;overflow-x:visible}
 #dc-root,#dc-root>.sc-host{height:auto!important;min-height:100vh!important;max-height:none!important;overflow:visible}
 [data-ocx-root]{height:auto!important;min-height:100vh!important;min-width:1400px;box-sizing:border-box}
 [data-ocx-root]{background:transparent!important}
@@ -98,9 +98,9 @@ body{background:#ded7c9}
 [data-ocx-donut]{flex-basis:96px!important;width:96px!important}
 [data-ocx-giant-value]{font-size:42px!important}
 [data-ocx-dots]{flex:1 1 88px!important;min-width:0!important;max-width:100px}
-[data-ocx-mech]{grid-template-columns:260px minmax(0,1fr)!important;align-items:start!important}
+[data-ocx-mech]{grid-template-columns:290px minmax(0,1fr)!important;align-items:start!important}
 [data-ocx-mech-visual]{order:2;width:100%;max-width:100%;min-width:0!important;overflow:hidden}
-[data-ocx-mech-visual]>:first-child{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+[data-ocx-mech-visual]>:first-child{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 [data-ocx-mech-controls]{order:1;display:flex!important;flex-direction:column;gap:11px!important;align-items:stretch;width:auto;max-width:100%;min-width:0}
 [data-ocx-mech-controls]>*{grid-column:auto!important;grid-row:auto!important}
 .ocx-viewport-warning{display:none;position:fixed;right:18px;bottom:18px;z-index:1000;width:min(420px,calc(100vw - 36px));align-items:flex-start;gap:12px;background:#12222c;color:#fff;border:1px solid rgba(242,180,90,.55);border-radius:10px;padding:14px 15px;box-shadow:0 14px 38px rgba(12,20,26,.38)}
@@ -419,37 +419,38 @@ body{background:#ded7c9}
   <!-- ============ ROW 6 : the mechanism (interactive, full width) ============ -->
   <div data-tour="mech" data-screen-label="Mechanism" style="margin-top:16px;position:relative;background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:22px 26px">
     <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:.03em;text-transform:uppercase;color:#12222c;line-height:1">The mechanism: a tug-of-war</div>
-    <p style="margin:6px 0 14px;font-family:'Source Sans 3',sans-serif;font-size:14px;line-height:1.5;color:#3a4147;max-width:820px">During marine heatwaves, warming raises <b style="color:#12222c">[H⁺]</b>. Whether an acidification extreme also occurs depends on the regime and the strength of the heatwave. <b style="color:#12222c">Drag the controls</b> to play out the tug-of-war between warming and mixing.</p>
+    <p style="margin:6px 0 14px;font-family:'Source Sans 3',sans-serif;font-size:14px;line-height:1.5;color:#3a4147;max-width:900px">During marine heatwaves, warming raises <b style="color:#12222c">[H⁺]</b>, while changes in mixing and sDIC can oppose it. <b style="color:#12222c">Drag the control</b> to explore that balance, or choose The Blob for manuscript-derived event magnitudes.</p>
 
     <div ref="{{ mechRef }}" data-ocx-mech style="display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch;margin-top:2px">
 
       <div data-ocx-mech-controls style="display:flex;flex-direction:column;gap:11px;padding:14px 16px;background:#fbf6ea;border:1px solid #e0d5ba;border-radius:8px">
         <div style="display:flex;align-items:center;gap:7px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.05em;text-transform:uppercase;color:#c8531f"><svg width="13" height="13" viewBox="0 0 24 24" fill="#c8531f"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>Experiment &mdash; your controls</div>
 
-        <div style="display:flex;gap:6px;background:#efe7d5;padding:5px;border-radius:8px;border:1px solid #ddd0b0">
-          <button data-m="lowBtn" type="button" style="flex:1;border:0;cursor:pointer;border-radius:6px;padding:8px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;background:#c8531f;color:#fff">Stratified<br>low–mid</button>
-          <button data-m="highBtn" type="button" style="flex:1;border:0;cursor:pointer;border-radius:6px;padding:8px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;background:transparent;color:#6f7873">Upwelling<br>high-lat.</button>
+        <div style="display:flex;gap:4px;background:#efe7d5;padding:5px;border-radius:8px;border:1px solid #ddd0b0">
+          <button data-m="psrBtn" type="button" style="flex:1;border:0;cursor:pointer;border-radius:6px;padding:8px 5px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.02em;text-transform:uppercase;line-height:1.05;background:#c8531f;color:#fff">Mid–low<br>lat.</button>
+          <button data-m="ssrBtn" type="button" style="flex:1;border:0;cursor:pointer;border-radius:6px;padding:8px 5px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11.5px;letter-spacing:.02em;text-transform:uppercase;line-height:1.05;background:transparent;color:#6f7873">Mixing-driven<br>regions</button>
         </div>
 
-        <div data-m="regimeDesc" style="font-family:'Source Sans 3',sans-serif;font-size:12px;line-height:1.4;color:#5a5540">Permanently stratified waters: warm anomalies push [H⁺] above the extreme threshold, and exchange with deeper water is weak.</div>
+        <div data-m="regimeDesc" style="font-family:'Source Sans 3',sans-serif;font-size:12px;line-height:1.4;color:#5a5540">Permanently stratified waters: warming raises [H⁺], while the opposing sDIC response is comparatively weak.</div>
 
         <div style="margin-top:2px">
           <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">
-            <label for="mech-event" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;color:#12222c;white-space:nowrap">Heatwave state <span style="color:#c8531f">&#8596;</span></label>
+            <label for="mech-event" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.03em;text-transform:uppercase;color:#12222c;white-space:nowrap">Temperature anomaly <span style="color:#c8531f">&#8596;</span></label>
           </div>
           <input id="mech-event" class="ocx-slider" data-m="event" type="range" min="0" max="1" step="0.01">
           <div style="position:relative;height:14px;border-radius:4px;margin-top:6px;overflow:hidden;background:linear-gradient(90deg,#7ba3c9,#38b0b8 30%,#e8b25c 58%,#c8531f 82%,#8c1d13)">
             <div data-m="gaugeMarker" style="position:absolute;top:2px;bottom:2px;width:4px;border-radius:3px;background:#12222c;box-shadow:0 0 0 2px rgba(255,255,255,.7);left:50%"></div>
           </div>
-          <div style="display:flex;justify-content:space-between;font-family:'Source Sans 3',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.02em;color:#8a836c;margin-top:3px"><span>cool + mixed</span><span>warm + stratified</span></div>
+          <div style="display:flex;justify-content:space-between;font-family:'Source Sans 3',sans-serif;font-size:9.5px;font-weight:600;letter-spacing:.02em;color:#8a836c;margin-top:3px"><span>−1.5 °C</span><span>+2.0 °C</span></div>
         </div>
 
         <div data-ocx-scenarios style="display:flex;flex-direction:column;gap:6px">
           <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c">Jump to a scenario</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px">
-            <button data-preset="blob" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">The Blob</button>
-            <button data-preset="highrare" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">High-lat. rare</button>
-            <button data-preset="highmixed" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">Cold upwelling</button>
+            <button data-preset="blob" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">The Blob · observed</button>
+            <button data-preset="highrare" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">High-lat. warm · concept</button>
+            <button data-preset="equatorial" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">El Niño · concept</button>
+            <button data-preset="highmixed" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">Cold upwelling · concept</button>
             <button data-preset="reset" type="button" style="border:1px solid #d8cdae;background:#fffdf7;border-radius:5px;padding:5px 8px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-weight:700;font-size:10.5px;color:#4a4636">Reset</button>
           </div>
         </div>
@@ -457,25 +458,35 @@ body{background:#ded7c9}
 
       <div data-ocx-mech-visual style="display:flex;flex-direction:column;gap:10px;min-width:0">
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
           <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
             <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Temp. anomaly</div>
-            <div data-m="tempScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+2.0 °C</div>
+            <div data-m="tempScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+1.40 °C</div>
+            <div data-m="mhwThreshold" style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">above local Q95</div>
           </div>
           <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">[H⁺] anomaly</div>
-            <div data-m="hplusScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+0.3</div>
-            <div style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">nmol/kg vs normal</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Thermal Δ[H⁺]</div>
+            <div data-m="thermalScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+0.41</div>
+            <div style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">nmol/kg; raises [H⁺]</div>
           </div>
           <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Surface mixing</div>
-            <div data-m="mixScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#1f9aa6">low</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">sDIC Δ[H⁺]</div>
+            <div data-m="dicScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#1f9aa6">−0.21</div>
+            <div style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">nmol/kg; opposes warming</div>
           </div>
           <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
-            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Compound risk</div>
-            <div data-m="compoundScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">likely</div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Net [H⁺] anomaly</div>
+            <div data-m="hplusScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">+0.18</div>
+            <div data-m="oaxThreshold" style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">above local Q95</div>
+          </div>
+          <div style="background:#fffdf7;border:1px solid #e6ddc7;border-radius:6px;padding:8px 10px">
+            <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:#8a836c;line-height:1.15">Mechanism</div>
+            <div data-m="alignmentScore" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:23px;line-height:1;margin-top:3px;color:#c8531f">aligned</div>
+            <div data-m="mixScore" style="font-family:'Source Sans 3',sans-serif;font-size:9px;color:#8a836c;margin-top:2px;line-height:1.1">surface mixing: low</div>
           </div>
         </div>
+
+        <div data-m="thresholdNote" style="font-family:'Source Sans 3',sans-serif;font-size:10.5px;line-height:1.35;color:#6f6855;padding:0 2px">The Blob values are from Table 1. Its driver split uses the manuscript’s mean compound-event balance (+0.41 thermal, −0.21 sDIC) with a small residual so the budget closes. Extremes are defined against local, season-specific detrended 95th-percentile thresholds—not universal absolute cutoffs.</div>
 
         <div style="border:1px solid #d7cdb3;border-radius:8px;overflow:hidden;background:#eef4f8">
           <svg viewBox="0 12 760 284" style="display:block;width:100%;height:auto" role="img" aria-label="Interactive schematic of stratification and compound extremes">
@@ -493,8 +504,8 @@ body{background:#ded7c9}
               <line x1="47" y1="37" x2="38" y2="28"></line><line x1="93" y1="83" x2="102" y2="92"></line>
               <line x1="93" y1="37" x2="102" y2="28"></line><line x1="47" y1="83" x2="38" y2="92"></line>
             </g>
-            <text data-m="regimeTitle" x="726" y="40" text-anchor="end" font-family="'Barlow Condensed',sans-serif" font-size="24" font-weight="700" letter-spacing=".02em" fill="#12222c">STRATIFIED LOW–MID LATITUDES</text>
-            <text data-m="regimeSub" x="726" y="64" text-anchor="end" font-family="'Source Sans 3',sans-serif" font-size="14" fill="#56605b">Permanent stratification limits exchange with deeper water</text>
+            <text data-m="regimeTitle" x="726" y="40" text-anchor="end" font-family="'Barlow Condensed',sans-serif" font-size="24" font-weight="700" letter-spacing=".02em" fill="#12222c">LOW– TO MID-LATITUDES (PSR)</text>
+            <text data-m="regimeSub" x="726" y="64" text-anchor="end" font-family="'Source Sans 3',sans-serif" font-size="14" fill="#56605b">Thermal and [H⁺] anomalies tend to align</text>
             <path data-m="waterTop" d="M0 135 C50 122 100 148 150 135 C200 122 250 148 300 135 C350 122 400 148 450 135 C500 122 550 148 600 135 C650 122 700 148 760 135 L760 330 L0 330 Z" fill="url(#mechHot)"></path>
             <path d="M0 190 C70 172 120 208 190 190 C260 172 310 208 380 190 C450 172 500 208 570 190 C640 172 690 208 760 190 L760 330 L0 330 Z" fill="#1b4f70" opacity=".30"></path>
             <path d="M0 247 C70 230 120 265 190 247 C260 230 310 265 380 247 C450 230 500 265 570 247 C640 230 690 265 760 247 L760 330 L0 330 Z" fill="#12384f" opacity=".30"></path>
@@ -524,12 +535,12 @@ body{background:#ded7c9}
         </div>
 
         <div>
-          <div data-m="outcomeHeading" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.02em;text-transform:uppercase;color:#c8531f;line-height:1.05">OAX ∩ MHW likely</div>
-          <div data-m="outcomeExplain" style="font-family:'Source Sans 3',sans-serif;font-size:12.5px;line-height:1.4;color:#4a4636;margin-top:2px">In permanently stratified low–mid latitudes, warming directly raises [H⁺] and exchange with deeper water is too weak to offset it.</div>
+          <div data-m="outcomeHeading" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.02em;text-transform:uppercase;color:#c8531f;line-height:1.05">Observed OAX ∩ MHW</div>
+          <div data-m="outcomeExplain" style="font-family:'Source Sans 3',sans-serif;font-size:12.5px;line-height:1.4;color:#4a4636;margin-top:2px">The Blob preset uses the manuscript’s compound-event magnitudes: +1.40 °C and +0.18 nmol/kg [H⁺].</div>
         </div>
       </div>
     </div>
-    <div class="ocx-pill" data-tip="Switch the ocean regime, drag the heatwave slider, or pick a preset to see when a compound extreme forms." style="position:absolute;top:14px;right:16px;display:inline-flex;align-items:center;gap:6px;background:#12222c;color:#f2b45a;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.09em;padding:5px 12px 5px 9px;border-radius:20px;box-shadow:0 2px 8px rgba(18,34,44,.22)"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f2b45a"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE MODEL</div>
+    <div class="ocx-pill" data-tip="Switch regimes, drag the temperature slider, or choose a preset. Named values are observed; conceptual scenarios are clearly labelled." style="position:absolute;top:14px;right:16px;display:inline-flex;align-items:center;gap:6px;background:#12222c;color:#f2b45a;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.09em;padding:5px 12px 5px 9px;border-radius:20px;box-shadow:0 2px 8px rgba(18,34,44,.22)"><svg width="12" height="12" viewBox="0 0 24 24" fill="#f2b45a"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE MODEL</div>
   </div>
 
   <!-- ==================== END RIGHT COLUMN ==================== -->
@@ -566,7 +577,7 @@ class Component extends DCLogic {
   mechRef = React.createRef();
   yearBadgeRef = React.createRef();
   viewportWarningRef = React.createRef();
-  _mech = { regime:'low', event:0.72 };
+  _mech = { regime:'psr', event:0.83, preset:'blob' };
 
   // Bump _ASSET_V whenever ocean-map-helpers.js / ocean-map-draw.js change, so browsers don't
   // serve a stale cached copy of a shared module against a newer page (which blanks the map+charts).
@@ -1080,26 +1091,45 @@ class Component extends DCLogic {
 
   // ---- interactive "tug-of-war" mechanism explorer ----
   _mechClamp(x,a,b){ return Math.max(a,Math.min(b,x)); }
-  _mechEventLabel(x){ if(x<0.38) return 'cool + mixed'; if(x<0.52) return 'near normal'; if(x<0.72) return 'warm + stratified'; return 'very warm + stratified'; }
+  _mechSigned(x,digits=2){ const sign=x>0?'+':x<0?'−':''; return `${sign}${Math.abs(x).toFixed(digits)}`; }
   _mechParams(){
-    if(this._mech.regime==='low') return {baseMix:0.28,tempToH:1.06,title:'STRATIFIED LOW–MID LATITUDES',sub:'Permanent stratification limits exchange with deeper water',desc:'Permanently stratified waters: warm anomalies push [H⁺] above the extreme threshold, and exchange with deeper water is weak.'};
-    return {baseMix:0.88,tempToH:0.50,title:'UPWELLING: HIGH-LAT. & E. EQ. PACIFIC',sub:'Warming strengthens stratification and cuts mixing-driven [H⁺] supply',desc:'Warm anomalies strengthen stratification and suppress the upwelling/mixing that usually raises surface [H⁺].'};
+    if(this._mech.regime==='psr') return {
+      baseMix:0.28,dicResponse:0.15,title:'LOW– TO MID-LATITUDES (PSR)',
+      sub:'Thermal and [H⁺] anomalies tend to align',
+      desc:'Permanently stratified waters: warming raises [H⁺], while the opposing sDIC response is comparatively weak.'
+    };
+    return {
+      baseMix:0.88,dicResponse:0.38,title:'MIXING- AND UPWELLING-DRIVEN REGIONS',
+      sub:'Warming suppresses DIC-rich mixing or upwelling',
+      desc:'At high latitudes and in the eastern equatorial Pacific, warming strengthens stratification and suppresses the DIC-rich mixing or upwelling pathway that usually raises [H⁺].'
+    };
   }
   _mechCalc(){
-    const p=this._mechParams(), event=this._mech.event, isLow=this._mech.regime==='low';
-    const anomalyScale=event*2-1, tempAnom=anomalyScale*3.0;
-    const stratification=isLow?0.55+event*0.42:0.15+event*0.82;
-    const mixingSuppression=isLow?0.82:0.93;
+    const p=this._mechParams(), event=this._mech.event;
+    const isPsr=this._mech.regime==='psr';
+    const stratification=isPsr?0.62+event*0.35:0.12+event*0.78;
+    const mixingSuppression=isPsr?0.82:0.93;
     const surfaceMixing=p.baseMix*(1-mixingSuppression*stratification);
-    const warmingHplus=tempAnom*p.tempToH;
-    const mixingHplusSupply=isLow?0.2*stratification:surfaceMixing*1.15;
-    const hplusAnomaly=isLow?anomalyScale:-anomalyScale;
-    let hplusLikelihood=isLow
-      ? this._mechClamp(warmingHplus-0.55+0.2*stratification,0,2.2)
-      : this._mechClamp(warmingHplus*0.35+mixingHplusSupply-0.55*stratification,0,2.2);
-    const tempGate=tempAnom<=0?0:this._mechClamp(tempAnom/2.1,0,1);
-    const compoundIndex=tempGate*this._mechClamp(hplusLikelihood/1.15,0,1);
-    return {event,tempAnom,stratification,surfaceMixing,hplusAnomaly,compoundIndex};
+
+    // The named Blob preset uses Table 1's event magnitudes. Its driver split follows
+    // the manuscript-wide compound-event balance in Figure 9 and closes to the observed net.
+    if(this._mech.preset==='blob'){
+      return {
+        event,tempAnom:1.40,thermalHplus:0.41,dicHplus:-0.21,alkHplus:-0.02,
+        hplusAnomaly:0.18,stratification,surfaceMixing,alignment:'aligned',empirical:true
+      };
+    }
+
+    // Conceptual slider model. Coefficients are deliberately modest and expressed in
+    // manuscript-scale nmol kg−1; they illustrate driver direction, not universal thresholds.
+    const tempAnom=-1.5+event*3.5;
+    const thermalHplus=0.293*tempAnom;
+    const dicResponse=this._mech.preset==='equatorial'?0.46:p.dicResponse;
+    const dicHplus=-dicResponse*tempAnom;
+    const alkHplus=-0.014*tempAnom;
+    const hplusAnomaly=thermalHplus+dicHplus+alkHplus;
+    const alignment=tempAnom<=0?'no-mhw':hplusAnomaly>0?'aligned':'opposed';
+    return {event,tempAnom,thermalHplus,dicHplus,alkHplus,hplusAnomaly,stratification,surfaceMixing,alignment,empirical:false};
   }
   _mechRenderDots(n){
     const g=this.mechRef.current&&this.mechRef.current.querySelector('[data-m="dicDots"]'); if(!g) return;
@@ -1110,63 +1140,76 @@ class Component extends DCLogic {
     const root=this.mechRef.current; if(!root) return;
     const q=s=>root.querySelector(`[data-m="${s}"]`);
     const slider=q('event'); if(slider) this._mech.event=Number(slider.value);
-    const c=this._mechCalc(), p=this._mechParams(), isLow=this._mech.regime==='low';
-    const RED='#c8531f', TEAL='#1f9aa6', GREEN='#3f7a4c', AMBER='#c07a1e';
+    const c=this._mechCalc(), p=this._mechParams(), isPsr=this._mech.regime==='psr';
+    const RED='#c8531f', TEAL='#1f9aa6', GREEN='#3f7a4c';
 
-    const low=q('lowBtn'), high=q('highBtn');
-    if(low){ low.style.background=isLow?RED:'transparent'; low.style.color=isLow?'#fff':'#6f7873'; }
-    if(high){ high.style.background=!isLow?TEAL:'transparent'; high.style.color=!isLow?'#fff':'#6f7873'; }
+    [['psrBtn','psr',RED],['ssrBtn','ssr',TEAL]].forEach(([id,regime,color])=>{
+      const button=q(id), active=this._mech.regime===regime;
+      if(button){ button.style.background=active?color:'transparent'; button.style.color=active?'#fff':'#6f7873'; button.setAttribute('aria-pressed',String(active)); }
+    });
     const desc=q('regimeDesc'); if(desc) desc.textContent=p.desc;
 
-    const elbl=q('eventLabel'); if(elbl) elbl.textContent=this._mechEventLabel(c.event);
-    const gm=q('gaugeMarker'); if(gm) gm.style.left=`calc(${Math.round(c.stratification*100)}% - 2px)`;
+    const gm=q('gaugeMarker'); if(gm) gm.style.left=`calc(${Math.round(c.event*100)}% - 2px)`;
+    if(slider) slider.setAttribute('aria-valuetext',`${this._mechSigned(c.tempAnom)} degrees Celsius`);
 
-    const ts=q('tempScore'); if(ts){ ts.textContent=`${c.tempAnom>=0?'+':''}${c.tempAnom.toFixed(1)} °C`; ts.style.color=c.tempAnom<-0.05?TEAL:c.tempAnom>0.05?RED:GREEN; }
-    const hs=q('hplusScore'); if(hs){ hs.textContent=`${c.hplusAnomaly>=0?'+':''}${c.hplusAnomaly.toFixed(1)}`; hs.style.color=c.hplusAnomaly<-0.05?TEAL:c.hplusAnomaly>0.05?RED:GREEN; }
-    const ms=q('mixScore'); if(ms) ms.textContent=c.surfaceMixing<0.18?'low':c.surfaceMixing<0.45?'moderate':'high';
-    const cs=q('compoundScore'); if(cs){ cs.textContent=c.compoundIndex<0.25?'rare':c.compoundIndex<0.55?'borderline':'likely'; cs.style.color=c.compoundIndex<0.25?TEAL:c.compoundIndex<0.55?GREEN:RED; }
+    const ts=q('tempScore'); if(ts){ ts.textContent=`${this._mechSigned(c.tempAnom)} °C`; ts.style.color=c.tempAnom<0?TEAL:c.tempAnom>0?RED:GREEN; }
+    const th=q('thermalScore'); if(th){ th.textContent=this._mechSigned(c.thermalHplus); th.style.color=c.thermalHplus<0?TEAL:RED; }
+    const ds=q('dicScore'); if(ds){ ds.textContent=this._mechSigned(c.dicHplus); ds.style.color=c.dicHplus<0?TEAL:RED; }
+    const hs=q('hplusScore'); if(hs){ hs.textContent=this._mechSigned(c.hplusAnomaly); hs.style.color=c.hplusAnomaly<0?TEAL:c.hplusAnomaly>0?RED:GREEN; }
+    const ms=q('mixScore'); if(ms) ms.textContent=`surface mixing: ${c.surfaceMixing<0.18?'low':c.surfaceMixing<0.45?'moderate':'high'}`;
+    const as=q('alignmentScore');
+    if(as){
+      as.textContent=c.alignment==='aligned'?'aligned':c.alignment==='opposed'?'opposed':'no MHW';
+      as.style.color=c.alignment==='aligned'?RED:c.alignment==='opposed'?TEAL:GREEN;
+    }
+    const mt=q('mhwThreshold'); if(mt) mt.textContent=c.empirical?'above local Q95':c.tempAnom<=0?'below local Q95':'compare with local Q95';
+    const ot=q('oaxThreshold'); if(ot) ot.textContent=c.empirical?'above local Q95':c.hplusAnomaly<=0?'not an OAX response':'compare with local Q95';
+    const tn=q('thresholdNote');
+    if(tn) tn.textContent=c.empirical
+      ? 'The Blob temperature (+1.40 °C) and net [H⁺] (+0.18 nmol/kg) are from Table 1. The driver split uses the manuscript’s mean compound-event balance (+0.41 thermal, −0.21 sDIC) with a small residual so the budget closes. Extremes use local, season-specific detrended Q95 thresholds.'
+      : 'Conceptual response: driver directions follow the manuscript, but these are not measured event values. MHW and OAX are defined against separate local, season-specific detrended 95th-percentile thresholds—not universal absolute cutoffs.';
 
     const rt=q('regimeTitle'); if(rt) rt.textContent=p.title;
     const rs=q('regimeSub'); if(rs) rs.textContent=p.sub;
-    const wt=q('waterTop'); if(wt) wt.setAttribute('fill', isLow?'url(#mechHot)':'url(#mechCool)');
+    const wt=q('waterTop'); if(wt) wt.setAttribute('fill', c.tempAnom>0?'url(#mechHot)':'url(#mechCool)');
     const sl=q('stratLabel'); if(sl) sl.textContent=c.stratification>0.65?'STRONG STRATIFICATION':'WEAK / SEASONAL STRATIFICATION';
 
     const sw=2+c.stratification*6.5;
     ['layer1','layer2','layer3'].forEach((id,idx)=>{ const line=q(id); if(line){ line.setAttribute('stroke-width',Math.max(1.5,sw-idx*1.4)); line.setAttribute('opacity',this._mechClamp(0.20+c.stratification-idx*.16,.16,.9)); } });
 
-    const ha=q('heatArrows'); if(ha) ha.setAttribute('opacity',this._mechClamp(c.event*1.25,0,1));
+    const ha=q('heatArrows'); if(ha) ha.setAttribute('opacity',this._mechClamp((c.tempAnom+0.3)/1.8,0,1));
     const ua=q('upwellArrows'); if(ua) ua.setAttribute('opacity',this._mechClamp(c.surfaceMixing*1.35,.04,.9));
-    const bm=q('blockedMix'); if(bm) bm.setAttribute('opacity', !isLow?this._mechClamp((c.stratification-0.42)*1.75,0,1):this._mechClamp((c.stratification-0.84)*.28,0,.14));
+    const bm=q('blockedMix'); if(bm) bm.setAttribute('opacity', !isPsr?this._mechClamp((c.stratification-0.42)*1.75,0,1):this._mechClamp((c.stratification-0.84)*.28,0,.14));
 
     this._mechRenderDots(Math.round(38*c.surfaceMixing));
 
     let heading,explain,color;
-    if(c.event<=0.05){ heading='No compound extreme'; color='#5a6b73'; explain='At the cool/mixed end there is no marine heatwave, so OAX ∩ MHW cannot occur.'; }
-    else if(c.compoundIndex>0.55){ heading='OAX ∩ MHW likely'; color=RED; explain=isLow?'In permanently stratified low–mid latitudes, warming directly raises [H⁺] and exchange with deeper water is too weak to offset it.':'These settings still allow enough [H⁺] increase for a compound event.'; }
-    else if(c.compoundIndex>0.25){ heading='Borderline compound risk'; color=AMBER; explain='A heatwave is present, but the [H⁺] pathway is only partly aligned.'; }
-    else { heading='OAX ∩ MHW rare'; color=TEAL; explain=isLow?'The heatwave is too weak, or the [H⁺] response too small, to create a compound event.':'Warming strengthens stratification and cuts off the upwelling of high-DIC water that usually raises surface [H⁺].'; }
+    if(c.empirical){ heading='Observed OAX ∩ MHW'; color=RED; explain='The Blob preset uses the manuscript’s compound-event magnitudes: +1.40 °C and +0.18 nmol/kg [H⁺].'; }
+    else if(c.alignment==='no-mhw'){ heading='No MHW pathway'; color='#5a6b73'; explain='Cooling can raise [H⁺] through mixing or upwelling, but it cannot simultaneously be a marine heatwave.'; }
+    else if(c.alignment==='aligned'){ heading='Mechanisms aligned'; color=RED; explain='In permanently stratified waters, the thermal increase in [H⁺] outweighs the opposing sDIC response. Whether an extreme occurs still depends on the local Q95 thresholds.'; }
+    else { heading='Mechanisms opposed'; color=TEAL; explain=this._mech.preset==='equatorial'?'El Niño warming suppresses DIC-rich upwelling, so [H⁺] falls even as temperature rises.':'Warming suppresses the mixing of DIC-rich water; that reduction in [H⁺] outweighs the direct thermal increase.'; }
     const oh=q('outcomeHeading'); if(oh){ oh.textContent=heading; oh.style.color=color; }
     const oe=q('outcomeExplain'); if(oe) oe.textContent=explain;
   }
   _mechSetRegime(r){
-    this._mech.regime=r; this._mech.event=r==='low'?0.72:0.70;
+    this._mech.regime=r; this._mech.event=0.70; this._mech.preset=null;
     const s=this.mechRef.current&&this.mechRef.current.querySelector('[data-m="event"]'); if(s) s.value=this._mech.event;
     this._mechUpdate();
   }
   _mechInit(){
     const root=this.mechRef.current; if(!root) return;
-    const low=root.querySelector('[data-m="lowBtn"]'), high=root.querySelector('[data-m="highBtn"]'), slider=root.querySelector('[data-m="event"]');
+    const psr=root.querySelector('[data-m="psrBtn"]'), ssr=root.querySelector('[data-m="ssrBtn"]'), slider=root.querySelector('[data-m="event"]');
     if(slider) slider.value=this._mech.event;
-    if(low) low.addEventListener('click',()=>this._mechSetRegime('low'));
-    if(high) high.addEventListener('click',()=>this._mechSetRegime('high'));
-    if(slider) slider.addEventListener('input',()=>this._mechUpdate());
+    if(psr) psr.addEventListener('click',()=>this._mechSetRegime('psr'));
+    if(ssr) ssr.addEventListener('click',()=>this._mechSetRegime('ssr'));
+    if(slider) slider.addEventListener('input',()=>{ this._mech.preset=null; this._mechUpdate(); });
     root.querySelectorAll('[data-preset]').forEach(btn=>{
       btn.addEventListener('click',()=>{
         const pr=btn.dataset.preset;
-        if(pr==='blob'){ this._mech.regime='low'; this._mech.event=.86; }
-        else if(pr==='highrare'){ this._mech.regime='high'; this._mech.event=.78; }
-        else if(pr==='highmixed'){ this._mech.regime='high'; this._mech.event=.30; }
-        else { this._mech.regime='low'; this._mech.event=.65; }
+        if(pr==='blob' || pr==='reset'){ this._mech.regime='psr'; this._mech.event=.83; this._mech.preset='blob'; }
+        else if(pr==='highrare'){ this._mech.regime='ssr'; this._mech.event=.78; this._mech.preset=null; }
+        else if(pr==='equatorial'){ this._mech.regime='ssr'; this._mech.event=.80; this._mech.preset='equatorial'; }
+        else if(pr==='highmixed'){ this._mech.regime='ssr'; this._mech.event=.30; this._mech.preset=null; }
         if(slider) slider.value=this._mech.event;
         this._mechUpdate();
       });
@@ -1183,7 +1226,7 @@ class Component extends DCLogic {
       {sel:'[data-tour="freq"]', t:'How often, and where', b:'Warm shades mean more frequent than chance, cool shades less. Globally, compound extremes are about 2.5× more common than chance would predict.'},
       {sel:'[data-tour="years"]',t:'Timing & the biggest events', b:'The bars track compound area year by year against El Ni\u00F1o / La Ni\u00F1a. Hover a bar or a table row — they light each other up, and the map too.'},
       {sel:'[data-tour="dist"]', t:'Size & season', b:'Most events are small, but a handful of giants dominate the total area — and they strike about twice as often in summer.'},
-      {sel:'[data-tour="mech"]', t:'Why it happens', b:'A tug-of-war between warming and mixing. Switch the regime and drag the heatwave slider to see when a compound extreme actually forms.'}
+      {sel:'[data-tour="mech"]', t:'Why it happens', b:'A tug-of-war between warming and the sDIC response. Switch regimes, drag the temperature slider, or choose the observed Blob example to see when the mechanisms align.'}
     ];
   }
   _maybeAutoTour(){

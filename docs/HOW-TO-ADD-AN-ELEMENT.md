@@ -1,6 +1,6 @@
 # Ocean Compound Extremes Infographic — Adding a New Element
 
-This page is a single self-contained file: `Ocean Compound Extremes Infographic.dc.html`.
+The current page is a single self-contained file: `Ocean Compound Extremes Infographic - scrolling.html`.
 Everything — layout, colors, map, legend — lives inline in that one file. There is no
 separate stylesheet or JS bundle to hunt through.
 
@@ -16,7 +16,8 @@ The page is built as stacked horizontal "bands," top to bottom:
 - **Band 3 — Legend + supporting charts.** "Where do they happen?" color legend,
   the year-by-year ring, and the El Niño bar chart.
 - **Band 4 — Mechanism + top events.** Left: **"The mechanism: a tug-of-war"** — an
-  interactive explorer (regime toggle, heatwave slider, presets, four score cards, an
+  interactive explorer (two-regime toggle, temperature slider,
+  observed/conceptual presets, five score cards, an
   ocean cross-section schematic, and a live outcome verdict). Right: the top-events
   table. The explorer's controls are wired imperatively in the logic class: every live
   element carries a `data-m="..."` attribute (or `data-preset="..."` for the presets),

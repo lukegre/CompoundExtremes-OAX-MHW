@@ -13,7 +13,8 @@ rebuilt as **editable components** and corrected against the source paper.
 
 | File | Purpose |
 |---|---|
-| `Ocean Compound Extremes Infographic.dc.html` | The poster itself. Open directly. |
+| `Ocean Compound Extremes Infographic - scrolling.html` | The current scrolling infographic. Open directly. |
+| `Ocean Compound Extremes Infographic.dc.html` | Earlier fixed-layout snapshot retained for reference. |
 | `HOW-TO-ADD-AN-ELEMENT.md` | Guide for adding a new box/panel to the poster. |
 | `ocean-infographic-base.css` | Base page styles (fonts, resets) loaded by the poster. |
 | `ocean-map-helpers.js` | Map data + pure helpers (events, event-circle color scale, manifest loader, tooltip markup). |
@@ -28,7 +29,7 @@ rebuilt as **editable components** and corrected against the source paper.
 
 ## 1. The interactive infographic (HTML)
 
-**`Ocean Compound Extremes Infographic.dc.html`** — the full poster. Open it
+**`Ocean Compound Extremes Infographic - scrolling.html`** — the current full poster. Open it
 directly in a browser. It is responsive: a composed poster on wide screens,
 and it stacks into a single column on narrow screens / mobile.
 
@@ -54,16 +55,18 @@ Each panel is a self-contained block you can edit independently:
 to highlight its circle on the map; **hover a year's bar** in the El Niño chart to
 swap the map's ocean background from the all-years total to that single year's field
 of compound-extreme months (the year badge, top-left of the map, tracks which is shown).
-The **mechanism** panel is a live explorer:
-toggle the regime (stratified low–mid ↔ upwelling high-lat.), drag the *heatwave
-state* slider, or hit a preset (The Blob / High-lat. rare / Cold upwelling /
-Reset) — the four score cards, the ocean cross-section schematic (stratification
-barrier, heat & upwelling arrows, "mixing suppressed" cue), and the outcome
-verdict all update in real time. It replaces the earlier static seesaw diagram.
-Wiring lives in the `_mech*` methods, keyed to the template by `data-m` /
-`data-preset` attributes under the `mechRef` container; the physics is a small
-heuristic model in `_mechCalc()` (temperature anomaly → [H⁺], modulated by
-regime-dependent stratification & mixing) — schematic, not the paper's numbers.
+The **mechanism** panel is a live explorer. Toggle between low-to-mid-latitude
+permanently stratified waters and a combined high-latitude/eastern-equatorial
+mixing-upwelling regime; drag the temperature-anomaly slider; or choose an
+observed/conceptual preset. Five score cards show temperature, the thermal and
+sDIC contributions to [H⁺], the net [H⁺] anomaly, and whether the mechanisms
+align. The Blob preset uses Table 1's observed +1.40 °C and +0.18 nmol kg⁻¹
+values; conceptual scenarios are labelled as such. Local, season-specific
+detrended Q95 thresholds are stated explicitly rather than represented as
+universal absolute cutoffs. Wiring lives in the `_mech*` methods, keyed to the
+template by `data-m` / `data-preset` attributes under the `mechRef` container.
+`_mechCalc()` keeps the observed Blob preset separate from the
+manuscript-scale conceptual response used by the slider.
 
 **Tweaks** (exposed in the editor's Tweaks panel — code-only changes):
 event-circle intensity colour scale (`warm` / `reds` / `viridis`), circle-size
