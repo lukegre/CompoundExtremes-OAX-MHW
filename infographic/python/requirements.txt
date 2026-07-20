@@ -1,5 +1,7 @@
 # Chart scripts
 matplotlib>=3.7
 numpy>=1.24
+xarray>=2024.1
+netCDF4>=1.6
 # Only needed for map_events.py (real coastlines + Robinson projection):
 cartopy>=0.22

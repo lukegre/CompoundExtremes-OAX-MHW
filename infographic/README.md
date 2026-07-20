@@ -19,6 +19,7 @@ rebuilt as **editable components** and corrected against the source paper.
 | `ocean-map-helpers.js` | Map data + pure helpers (events, event-circle color scale, manifest loader, tooltip markup). |
 | `ocean-map-draw.js` | Map SVG construction + interaction wiring (equirectangular; ocean field is an `<image>` overlay). |
 | `annual/` | **Pre-baked ocean-field images** — `total.png` (default background = extremes summed over all years), `year_<YYYY>.png` (one per year, shown on bar hover), `region_high/low.png` (spotlight masks), and `manifest.json` (levels/colors/labels/years). Rebuilt by `python/build_annual_rasters.py` from `uploads/n_extremes_annual.nc`. |
+| `definition_2015/` | **Definition-hover map images** — `mhw.png`, `oax.png`, and `cex.png`, plus their manifest. Rebuilt by `python/build_definition_rasters.py` from `uploads/num_extremes_2015.nc`. |
 | `ocean_raster.png` / `ocean_raster.json` | **Legacy.** The old frequency-vs-chance contour grid. No longer used by the current poster — kept only by the `v1 (snapshot)`. Safe to delete once the snapshot is retired. |
 | `python/` | Scripts to regenerate the ocean-field images and the standalone chart images (see §2 below). |
 | `uploads/` | Source materials only: the AGU paper PDF and `n_extremes_annual.nc` (the per-year field the map images are baked from). Keep this folder pruned. |
@@ -48,7 +49,8 @@ Each panel is a self-contained block you can edit independently:
 | **The mechanism: a tug-of-war** (interactive explorer) | template markup with `data-m="…"` hooks + `_mechInit()` / `_mechUpdate()` / `_mechCalc()` in the logic class |
 | **Top events table** | template markup (`<tbody>` rows, `data-key` links each row to its map circle) |
 
-**Interactive touches:** hover a map circle for a tooltip; hover a table row
+**Interactive touches:** hover one of the three definition cards to compare the
+2015 month-count maps for MHW, OAX, and compound extremes; hover a map circle for a tooltip; hover a table row
 to highlight its circle on the map; **hover a year's bar** in the El Niño chart to
 swap the map's ocean background from the all-years total to that single year's field
 of compound-extreme months (the year badge, top-left of the map, tracks which is shown).
@@ -82,6 +84,7 @@ HTML and with each other.
 cd python
 pip install -r requirements.txt
 python build_annual_rasters.py   # -> ../annual/*.png + manifest.json (the map's ocean-field images)
+python build_definition_rasters.py # -> ../definition_2015/*.png + manifest.json
 python map_events.py             # -> output/map_events.png + .svg
 python timeline_ring.py          # -> output/timeline_ring.png + .svg
 python elnino_lanina.py          # -> output/elnino_lanina.png + .svg
@@ -95,6 +98,14 @@ python elnino_lanina.py          # -> output/elnino_lanina.png + .svg
   Longitude is pre-rolled by `ROTATE` and latitude cropped to the map frame so the PNGs
   overlay the equirectangular map directly. Edit the levels/palette here and re-run to
   restyle the map — the legend in the `.dc.html` must be updated to match.
+
+- **`build_definition_rasters.py`** — reads `uploads/num_extremes_2015.nc` and
+  renders the 2015 `mhw_months`, `oax_months`, and `cex_months` fields with the
+  same map framing and count bins as the main map. MHW uses red, OAX uses teal,
+  and compound extremes use the main map's warm palette. Hovering the emphasized
+  intersection symbol composites all three fields, with compound cells drawn on
+  top; hovering the Compound card shows only compound extremes. Leaving a
+  definition restores the previously selected annual field.
 
 - **`data.py`** — the single source of truth. Event values are transcribed
   from the paper's Table 1 (`area` = event-maximum Mkm², `dur` = Lagrangian

@@ -1,0 +1,86 @@
+{
+  "year": 2015,
+  "levels": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "labels": [
+    "0-1",
+    "1-2",
+    "2-4",
+    "4-8",
+    "8-16",
+    "16-32",
+    ">32"
+  ],
+  "rotate": 150,
+  "latMin": -85,
+  "latMax": 80,
+  "lonMin": -180,
+  "lonMax": 180,
+  "unit": "extreme-months",
+  "fields": {
+    "mhw": {
+      "file": "mhw.png",
+      "label": "Marine heatwave",
+      "shortLabel": "MHW",
+      "colors": [
+        "#fbe9e4",
+        "#f5c9bc",
+        "#eba58f",
+        "#df7a5e",
+        "#c94b2a",
+        "#98321f",
+        "#6b1710"
+      ]
+    },
+    "oax": {
+      "file": "oax.png",
+      "label": "Ocean acidification extreme",
+      "shortLabel": "OAX",
+      "colors": [
+        "#e4f2f3",
+        "#c4e2e5",
+        "#99ccd1",
+        "#62b1b8",
+        "#1f9aa6",
+        "#177f8a",
+        "#0b4650"
+      ]
+    },
+    "cex": {
+      "file": "cex.png",
+      "label": "Compound extreme",
+      "shortLabel": "OAX ∩ MHW",
+      "colors": [
+        "#fce8c8",
+        "#f6c886",
+        "#eda44e",
+        "#e07b2e",
+        "#c8531f",
+        "#a5281a",
+        "#6b1710"
+      ]
+    },
+    "intersection": {
+      "file": "combined.png",
+      "label": "MHW, OAX and compound extremes",
+      "shortLabel": "MHW ∩ OAX",
+      "colors": [
+        "#fce8c8",
+        "#f6c886",
+        "#eda44e",
+        "#e07b2e",
+        "#c8531f",
+        "#a5281a",
+        "#6b1710"
+      ],
+      "composite": true
+    }
+  }
+}

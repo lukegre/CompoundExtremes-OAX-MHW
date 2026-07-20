@@ -19,6 +19,7 @@ wheels/
 
 # Data and figures
 **/data/*
+**/*.nc
 **/*.zarr/
 **/*cache*/
 

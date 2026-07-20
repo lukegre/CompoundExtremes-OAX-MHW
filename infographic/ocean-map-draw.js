@@ -79,15 +79,22 @@ export function drawMap({
 }){
   if(!el) return;
   el.innerHTML = '';
+  // Replacing an SVG <image> href can briefly expose the image's intrinsic
+  // bounds to the document's scroll-overflow calculation. Keep that overflow
+  // local to the map instead of letting a year hover lengthen the page.
+  el.style.overflow = 'hidden';
+  el.style.contain = 'paint';
   // CHANGE ASPECT RATIO / OVERALL MAP SIZE: these are viewBox units, not pixels — the SVG scales
   // to 100% of its container width, so raising H relative to W makes the map taller in proportion.
   const W = 1000, H = 475;
   const svg = d3.select(el).append('svg')
     .attr('viewBox', `0 0 ${W} ${H}`).attr('width', '100%').attr('height', '100%')
+    .attr('overflow', 'hidden')
     // fill the parent's full height, scaling up and cropping the horizontal overflow (the faded
     // edges) rather than letterboxing with empty space above/below the map.
     .attr('preserveAspectRatio', 'xMidYMid slice')
-    .style('display', 'block').style('border-radius', '4px');
+    .style('display', 'block').style('border-radius', '4px')
+    .style('overflow', 'hidden').style('contain', 'paint');
 
   // PROJECTION: always geoEquirectangular (== PlateCarree). This is what lets the pre-baked field
   // images overlay directly — under equirectangular, screen x/y are linear in lon/lat, so a single
@@ -135,15 +142,28 @@ export function drawMap({
     .attr('opacity', 0);
   const fieldLayers = [mkFieldLayer(), mkFieldLayer()];
   let fieldFront = fieldLayers[0], fieldCurUrl = null;
+  let restoreFieldTransitionFrame = 0;
   if (fieldImageUrl) { setHref(fieldFront, fieldImageUrl); fieldFront.attr('opacity', baseOp); fieldCurUrl = fieldImageUrl; }
-  el.__oceSetField = (url) => {
+  el.__oceSetField = (url, options = {}) => {
     if (!url || url === fieldCurUrl) return;
     fieldCurUrl = url;
     const back = fieldFront === fieldLayers[0] ? fieldLayers[1] : fieldLayers[0];
+    const instant = options.instant === true;
+    if (instant) {
+      cancelAnimationFrame(restoreFieldTransitionFrame);
+      fieldLayers.forEach(layer => layer.style('transition', 'none'));
+    }
     setHref(back, url);
     back.attr('opacity', baseOp);   // fade the new field in
     fieldFront.attr('opacity', 0);  // fade the old field out
     fieldFront = back;
+    if (instant) {
+      // Event-footprint hovers still use the deliberate crossfade.
+      restoreFieldTransitionFrame = requestAnimationFrame(() => {
+        fieldLayers.forEach(layer => layer.style('transition', `opacity ${FIELD_FADE_MS}ms ease`));
+        restoreFieldTransitionFrame = 0;
+      });
+    }
   };
 
   // land fill + country borders: land is filled with a muted "paper" tone (distinct from the
