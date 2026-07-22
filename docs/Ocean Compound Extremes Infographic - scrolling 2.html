@@ -164,7 +164,51 @@ body{background:#ded7c9}
   <!-- ==================== LEFT COLUMN — stays in frame ==================== -->
   <div data-ocx-left style="flex:2 1 0;min-width:560px;position:sticky;top:18px;align-self:flex-start;display:flex;flex-direction:column;gap:14px">
 
-  <!-- ============ Map (full width) ============ -->
+  <!-- ============ ROW 1 : title + definitions ============ -->
+  <div data-ocx-intro data-screen-label="Definitions" style="background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:20px 24px;display:flex;flex-direction:column;justify-content:center;gap:15px">
+      <p data-ocx-intro-copy style="margin:0;font-size:15px;line-height:1.5;color:#4a4636">Marine heatwaves and ocean‑acidification extremes increasingly strike the same waters at the same time — <b style="color:#12222c">compound extremes</b> that stress marine life far more than either event alone. Here is their recent history across the global ocean, <b style="color:#12222c">1982–2024</b>.</p>
+      <div data-ocx-intro-divider style="height:1px;background:#e6ddc7"></div>
+      <div data-ocx-definitions style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div data-ocx-definitions-head>
+          <div data-ocx-definitions-title>How two extremes become compound</div>
+          <div data-ocx-definitions-subtitle>A 2015 example · Hover each part to update the map</div>
+        </div>
+        <div data-ocx-definitions-try class="ocx-pill" data-tip="Hover MHW, OAX, the intersection symbol, or Compound to change the 2015 map." style="display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.92);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+        <div class="ocx-def-card" data-definition="mhw" tabIndex="0" role="button" aria-label="Show marine heatwave months in 2015 on the map" onMouseEnter="{{ defMhwOn }}" onMouseLeave="{{ defMhwOff }}" onFocus="{{ defMhwOn }}" onBlur="{{ defMhwOff }}" style="grid-area:mhw;display:flex;gap:12px;align-items:center">
+          <svg width="26" height="40" viewBox="0 0 30 46" style="flex:0 0 auto"><rect x="11" y="4" width="8" height="26" rx="4" fill="#e6e0d0" stroke="#c94b2a" stroke-width="2"></rect><circle cx="15" cy="36" r="8" fill="#c94b2a"></circle><rect x="13" y="16" width="4" height="20" rx="2" fill="#c94b2a"></rect></svg>
+          <div>
+            <div class="ocx-def-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#c94b2a;line-height:1.05">Marine Heatwave</div>
+            <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Sea-surface temperature in the top 5% of its historical record.</p>
+          </div>
+        </div>
+        <div class="ocx-flow-card" data-definition="intersection" tabIndex="0" role="button" aria-label="Show MHW, OAX and compound extreme months together on the 2015 map" onMouseEnter="{{ defIntersectionOn }}" onMouseLeave="{{ defIntersectionOff }}" onFocus="{{ defIntersectionOn }}" onBlur="{{ defIntersectionOff }}">
+          <svg viewBox="0 0 58 112" aria-hidden="true">
+            <path class="ocx-flow-branch" d="M3 32 C16 32 17 51 29 51" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
+            <path class="ocx-flow-branch" d="M55 32 C42 32 41 51 29 51" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
+            <path class="ocx-flow-stem" d="M29 51 L29 74" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
+            <path class="ocx-flow-arrowhead" d="M20 72 L29 90 L38 72 Z" fill="#8a836c"></path>
+          </svg>
+        </div>
+        <div class="ocx-def-card" data-definition="oax" tabIndex="0" role="button" aria-label="Show ocean acidification extreme months in 2015 on the map" onMouseEnter="{{ defOaxOn }}" onMouseLeave="{{ defOaxOff }}" onFocus="{{ defOaxOn }}" onBlur="{{ defOaxOff }}" style="grid-area:oax;display:flex;gap:12px;align-items:center">
+          <svg width="34" height="34" viewBox="0 0 40 40" style="flex:0 0 auto"><circle cx="20" cy="20" r="18" fill="#1f9aa6"></circle><text x="20" y="26" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="19" fill="#fff">H⁺</text></svg>
+          <div>
+            <div class="ocx-def-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#177f8a;line-height:1.05">Ocean Acidification Extreme</div>
+            <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Hydrogen-ion concentration [H⁺] in the top 5% of its record.</p>
+          </div>
+        </div>
+        <div data-ocx-compound-row>
+          <div class="ocx-def-card" data-definition="cex" tabIndex="0" role="button" aria-label="Show only compound extreme months in 2015 on the map" onMouseEnter="{{ defCexOn }}" onMouseLeave="{{ defCexOff }}" onFocus="{{ defCexOn }}" onBlur="{{ defCexOff }}" style="display:flex;gap:12px;align-items:center">
+            <svg width="42" height="31" viewBox="0 0 46 34" style="flex:0 0 auto"><circle cx="18" cy="17" r="14" fill="#c94b2a" fill-opacity="0.75"></circle><circle cx="28" cy="17" r="14" fill="#1f9aa6" fill-opacity="0.7"></circle></svg>
+            <div>
+              <div class="ocx-def-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#c8531f;line-height:1.05">Compound Extreme</div>
+              <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Both extremes in the same place and month.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
+  <!-- ============ ROW 2 : map (full width) ============ -->
   <div data-tour="map" data-screen-label="World map" style="position: relative; border-radius: 8px; overflow: hidden; margin-bottom: 15px; z-index: 0; margin-top: 16px">
     <div ref="{{ mapWrapRef }}" style="position:relative;width:100%;aspect-ratio:1000/475">
       <div ref="{{ mapRef }}" style="position:absolute;inset:0"></div>
@@ -179,7 +223,7 @@ body{background:#ded7c9}
     </div>
   </div>
 
-  <!-- ============ Map legend — stays with the map ============ -->
+  <!-- ============ ROW 3 (left part) : map legend — stays with the map ============ -->
   <div style="margin-top: -34px; padding: 2px 4px 0; z-index: 1; position: relative">
     <div style="width:50%;min-width:320px">
       <div ref="{{ legendTitleRef }}" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;color:#12222c;line-height:1;white-space:nowrap;overflow:visible">WHERE DO COMPOUND EXTREMES HAPPEN?</div>
@@ -212,49 +256,6 @@ body{background:#ded7c9}
       <p style="margin:0;font-size:12px;line-height:1.45;color:#e9e4d6">Add your text here.</p>
     </div>
 
-    <!-- ============ Intro copy + definitions ============ -->
-    <div data-ocx-intro data-screen-label="Definitions" style="background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:20px 24px;display:flex;flex-direction:column;justify-content:center;gap:15px">
-        <p data-ocx-intro-copy style="margin:0;font-size:15px;line-height:1.5;color:#4a4636">Marine heatwaves and ocean‑acidification extremes increasingly strike the same waters at the same time — <b style="color:#12222c">compound extremes</b> that stress marine life far more than either event alone. Here is their recent history across the global ocean, <b style="color:#12222c">1982–2024</b>.</p>
-        <div data-ocx-intro-divider style="height:1px;background:#e6ddc7"></div>
-        <div data-ocx-definitions style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-          <div data-ocx-definitions-head>
-            <div data-ocx-definitions-title>How two extremes become compound</div>
-            <div data-ocx-definitions-subtitle>A 2015 example · Hover each part to update the map</div>
-          </div>
-          <div data-ocx-definitions-try class="ocx-pill" data-tip="Hover MHW, OAX, the intersection symbol, or Compound to change the 2015 map." style="display:inline-flex;align-items:center;gap:5px;background:rgba(250,246,236,.92);border:1px solid #ddd2b8;color:#8a836c;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:10px;letter-spacing:.09em;padding:3px 9px 3px 7px;border-radius:20px"><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
-          <div class="ocx-def-card" data-definition="mhw" tabIndex="0" role="button" aria-label="Show marine heatwave months in 2015 on the map" onMouseEnter="{{ defMhwOn }}" onMouseLeave="{{ defMhwOff }}" onFocus="{{ defMhwOn }}" onBlur="{{ defMhwOff }}" style="grid-area:mhw;display:flex;gap:12px;align-items:center">
-            <svg width="26" height="40" viewBox="0 0 30 46" style="flex:0 0 auto"><rect x="11" y="4" width="8" height="26" rx="4" fill="#e6e0d0" stroke="#c94b2a" stroke-width="2"></rect><circle cx="15" cy="36" r="8" fill="#c94b2a"></circle><rect x="13" y="16" width="4" height="20" rx="2" fill="#c94b2a"></rect></svg>
-            <div>
-              <div class="ocx-def-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#c94b2a;line-height:1.05">Marine Heatwave</div>
-              <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Sea-surface temperature in the top 5% of its historical record.</p>
-            </div>
-          </div>
-          <div class="ocx-flow-card" data-definition="intersection" tabIndex="0" role="button" aria-label="Show MHW, OAX and compound extreme months together on the 2015 map" onMouseEnter="{{ defIntersectionOn }}" onMouseLeave="{{ defIntersectionOff }}" onFocus="{{ defIntersectionOn }}" onBlur="{{ defIntersectionOff }}">
-            <svg viewBox="0 0 58 112" aria-hidden="true">
-              <path class="ocx-flow-branch" d="M3 32 C16 32 17 51 29 51" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
-              <path class="ocx-flow-branch" d="M55 32 C42 32 41 51 29 51" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
-              <path class="ocx-flow-stem" d="M29 51 L29 74" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
-              <path class="ocx-flow-arrowhead" d="M20 72 L29 90 L38 72 Z" fill="#8a836c"></path>
-            </svg>
-          </div>
-          <div class="ocx-def-card" data-definition="oax" tabIndex="0" role="button" aria-label="Show ocean acidification extreme months in 2015 on the map" onMouseEnter="{{ defOaxOn }}" onMouseLeave="{{ defOaxOff }}" onFocus="{{ defOaxOn }}" onBlur="{{ defOaxOff }}" style="grid-area:oax;display:flex;gap:12px;align-items:center">
-            <svg width="34" height="34" viewBox="0 0 40 40" style="flex:0 0 auto"><circle cx="20" cy="20" r="18" fill="#1f9aa6"></circle><text x="20" y="26" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="19" fill="#fff">H⁺</text></svg>
-            <div>
-              <div class="ocx-def-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#177f8a;line-height:1.05">Ocean Acidification Extreme</div>
-              <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Hydrogen-ion concentration [H⁺] in the top 5% of its record.</p>
-            </div>
-          </div>
-          <div data-ocx-compound-row>
-            <div class="ocx-def-card" data-definition="cex" tabIndex="0" role="button" aria-label="Show only compound extreme months in 2015 on the map" onMouseEnter="{{ defCexOn }}" onMouseLeave="{{ defCexOff }}" onFocus="{{ defCexOn }}" onBlur="{{ defCexOff }}" style="display:flex;gap:12px;align-items:center">
-              <svg width="42" height="31" viewBox="0 0 46 34" style="flex:0 0 auto"><circle cx="18" cy="17" r="14" fill="#c94b2a" fill-opacity="0.75"></circle><circle cx="28" cy="17" r="14" fill="#1f9aa6" fill-opacity="0.7"></circle></svg>
-              <div>
-                <div class="ocx-def-title" style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;letter-spacing:.03em;text-transform:uppercase;color:#c8531f;line-height:1.05">Compound Extreme</div>
-                <p style="margin:3px 0 0;font-size:13.5px;line-height:1.35;color:#4a4636">Both extremes in the same place and month.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-    </div>
     <!-- ============ More common than chance ============ -->
     <div data-tour="freq" data-screen-label="Frequency" style="background:#faf6ec;border:1px solid #e6ddc7;border-radius:6px;padding:18px 22px;position:relative;display:flex;flex-direction:column;justify-content:center">
       <div data-ocx-freq-head style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding-top:10px;margin-top:-10px">
@@ -649,11 +650,16 @@ class Component extends DCLogic {
       host=host.parentElement;
     }
     const right=root.querySelector('[data-ocx-right]');
+    const intro=root.querySelector('[data-ocx-intro]');
     const dist=root.querySelector('[data-ocx-dist]');
     const frequency=root.querySelector('[data-tour="freq"]');
     const footer=root.querySelector('[data-ocx-footer]');
     const left=root.querySelector('[data-ocx-left]');
     const mechanism=root.querySelector('[data-screen-label="Mechanism"]');
+    const gutterIntro=root.querySelector('[data-ocx-gutter-intro]');
+    // data-ocx-intro is authored in the left column, so it has to be relocated into the
+    // gutter. Slot it in just after the static gutter box, which stays the first element.
+    if(right&&intro){ if(gutterIntro) gutterIntro.after(intro); else right.prepend(intro); }
     if(dist&&frequency) dist.prepend(frequency);
     if(right&&footer) right.append(footer);
     if(left&&!left.querySelector('[data-ocx-map-stage]')){
