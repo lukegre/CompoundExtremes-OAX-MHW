@@ -8,9 +8,9 @@ Input:
         each cell spent in the compound extreme during that event; 0 = not part
         of the event.
 
-Output (written to infographic/annual/events/):
+Output (written to infographic/assets/img/annual/events/):
     <key>.png   -- one per event key (blob -> key map below)
-And merges an "events" block into infographic/annual/manifest.json (which must
+And merges an "events" block into infographic/assets/img/annual/manifest.json (which must
 already exist, produced by build_annual_rasters.py).
 
 Geometry + palette are kept identical to build_annual_rasters.py so the event
@@ -50,7 +50,7 @@ BLOB_KEY = {
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NC_PATH = os.path.join(HERE, "..", "uploads", "most_extreme_blobs.nc")
-ANNUAL_DIR = os.path.join(HERE, "..", "annual")
+ANNUAL_DIR = os.path.join(HERE, "..", "assets", "img", "annual")
 OUT_DIR = os.path.join(ANNUAL_DIR, "events")
 MANIFEST_PATH = os.path.join(ANNUAL_DIR, "manifest.json")
 

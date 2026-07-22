@@ -1,0 +1,108 @@
+{
+  "_readme": "Edit the strings below to change the infographic copy. Each key maps to an element via its data-ocx-content=\"path\" attribute in index.html. Values may contain inline HTML (e.g. <b>bold</b>) and HTML entities (&nbsp;, &amp;). To move another element under JSON control, give it data-ocx-content=\"some.path\" and add a matching key here.",
+
+  "header": {
+    "title": "<span>When Ocean </span><span class=\"ocx-header-02\">Heatwaves </span><span class=\"ocx-header-03\">Turn Acidic</span>",
+    "byline": ""
+  },
+
+  "credits": {
+    "eyebrow": "Based on a study by Luke Gregor &amp; Nicolas Gruber:",
+    "title": "<i>Recent history of surface ocean acidification extremes that compound marine heatwaves</i> &nbsp in &nbsp <a href=\"#\" class=\"ocx-mechanism-03\">AGU Advances (2026)</a>",
+    "byline": ""
+  },
+
+  "intro": {
+    "copy": "Marine heatwaves and ocean‑acidification extremes increasingly strike the same waters at the same time — <b class=\"ocx-text-ink\">compound extremes</b> that stress marine life far more than either event alone. Here is their recent history across the global ocean, <b class=\"ocx-text-ink\">1982–2024</b>."
+  },
+
+  "definitions": {
+    "title": "How two extremes become compound",
+    "subtitle": "A 2015 example · Hover each part to update the map",
+    "mhw": {
+      "title": "Marine Heatwave",
+      "desc": "Sea-surface temperature in the top 5% of its historical record."
+    },
+    "oax": {
+      "title": "Ocean Acidification Extreme",
+      "desc": "Hydrogen-ion concentration [H⁺] in the top 5% of its record."
+    },
+    "cex": {
+      "title": "Compound Extreme",
+      "desc": "Both extremes in the same place and month."
+    }
+  },
+
+  "method": {
+    "title": "How do we decide what is extreme?",
+    "intro": "An extreme is unusual for that <b class=\"ocx-text-ink\">location and time of year</b>—not simply the warmest or most acidic value on the map.",
+    "exampleHeading": "One concrete example: estimating January's threshold",
+    "step1": {
+      "title": "Remove the long-term trend",
+      "body": "At every ocean pixel, we first remove a quadratic trend from the monthly SST and <b>[H⁺]</b> series. This keeps the focus on unusually strong departures while preserving changes in variability."
+    },
+    "step2": {
+      "title": "Build the local record",
+      "body": "From each detrended 1° time series, we collect matching calendar months into local records: all Januaries together, all Februaries together, and so on."
+    },
+    "step3": {
+      "title": "Respect the seasonal cycle",
+      "body": "January is compared with Januaries, July with Julys, and so on. A month is extreme when it exceeds its month-of-year <b>95th percentile</b>. For our time series (43 years), this results in only two Junuaries, two Februaries, etc. being extreme in the same pixel."
+    },
+    "step4": {
+      "title": "Find the overlap",
+      "body": "A compound extreme is recorded only when <b class=\"ocx-text-orange\">SST</b> and <b class=\"ocx-text-teal\">[H⁺]</b> both cross their local thresholds in the same pixel and month."
+    },
+    "why": "<b class=\"ocx-text-ink\">Why not a fixed baseline?</b> With rapid warming and acidification, once-rare conditions quickly become common. Detrending lets us examine the processes that still create exceptional months within a changing ocean."
+  },
+
+  "enso": {
+    "title": "El Niño – La Niña connection",
+    "copy": "Compound area peaks at the end of — or just after — El&nbsp;Niño events, often during the following La&nbsp;Niña. <b class=\"ocx-text-ink\">Hover a bar</b> to trace that year in the table &amp; map."
+  },
+
+  "largest": {
+    "title": "The largest compound events",
+    "copy": "<b class=\"ocx-text-ink\">Hover a row</b> to locate it on the map and highlight its year in the chart."
+  },
+
+  "frequency": {
+    "title": "More common than chance",
+    "copy": "The two hazards do not overlap randomly: circulation and stratification make their coincidence strongly latitude-dependent.",
+    "lowLabel": "Low– to mid–lat.",
+    "lowStat": "3–4×",
+    "lowNote": "more frequent than by chance",
+    "highLabel": "High latitudes",
+    "highStat": "~4×",
+    "highNote": "<b>less</b> frequent than by chance"
+  },
+
+  "small": {
+    "title": "Most events are small",
+    "copy": "Most common size <b class=\"ocx-text-orange\">~500,000 km²</b> — roughly the area of Spain — lasting a single month."
+  },
+
+  "giants": {
+    "title": "But a few giants dominate",
+    "copy1": "The largest <b>20%</b> of events contribute more than",
+    "copy2": "of the total compound-event area in the global ocean."
+  },
+
+  "seasons": {
+    "title": "Summer is the danger season",
+    "copy": "Compound extremes occur nearly twice as often in summer. Their latitude range expands poleward in summer and contracts toward the tropics in winter."
+  },
+
+  "mechanism": {
+    "title": "The mechanism: a tug-of-war",
+    "copy": "During marine heatwaves, warming raises <b class=\"ocx-text-ink\">[H⁺]</b>, while changes in mixing and sDIC can oppose it. <b class=\"ocx-text-ink\">Drag the control</b> to explore that balance, or choose The Blob for manuscript-derived event magnitudes."
+  },
+
+  "footer": {
+    "oax": "<b class=\"ocx-text-white\">OAX</b> Ocean Acidification Extreme",
+    "mhw": "<b class=\"ocx-text-white\">MHW</b> Marine Heatwave",
+    "dic": "<b class=\"ocx-text-white\">DIC</b> Dissolved Inorganic Carbon",
+    "hplus": "<b class=\"ocx-text-white\">[H⁺]</b> Hydrogen-ion concentration",
+    "data": "<b class=\"ocx-text-white\">DATA</b> <a href=\"https://opensciencedata.esa.int/products/ocean-soda-ethz/ocean-soda-zarr\" target=\"_blank\" rel=\"noopener\" class=\"ocx-mechanism-03\">OceanSODA-ETHZ, 1982–2024</a>"
+  }
+}

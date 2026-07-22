@@ -4,7 +4,8 @@
 //
 // ============================== QUICK GUIDE: WHAT TO CHANGE WHERE ==============================
 // Rotation / map framing (which ocean sits center)  -> ROTATE in ocean-map-helpers.js (+ re-bake)
-// Ocean background field images + color bins/levels -> python/build_annual_rasters.py (re-bake ./annual/*)
+// Ocean background field images + color bins/levels -> python/build_annual_rasters.py
+// (re-bake ./assets/img/annual/*)
 // Which field is shown (a year, or the total)       -> el.__oceSetField(url) — driven by _setMapYear() in .dc.html
 // Event circle SIZE (radius vs. area)               -> `rs` scale, a few lines down in drawMap()
 // Event circle COLOR (by compound intensity)        -> circleColorScale() in ocean-map-helpers.js

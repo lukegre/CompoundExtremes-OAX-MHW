@@ -1,0 +1,2140 @@
+:root {
+  --ocx-ink: #12222c;
+  --ocx-page: #f4efe3;
+  --ocx-panel: #faf6ec;
+  --ocx-border: #e6ddc7;
+  --ocx-orange: #c8531f;
+  --ocx-teal: #1f9aa6;
+  --ocx-amber: #f2b45a;
+  --ocx-body: #4a4636;
+  --ocx-muted: #5a5540;
+  --story-panel-border-radius: 10px;
+}
+
+/* Shared reset and map overlays */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+}
+body {
+  background: #e5dece;
+  font-family: "Source Sans 3", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.oce-tip {
+  position: fixed;
+  pointer-events: none;
+  z-index: 80;
+  background: var(--ocx-ink);
+  color: #fff;
+  padding: 8px 11px;
+  border-radius: 6px;
+  font:
+    600 12px/1.4 "Source Sans 3",
+    sans-serif;
+  opacity: 0;
+  transition: opacity 0.12s;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  max-width: 280px;
+}
+.oce-tip b {
+  color: var(--ocx-amber);
+}
+/* Top-left map badge: size-animated (JS, _animateBadge) between the resting/name pill and the expanded
+   event info box. overflow:hidden clips the content so it reveals/hides as the box resizes. The box keeps
+   the pill's 20px border-radius (no override) so the corners match in both states. */
+.oce-ev-badge {
+  overflow: hidden;
+}
+/* In box mode, match the hover tooltip's text/font styling (.oce-tip): Source Sans 3 600 12/1.4, white
+   text — overriding the pill's Barlow Condensed / amber. The event stats markup (tipHtml) sets its own
+   per-element fonts/colors on top. The top/side padding matches the resting pill (4px top, 11px sides)
+   so the header title stays pinned exactly where the pill text was and the box appears to grow out from
+   under it; the extra bottom padding gives the stats table room. */
+.oce-ev-box {
+  padding: 4px 11px 10px !important;
+  font:
+    600 12px/1.4 "Source Sans 3",
+    sans-serif !important;
+  color: #fff !important;
+  letter-spacing: normal !important;
+  text-transform: none !important;
+  text-align: left !important;
+}
+
+/* Page layout and component states */
+@keyframes ocxBlink {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes ocxPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 6px rgba(18, 34, 44, 0.35),
+      0 0 0 0 rgba(200, 83, 31, 0.55);
+  }
+  50% {
+    box-shadow:
+      0 2px 6px rgba(18, 34, 44, 0.35),
+      0 0 0 8px rgba(200, 83, 31, 0);
+  }
+}
+input[type="range"].ocx-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 6px;
+  background: #e3d8bd;
+  outline: none;
+  cursor: pointer;
+  margin: 2px 0;
+}
+input[type="range"].ocx-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ocx-orange);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(18, 34, 44, 0.35);
+  cursor: grab;
+  animation: ocxPulse 1.8s ease-out infinite;
+}
+input[type="range"].ocx-slider:hover::-webkit-slider-thumb,
+input[type="range"].ocx-slider:active::-webkit-slider-thumb {
+  animation: none;
+}
+input[type="range"].ocx-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  background: #a83f13;
+}
+input[type="range"].ocx-slider::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--ocx-orange);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(18, 34, 44, 0.35);
+  cursor: grab;
+  animation: ocxPulse 1.8s ease-out infinite;
+}
+input[type="range"].ocx-slider:hover::-moz-range-thumb {
+  animation: none;
+}
+input[type="range"].ocx-slider::-moz-range-track {
+  height: 10px;
+  border-radius: 6px;
+  background: #e3d8bd;
+}
+.ocx-pill {
+  position: relative;
+}
+.ocx-pill::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: max-content;
+  max-width: 230px;
+  background: var(--ocx-ink);
+  color: #f2f0e8;
+  font-family: "Source Sans 3", sans-serif;
+  font-weight: 400;
+  font-size: 11.5px;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.35;
+  padding: 7px 10px;
+  border-radius: 7px;
+  box-shadow: 0 6px 18px rgba(18, 34, 44, 0.28);
+  opacity: 0;
+  transform: translateY(-3px);
+  pointer-events: none;
+  transition:
+    opacity 0.15s,
+    transform 0.15s;
+  z-index: 50;
+  white-space: normal;
+  text-align: left;
+}
+.ocx-pill::before {
+  content: "";
+  position: absolute;
+  top: calc(100% + 3px);
+  right: 15px;
+  border: 5px solid transparent;
+  border-bottom-color: var(--ocx-ink);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+  z-index: 50;
+}
+.ocx-pill:hover::after,
+.ocx-pill:hover::before {
+  opacity: 1;
+  transform: translateY(0);
+}
+.ocx-def-card {
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 10px 8px;
+  margin: -7px -8px;
+  height: 98px;
+  min-height: 98px;
+  box-sizing: border-box;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+  outline: none;
+}
+.ocx-def-card:hover,
+.ocx-def-card:focus-visible {
+  background: #f0ead9;
+  box-shadow: 0 0 0 1px #ddd2b8;
+  transform: translateY(-1px);
+}
+.ocx-def-title {
+  font-size: 17px !important;
+}
+@keyframes ocxArrowNudge {
+  from {
+    transform: translateY(-1px);
+  }
+  to {
+    transform: translateY(3px);
+  }
+}
+.ocx-flow-card {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: start;
+  justify-self: stretch;
+  position: relative;
+  z-index: 3;
+  height: 98px;
+  cursor: pointer;
+  border-radius: 6px;
+  outline: none;
+  opacity: 0.82;
+  transition:
+    opacity 0.16s ease,
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+.ocx-flow-card:hover,
+.ocx-flow-card:focus-visible {
+  opacity: 1;
+  background: #f0ead9;
+  box-shadow: 0 0 0 1px #ddd2b8;
+  transform: translateY(-1px);
+}
+.ocx-flow-card svg {
+  display: block;
+  width: 100%;
+  height: 112px;
+  overflow: visible;
+  pointer-events: none;
+}
+.ocx-flow-branch,
+.ocx-flow-stem {
+  transition: stroke-width 0.16s ease;
+}
+.ocx-flow-card:hover .ocx-flow-branch,
+.ocx-flow-card:focus-visible .ocx-flow-branch,
+.ocx-flow-card:hover .ocx-flow-stem,
+.ocx-flow-card:focus-visible .ocx-flow-stem {
+  stroke-width: 4.5;
+}
+.ocx-flow-card:hover .ocx-flow-arrowhead,
+.ocx-flow-card:focus-visible .ocx-flow-arrowhead {
+  animation: ocxArrowNudge 0.55s ease-in-out infinite alternate;
+}
+html {
+  height: auto !important;
+  min-height: 100%;
+  scroll-snap-type: none;
+  scroll-padding-top: 0;
+  overscroll-behavior: none;
+  overflow-x: auto;
+}
+body {
+  height: auto !important;
+  min-height: 100vh !important;
+  min-width: 1400px !important;
+  max-width: 2000px !important;
+  margin: 0 auto !important;
+  overscroll-behavior: none;
+  overflow-x: visible;
+}
+#dc-root,
+#dc-root > .sc-host {
+  height: auto !important;
+  min-height: 100vh !important;
+  max-height: none !important;
+  overflow: visible;
+}
+[data-ocx-root] {
+  height: auto !important;
+  min-height: 100vh !important;
+  min-width: 1400px;
+  box-sizing: border-box;
+}
+[data-ocx-root] {
+  background: transparent !important;
+}
+[data-ocx-root] > * {
+  position: relative;
+  z-index: 1;
+}
+/* The map hover tooltip (.oce-tip) is a direct child of the root, so the rule above would otherwise
+   override its position:fixed (equal specificity, declared later) down to position:relative. In flow,
+   _tip()'s top/left then shove it ~700px below the footer, growing the page and leaving blank space that
+   persists after the tooltip fades (only opacity is reset). Keep it fixed so it never affects page flow. */
+[data-ocx-root] > .oce-tip {
+  position: fixed;
+  z-index: 80;
+}
+body {
+  background: #ded7c9;
+}
+[data-ocx-title] {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: calc(100% + 24px) !important;
+  margin-left: -24px !important;
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  box-sizing: border-box;
+}
+[data-ocx-left] {
+  position: relative !important;
+  top: auto !important;
+  align-self: stretch !important;
+  background: var(--ocx-page);
+  padding: 0 12px 12px;
+  max-width: min(1824px, calc(210.5263vh - 199.158px));
+}
+/* The left column carries its own paper canvas (background above) at the real flex-derived width and
+   full row height (align-self:stretch). This pseudo only bleeds that canvas into the root's 24px left
+   padding so the map meets the page edge with no body-colour sliver — replacing the old fixed-66.666%
+   [data-ocx-root]::before band, which could desync from the actual column boundary. */
+[data-ocx-left]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -24px;
+  width: 24px;
+  background: var(--ocx-page);
+  z-index: -1;
+  pointer-events: none;
+}
+[data-ocx-map-pin] {
+  position: relative;
+  width: 100%;
+  min-height: 0;
+}
+[data-ocx-left-stack] {
+  position: sticky;
+  top: 106px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  width: 100%;
+}
+[data-ocx-map-stage] {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+[data-ocx-left-stack] > [data-screen-label="Mechanism"] {
+  position: relative;
+  z-index: 3;
+  margin-top: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-top: 1px solid #d5cbb5 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 28px 0 0 !important;
+}
+[data-screen-label="World map"] {
+  margin-top: 0 !important;
+}
+[data-ocx-right] {
+  background: transparent;
+}
+[data-ocx-right] > *,
+[data-ocx-dist] > * {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+  scroll-margin-top: 136px;
+}
+[data-ocx-right] > *,
+[data-ocx-dist] > * {
+  box-shadow: none !important;
+}
+[data-ocx-enso],
+[data-ocx-largest] {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+  height: auto !important;
+  align-self: auto;
+  scroll-snap-align: start;
+  scroll-margin-top: 136px;
+  box-shadow: none !important;
+}
+[data-ocx-intro-copy],
+[data-ocx-definitions] {
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 20px;
+  box-shadow: none !important;
+  scroll-snap-align: start;
+  scroll-margin-top: 136px;
+}
+[data-ocx-intro-copy] {
+  order: 0;
+}
+[data-ocx-definitions] {
+  order: 1;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
+  grid-template-areas: "mhw intersection oax" "compound compound compound";
+  column-gap: 10px !important;
+  row-gap: 7px !important;
+  align-items: center !important;
+  position: relative;
+  padding-top: 58px !important;
+}
+[data-ocx-definitions] > div {
+  min-width: 0 !important;
+}
+[data-ocx-definitions] p {
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+}
+[data-ocx-definitions] div div {
+  font-size: 14px !important;
+}
+[data-ocx-definitions] .ocx-def-title {
+  font-size: 17px !important;
+}
+[data-ocx-definitions-head] {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  right: 86px;
+}
+[data-ocx-definitions] [data-ocx-definitions-title] {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 17px !important;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ocx-ink);
+}
+[data-ocx-definitions] [data-ocx-definitions-subtitle] {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 12px !important;
+  font-weight: 400;
+  line-height: 1.35;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--ocx-muted);
+  margin-top: 3px;
+}
+[data-ocx-definitions-try] {
+  position: absolute !important;
+  top: 17px;
+  right: 10px;
+}
+[data-ocx-compound-row] {
+  grid-area: compound;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+[data-ocx-compound-row] > .ocx-def-card {
+  flex: 1 1 auto;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  justify-content: center;
+}
+[data-ocx-largest] {
+  order: 2;
+}
+[data-ocx-enso] {
+  order: 3;
+}
+[data-ocx-dist] {
+  order: 4;
+}
+[data-ocx-method] {
+  order: 5;
+}
+[data-ocx-footer] {
+  order: 6;
+  align-self: stretch;
+  scroll-snap-align: end;
+  scroll-margin: 0;
+  box-shadow: none !important;
+}
+[data-ocx-method-step] {
+  position: relative;
+  padding-left: 42px;
+}
+[data-ocx-method-step]::before {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 30px;
+  bottom: -14px;
+  width: 1px;
+  background: #d8cfb8;
+}
+[data-ocx-method-step]:last-child::before {
+  display: none;
+}
+[data-ocx-method-num] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--ocx-ink);
+  color: var(--ocx-amber);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+[data-ocx-dist] {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+[data-screen-label="Frequency"] {
+  justify-content: flex-start !important;
+  padding-bottom: 46px !important;
+}
+[data-ocx-freq-head] {
+  font-size: 19px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+[data-ocx-freq-pill] {
+  position: absolute !important;
+  top: auto !important;
+  right: 12px !important;
+  bottom: 12px !important;
+}
+[data-ocx-freq-pill]::after {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+[data-ocx-freq-pill]::before {
+  top: auto;
+  bottom: calc(100% + 3px);
+  border-bottom-color: transparent;
+  border-top-color: var(--ocx-ink);
+}
+[data-ocx-small-events] > :nth-child(2) {
+  flex-wrap: wrap;
+}
+[data-ocx-small-copy] {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+[data-ocx-donut] {
+  flex-basis: 96px !important;
+  width: 96px !important;
+}
+[data-ocx-giant-value] {
+  font-size: 42px !important;
+}
+[data-ocx-dots] {
+  flex: 1 1 88px !important;
+  min-width: 0 !important;
+  max-width: 100px;
+}
+[data-ocx-mech] {
+  grid-template-columns: 290px minmax(0, 1fr) !important;
+  align-items: start !important;
+}
+[data-ocx-mech-visual] {
+  order: 2;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0 !important;
+  overflow: hidden;
+}
+[data-ocx-mech-visual] > :first-child {
+  grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+}
+[data-ocx-mech-controls] {
+  order: 1;
+  display: flex !important;
+  flex-direction: column;
+  gap: 11px !important;
+  align-items: stretch;
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+}
+[data-ocx-mech-controls] > * {
+  grid-column: auto !important;
+  grid-row: auto !important;
+}
+.ocx-viewport-warning {
+  display: none;
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  width: min(420px, calc(100vw - 36px));
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--ocx-ink);
+  color: #fff;
+  border: 1px solid rgba(242, 180, 90, 0.55);
+  border-radius: 10px;
+  padding: 14px 15px;
+  box-shadow: 0 14px 38px rgba(12, 20, 26, 0.38);
+}
+.ocx-viewport-warning[hidden] {
+  display: none !important;
+}
+.ocx-viewport-warning-icon {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ocx-amber);
+  color: var(--ocx-ink);
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+}
+.ocx-viewport-warning-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ocx-viewport-warning-title {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-amber);
+}
+.ocx-viewport-warning-text {
+  margin: 4px 0 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #d6e0e4;
+}
+.ocx-viewport-warning-dismiss {
+  border: 1px solid #667780;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ocx-viewport-warning-dismiss:hover,
+.ocx-viewport-warning-dismiss:focus-visible {
+  background: #fff;
+  color: var(--ocx-ink);
+  outline: none;
+}
+@media (min-width: 901px) {
+  [data-ocx-definitions] .ocx-def-card {
+    justify-content: center;
+  }
+  [data-ocx-definitions] [data-definition="oax"] {
+    padding-block: 9px;
+  }
+}
+@media (max-width: 1399px) {
+  .ocx-viewport-warning {
+    display: flex;
+  }
+}
+@media (max-width: 900px) {
+  html {
+    scroll-snap-type: none;
+    scroll-padding-top: 0;
+  }
+  [data-ocx-left] {
+    position: relative !important;
+    top: auto !important;
+    min-width: 0 !important;
+  }
+  [data-ocx-map-pin] {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+  [data-ocx-left-stack] {
+    position: relative;
+    top: auto;
+  }
+  [data-ocx-right] {
+    min-width: 0 !important;
+  }
+  [data-ocx-right] > *,
+  [data-ocx-dist] > * {
+    scroll-margin-top: 94px;
+  }
+  [data-ocx-dist] {
+    grid-template-columns: 1fr !important;
+  }
+  [data-ocx-mech] {
+    grid-template-columns: 1fr !important;
+  }
+  [data-ocx-mech-controls] {
+    width: 100%;
+  }
+}
+
+/* Styles extracted from the component template */
+#dc-root .ocx-text-ink {
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-text-white {
+  color: #fff;
+}
+#dc-root .ocx-text-orange {
+  color: var(--ocx-orange);
+}
+#dc-root .ocx-text-teal {
+  color: #177f8a;
+}
+#dc-root .ocx-text-muted {
+  color: #8a836c;
+}
+#dc-root .ocx-no-shrink {
+  flex: 0 0 auto;
+}
+#dc-root .ocx-mech-score-card {
+  background: #fffdf7;
+  border: 1px solid var(--ocx-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+#dc-root .ocx-mech-score-label {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a836c;
+  line-height: 1.15;
+}
+#dc-root .ocx-mech-score-value {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 1;
+  margin-top: 3px;
+  color: var(--ocx-orange);
+}
+#dc-root .ocx-mech-score-note {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 9px;
+  color: #8a836c;
+  margin-top: 2px;
+  line-height: 1.1;
+}
+#dc-root .ocx-scenario-button {
+  border: 1px solid #d8cdae;
+  background: #fffdf7;
+  border-radius: 5px;
+  padding: 5px 8px;
+  cursor: pointer;
+  font-family: "Source Sans 3", sans-serif;
+  font-weight: 700;
+  font-size: 10.5px;
+  color: var(--ocx-body);
+}
+#dc-root .ocx-table-cell {
+  padding: 6px 6px 6px 0;
+}
+#dc-root .ocx-table-cell--number {
+  padding: 6px 6px 6px 0;
+  text-align: right;
+  font-weight: 700;
+}
+#dc-root .ocx-table-cell--duration {
+  padding: 6px 0 6px 6px;
+  text-align: right;
+}
+#dc-root .ocx-table-row {
+  border-bottom: 1px solid #ece3cd;
+}
+#dc-root .ocx-method-arrow {
+  display: grid;
+  place-items: center;
+  color: #b7ab8d;
+  font-weight: 700;
+}
+#dc-root .ocx-method-example-step {
+  padding: 8px 6px;
+  border-radius: 5px;
+  background: var(--ocx-page);
+  text-align: center;
+}
+#dc-root .ocx-event-dot--dark-red {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #b0331a;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+#dc-root .ocx-event-dot--amber {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #e8a13a;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+#dc-root .ocx-event-dot--deep-red {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #8c1d13;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+#dc-root .ocx-root {
+  width: 100%;
+  max-width: 2000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  background: var(--ocx-page);
+  color: #1e2a30;
+  position: relative;
+  font-family: "Source Sans 3", sans-serif;
+}
+#dc-root .ocx-title {
+  width: 100%;
+  background: var(--ocx-ink);
+  color: #fff;
+  padding: 18px 28px 20px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  box-shadow: 7px 10px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+#dc-root .ocx-header-01 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-size: clamp(20px, 4.15vw, 64px);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-02 {
+  color: #e8891c;
+}
+#dc-root .ocx-header-03 {
+  color: #38b0b8;
+}
+#dc-root .ocx-title-meta {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+#dc-root .ocx-header-04 {
+  font-family: "Source Sans 3", sans-serif;
+  font-weight: 600;
+  font-size: clamp(11px, 1.05vw, 15px);
+  letter-spacing: 0.02em;
+  color: #e9e4d6;
+  white-space: nowrap;
+  text-align: right;
+}
+#dc-root .ocx-header-logo {
+  /* 50% of the header height: title font-size (line-height 1) + 38px vertical padding, halved */
+  height: 30px;
+  width: auto;
+  flex: 0 0 auto;
+  opacity: 0.5;
+  display: block;
+}
+#dc-root .ocx-header-06 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  align-items: flex-start;
+}
+#dc-root .ocx-left {
+  flex: 2 1 0;
+  min-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+#dc-root .ocx-header-07 {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 15px;
+  z-index: 0;
+  margin-top: 16px;
+}
+#dc-root .ocx-map-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000/475;
+}
+#dc-root .ocx-map {
+  position: absolute;
+  inset: 0;
+}
+#dc-root .ocx-header-08 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 90px;
+  pointer-events: none;
+  background: linear-gradient(
+    to right,
+    var(--ocx-page),
+    rgba(244, 239, 227, 0)
+  );
+}
+#dc-root .ocx-header-09 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 90px;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--ocx-page), rgba(244, 239, 227, 0));
+}
+#dc-root .ocx-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#dc-root .ocx-year-badge {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  z-index: 6;
+  pointer-events: none;
+  background: rgba(18, 34, 44, 0.82);
+  color: var(--ocx-amber);
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  padding: 4px 11px;
+  border-radius: 13px;
+  box-shadow: 0 2px 8px rgba(18, 34, 44, 0.18);
+}
+#dc-root .ocx-header-10 {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(250, 246, 236, 0.85);
+  border: 1px solid #ddd2b8;
+  color: #8a836c;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  padding: 3px 9px 3px 7px;
+  border-radius: 20px;
+}
+#dc-root .ocx-header-11 {
+  margin-top: -34px;
+  padding: 2px 4px 0;
+  z-index: 1;
+  position: relative;
+}
+#dc-root .ocx-header-12 {
+  width: 50%;
+  min-width: 320px;
+}
+#dc-root .ocx-legend-title {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ocx-ink);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: visible;
+}
+#dc-root .ocx-legend-caption {
+  margin: 5px 0 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+  background-color: var(--ocx-page);
+  white-space: nowrap;
+  overflow: visible;
+}
+#dc-root .ocx-legend-swatch {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  height: 15px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+#dc-root .ocx-header-13 {
+  background: #fce8c8;
+}
+#dc-root .ocx-header-14 {
+  background: #f6c886;
+}
+#dc-root .ocx-header-15 {
+  background: #eda44e;
+}
+#dc-root .ocx-header-16 {
+  background: #e07b2e;
+}
+#dc-root .ocx-header-17 {
+  background: var(--ocx-orange);
+}
+#dc-root .ocx-header-18 {
+  background: #a5281a;
+}
+#dc-root .ocx-header-19 {
+  background: #6b1710;
+}
+#dc-root .ocx-header-20 {
+  position: relative;
+  height: 14px;
+  margin-top: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ocx-body);
+}
+#dc-root .ocx-header-21 {
+  position: absolute;
+  left: 0;
+  white-space: nowrap;
+}
+#dc-root .ocx-header-22 {
+  position: absolute;
+  left: 14.286%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-23 {
+  position: absolute;
+  left: 28.571%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-24 {
+  position: absolute;
+  left: 42.857%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-25 {
+  position: absolute;
+  left: 57.143%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-26 {
+  position: absolute;
+  left: 71.429%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-27 {
+  position: absolute;
+  left: 85.714%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-28 {
+  position: absolute;
+  left: 100%;
+  transform: translateX(-100%);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-29 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #8a836c;
+  margin-top: 2px;
+}
+#dc-root .ocx-header-30 {
+  margin-top: 16px;
+  position: relative;
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: 6px;
+  padding: 22px 26px;
+}
+#dc-root .ocx-header-31 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-ink);
+  line-height: 1;
+}
+#dc-root .ocx-header-32 {
+  margin: 6px 0 14px;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #3a4147;
+  max-width: 900px;
+}
+#dc-root .ocx-mech {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: stretch;
+  margin-top: 2px;
+}
+#dc-root .ocx-mech-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 14px 16px;
+  background: #fbf6ea;
+  border: 1px solid #e0d5ba;
+  border-radius: 8px;
+}
+#dc-root .ocx-header-33 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ocx-orange);
+}
+#dc-root .ocx-header-34 {
+  display: flex;
+  gap: 4px;
+  background: #efe7d5;
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #ddd0b0;
+}
+#dc-root .ocx-mech-psr-btn {
+  flex: 1;
+  border: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 8px 5px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  background: var(--ocx-orange);
+  color: #fff;
+}
+#dc-root .ocx-mech-ssr-btn {
+  flex: 1;
+  border: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 8px 5px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  background: transparent;
+  color: #6f7873;
+}
+#dc-root .ocx-mech-regime-desc {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-header-35 {
+  margin-top: 2px;
+}
+#dc-root .ocx-header-36 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+#dc-root .ocx-header-37 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-ink);
+  white-space: nowrap;
+}
+#dc-root .ocx-header-38 {
+  position: relative;
+  height: 14px;
+  border-radius: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    #7ba3c9,
+    #38b0b8 30%,
+    #e8b25c 58%,
+    var(--ocx-orange) 82%,
+    #8c1d13
+  );
+}
+#dc-root .ocx-mech-gauge-marker {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  width: 4px;
+  border-radius: 3px;
+  background: var(--ocx-ink);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+  left: 50%;
+}
+#dc-root .ocx-header-39 {
+  display: flex;
+  justify-content: space-between;
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #8a836c;
+  margin-top: 3px;
+}
+#dc-root .ocx-scenarios {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#dc-root .ocx-header-40 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #8a836c;
+}
+#dc-root .ocx-header-41 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+#dc-root .ocx-mech-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+#dc-root .ocx-header-42 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+#dc-root .ocx-mech-dic-score {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 1;
+  margin-top: 3px;
+  color: var(--ocx-teal);
+}
+#dc-root .ocx-mech-threshold-note {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: #6f6855;
+  padding: 0 2px;
+}
+#dc-root .ocx-map-01 {
+  border: 1px solid #d7cdb3;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #eef4f8;
+}
+#dc-root .ocx-map-02 {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+#dc-root .ocx-map-03 {
+  paint-order: stroke;
+  text-shadow: 0px 0px 5px #ffffff;
+}
+#dc-root .ocx-mech-outcome-heading {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ocx-orange);
+  line-height: 1.05;
+}
+#dc-root .ocx-mech-outcome-explain {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 12.5px;
+  line-height: 1.4;
+  min-height: 2.8em;
+  color: var(--ocx-body);
+  margin-top: 2px;
+}
+#dc-root .ocx-map-04 {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ocx-ink);
+  color: var(--ocx-amber);
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.09em;
+  padding: 5px 12px 5px 9px;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(18, 34, 44, 0.22);
+}
+#dc-root .ocx-right {
+  flex: 1 1 0;
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+#dc-root .ocx-credits {
+  background: var(--ocx-ink);
+  color: #fff;
+  padding: 22px 22px 18px 22px;
+  /* Square top so the box fuses into the header bar above (same ink colour,
+     overlapped via the negative margin); only the free bottom edge is rounded. */
+  border-radius: 0 0 10px 10px;
+  margin-top: -24px;
+  display: flex;
+  flex-direction: column;
+}
+
+#dc-root .ocx-credits-eyebrow {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--ocx-amber);
+}
+#dc-root .ocx-credits-title {
+  margin: 5px 0 0 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: #fff;
+}
+#dc-root .ocx-credits-byline {
+  margin: 7px 0 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: #e9e4d6;
+}
+#dc-root .ocx-credits-source {
+  margin: 0px 0 0 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #8ea3ac;
+}
+#dc-root .ocx-footer-credit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  margin-left: auto;
+}
+#dc-root .ocx-credits-logo-label {
+  font-family: "Source Sans 3", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8ea3ac;
+}
+#dc-root .ocx-credits-logo {
+  height: 22px;
+  width: auto;
+  margin-top: 5px;
+  display: block;
+  opacity: 0.9;
+}
+#dc-root .ocx-intro-copy {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ocx-body);
+}
+#dc-root .ocx-definitions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+#dc-root .ocx-definitions-try {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(250, 246, 236, 0.92);
+  border: 1px solid #ddd2b8;
+  color: #8a836c;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  padding: 3px 9px 3px 7px;
+  border-radius: 20px;
+}
+#dc-root .ocx-definitions-02 {
+  grid-area: mhw;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+#dc-root .ocx-definitions-03 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #c94b2a;
+  line-height: 1.05;
+}
+#dc-root .ocx-definitions-04 {
+  margin: 3px 0 0;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--ocx-body);
+}
+#dc-root .ocx-definitions-05 {
+  grid-area: oax;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+#dc-root .ocx-definitions-06 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #177f8a;
+  line-height: 1.05;
+}
+#dc-root .ocx-definitions-07 {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+#dc-root .ocx-definitions-08 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-orange);
+  line-height: 1.05;
+}
+#dc-root .ocx-method {
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 20px 22px;
+  position: relative;
+}
+#dc-root .ocx-definitions-09 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+#dc-root .ocx-definitions-10 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-definitions-11 {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-method-01 {
+  flex: 0 0 auto;
+  background: #e9f3f3;
+  border: 1px solid #c7dede;
+  border-radius: 20px;
+  padding: 4px 9px;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #177f8a;
+}
+#dc-root .ocx-method-02 {
+  margin: 14px 0 10px;
+  padding: 12px;
+  background: #fffdf7;
+  border: 1px solid var(--ocx-border);
+  border-radius: 7px;
+}
+#dc-root .ocx-method-03 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #8a836c;
+  margin-bottom: 9px;
+}
+#dc-root .ocx-method-04 {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: 6px;
+  align-items: stretch;
+}
+#dc-root .ocx-method-05 {
+  display: block;
+  width: 100%;
+  height: 24px;
+}
+#dc-root .ocx-method-06 {
+  font-size: 9.5px;
+  line-height: 1.2;
+  color: var(--ocx-muted);
+  margin-top: 3px;
+}
+#dc-root .ocx-method-07 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-method-08 {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  height: 24px;
+}
+#dc-root .ocx-method-09 {
+  width: 4px;
+  height: 5px;
+  background: #9ccfd2;
+  border-radius: 2px;
+}
+#dc-root .ocx-method-10 {
+  width: 4px;
+  height: 8px;
+  background: #78b9bf;
+  border-radius: 2px;
+}
+#dc-root .ocx-method-11 {
+  width: 4px;
+  height: 12px;
+  background: #55a5ae;
+  border-radius: 2px;
+}
+#dc-root .ocx-method-12 {
+  width: 4px;
+  height: 17px;
+  background: #318f9a;
+  border-radius: 2px;
+}
+#dc-root .ocx-method-13 {
+  width: 4px;
+  height: 22px;
+  background: #177f8a;
+  border-radius: 2px;
+}
+#dc-root .ocx-method-14 {
+  padding: 8px 6px;
+  border-radius: 5px;
+  background: var(--ocx-ink);
+  text-align: center;
+}
+#dc-root .ocx-method-15 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ocx-amber);
+}
+#dc-root .ocx-method-16 {
+  font-size: 9.5px;
+  line-height: 1.2;
+  color: #b9c5ca;
+  margin-top: 3px;
+}
+#dc-root .ocx-method-17 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 9px;
+  font-size: 10px;
+  line-height: 1.3;
+  color: #6f6856;
+}
+#dc-root .ocx-method-18 {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e9f3f3;
+  color: #177f8a;
+  font-weight: 700;
+}
+#dc-root .ocx-method-19 {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+#dc-root .ocx-method-20 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-method-21 {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-method-22 {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1.25fr;
+  align-items: center;
+  gap: 7px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  background: var(--ocx-ink);
+  border-radius: 7px;
+  color: #fff;
+  text-align: center;
+}
+#dc-root .ocx-method-23 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ocx-amber);
+}
+#dc-root .ocx-method-24 {
+  font-size: 9.5px;
+  line-height: 1.2;
+  color: #b9c5ca;
+  margin-top: 2px;
+}
+#dc-root .ocx-method-25 {
+  color: #718089;
+  font-weight: 700;
+}
+#dc-root .ocx-method-26 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  color: #38b0b8;
+}
+#dc-root .ocx-method-27 {
+  margin: 10px 0 0;
+  padding-top: 9px;
+  border-top: 1px solid var(--ocx-border);
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: #7a725e;
+}
+#dc-root .ocx-enso {
+  flex: 1.25 1 460px;
+  min-width: 340px;
+  position: relative;
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+}
+#dc-root .ocx-method-29 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-method-30 {
+  margin: 6px 0 4px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-line {
+  width: 100%;
+  margin-top: auto;
+}
+#dc-root .ocx-method-31 {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(250, 246, 236, 0.85);
+  border: 1px solid #ddd2b8;
+  color: #8a836c;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  padding: 3px 9px 3px 7px;
+  border-radius: 20px;
+}
+#dc-root .ocx-largest {
+  flex: 1 1 360px;
+  min-width: 320px;
+  position: relative;
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 24px;
+}
+#dc-root .ocx-method-32 {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 12px;
+}
+#dc-root .ocx-method-33 {
+  text-align: left;
+  color: #8a836c;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1.5px solid #ddd2b8;
+}
+#dc-root .ocx-method-34 {
+  padding: 5px 6px 6px 0;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+#dc-root .ocx-method-35 {
+  opacity: 0;
+  margin-left: 3px;
+}
+#dc-root .ocx-events-01 {
+  padding: 5px 6px 6px 0;
+  font-weight: 700;
+  text-align: right;
+  cursor: pointer;
+  user-select: none;
+}
+#dc-root .ocx-events-02 {
+  opacity: 0;
+  margin-right: 3px;
+}
+#dc-root .ocx-events-03 {
+  padding: 5px 0 6px 6px;
+  font-weight: 700;
+  text-align: right;
+  cursor: pointer;
+  user-select: none;
+}
+#dc-root .ocx-events-04 {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ocx-orange);
+  margin-right: 7px;
+  vertical-align: middle;
+}
+#dc-root .ocx-events-05 {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #c05a1e;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+#dc-root .ocx-events-06 {
+  color: var(--ocx-orange);
+  font-weight: 600;
+}
+#dc-root .ocx-dist {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+#dc-root .ocx-events-coincidence {
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 22px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#dc-root .ocx-freq-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  margin-top: -10px;
+}
+#dc-root .ocx-freq-pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(250, 246, 236, 0.85);
+  border: 1px solid #ddd2b8;
+  color: #8a836c;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  padding: 3px 9px 3px 7px;
+  border-radius: 20px;
+}
+#dc-root .ocx-events-08 {
+  margin: 0 0 10px;
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-events-09 {
+  display: flex;
+  gap: 12px;
+  text-align: center;
+}
+#dc-root .ocx-events-10 {
+  flex: 1;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 6px 4px;
+}
+#dc-root .ocx-events-11 {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #5a6b73;
+}
+#dc-root .ocx-events-12 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 0.9;
+  color: var(--ocx-orange);
+  margin-top: 2px;
+}
+#dc-root .ocx-events-13 {
+  font-size: 10px;
+  line-height: 1.22;
+  color: #5a6b73;
+  margin-top: 3px;
+}
+#dc-root .ocx-events-14 {
+  width: 1px;
+  background: #d8cfb8;
+}
+#dc-root .ocx-events-15 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 0.9;
+  color: #3b6fa0;
+  margin-top: 2px;
+}
+#dc-root .ocx-small-events {
+  position: relative;
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+#dc-root .ocx-events-16 {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+#dc-root .ocx-donut {
+  flex: 0 0 128px;
+  width: 128px;
+}
+#dc-root .ocx-events-17 {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-body);
+}
+#dc-root .ocx-events-18 {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+#dc-root .ocx-events-19 {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: var(--ocx-teal);
+}
+#dc-root .ocx-events-20 {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: #e6a54e;
+}
+#dc-root .ocx-events-21 {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+#dc-root .ocx-events-22 {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: var(--ocx-orange);
+}
+#dc-root .ocx-events-23 {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-events-giants {
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+#dc-root .ocx-events-25 {
+  margin: 7px 0 8px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-events-26 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#dc-root .ocx-giant-value {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 52px;
+  line-height: 0.85;
+  color: var(--ocx-orange);
+}
+#dc-root .ocx-dots {
+  flex: 1;
+  min-width: 120px;
+}
+#dc-root .ocx-events-27 {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-events-seasons {
+  background: var(--ocx-panel);
+  border: 1px solid var(--ocx-border);
+  border-radius: var(--story-panel-border-radius);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+#dc-root .ocx-events-29 {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+  margin: 10px auto 4px;
+}
+#dc-root .ocx-events-30 {
+  text-align: center;
+}
+#dc-root .ocx-events-31 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 0.9;
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-events-32 {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a836c;
+  font-weight: 700;
+}
+#dc-root .ocx-mechanism-01 {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ocx-muted);
+}
+#dc-root .ocx-footer {
+  padding: 12px 16px;
+  margin-bottom: -14px;
+  background: var(--ocx-ink);
+  border-top-left-radius: var(--story-panel-border-radius);
+  border-top-right-radius: var(--story-panel-border-radius);
+  color: #aebac0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  align-items: center;
+}
+#dc-root .ocx-mechanism-02 {
+  color: #7f8c93;
+}
+#dc-root .ocx-mechanism-03 {
+  color: #cdd8dc;
+  text-decoration: underline;
+}
+
+/* Static hover states formerly expressed through runtime style-* attributes */
+.ocx-hover-muted:hover {
+  background: #efe7d5;
+}
+.ocx-hover-paper:hover {
+  background: #f2ead6;
+}
+.ocx-hover-ink:hover {
+  color: var(--ocx-ink);
+}
+
+/* Event tooltip markup generated by ocean-map-helpers.js */
+.oce-tip-title {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.2;
+  color: var(--ocx-amber);
+  letter-spacing: 0.06em;
+}
+.oce-tip-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 5px 0;
+}
+.oce-tip-table {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #e7ecee;
+  border-collapse: collapse;
+}
+.oce-tip-label {
+  color: #9fb0b8;
+  padding: 1px 10px 1px 0;
+  white-space: nowrap;
+}
+.oce-tip-value {
+  white-space: nowrap;
+}

@@ -37,19 +37,22 @@ export const NINA_YEARS = new Set([1988,1989,1998,1999,2007,2008,2010,2011]);
 // ============================== OCEAN BACKGROUND: PER-YEAR EXTREME-COUNT IMAGES ==============
 // The ocean background is no longer computed at runtime. It's a set of pre-baked, transparent
 // filled-contour PNGs (one per year + a "total" summed field), rendered offline by
-// python/build_annual_rasters.py from uploads/n_extremes_annual.nc and written to ./annual/
+// python/build_annual_rasters.py from uploads/n_extremes_annual.nc and written to
+// ./assets/img/annual/
 // alongside a manifest.json. The map overlays the current field as a single <image> under the
 // equirectangular projection (see ocean-map-draw.js). loadManifest() fetches that manifest,
 // which carries the discrete contourf levels/colors/labels (for the legend), the list of years,
 // and the file-name templates. TO CHANGE THE PALETTE OR LEVELS: edit build_annual_rasters.py and
 // re-run it — the manifest + baked PNGs + the legend all follow from it.
-export function loadManifest(url='./annual/manifest.json'){
+export const ANNUAL_ASSET_DIR = './assets/img/annual/';
+
+export function loadManifest(url=ANNUAL_ASSET_DIR+'manifest.json'){
   return fetch(url).then(r=>r.json()).catch(e=>{ console.warn('manifest '+url+' failed to load',e); return null; });
 }
 
 // Resolve the image URL for a given year (or the summed total when year is null/undefined).
-// dir defaults to the same ./annual/ folder the manifest lives in.
-export function fieldImageUrl(manifest, year, dir='./annual/'){
+// dir defaults to the same assets/img/annual/ folder the manifest lives in.
+export function fieldImageUrl(manifest, year, dir=ANNUAL_ASSET_DIR){
   if(!manifest) return null;
   if(year==null) return dir+manifest.total;
   return dir+manifest.yearFmt.replace('{year}', year);
@@ -64,7 +67,7 @@ export function fieldImageUrl(manifest, year, dir='./annual/'){
 export const ROTATE = 150;
 
 // Sequential color scale for the event-circle "compound intensity" fill (distinct from the
-// discrete ocean-field background colours baked into the ./annual/ images).
+// discrete ocean-field background colours baked into the assets/img/annual/ images).
 // TO ADD A NEW PALETTE OPTION: add a key here AND to the `intensityScale` prop's `options` list
 // in the .dc.html's data-props JSON. domain([2.5,4.05]) is the compound-intensity (`I`) range
 // across EVENTS above — widen it if you add an event with a more extreme I value.
@@ -86,10 +89,10 @@ export function circleColorScale(d3, intensityScale){
 }
 
 export function tipHtml(e){
-  const row=(l,v)=>`<tr><td style="color:#9fb0b8;padding:1px 10px 1px 0;white-space:nowrap">${l}</td><td style="white-space:nowrap">${v}</td></tr>`;
-  return `<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;line-height:1.2;color:#f2b45a;letter-spacing:.06em">${e.name.toUpperCase()} &middot; ${e.year}</div>`+
-    `<div style="height:1px;background:rgba(255,255,255,.2);margin:5px 0"></div>`+
-    `<table style="font-size:11.5px;line-height:1.45;color:#e7ecee;border-collapse:collapse">`+
+  const row=(label,value)=>`<tr><td class="oce-tip-label">${label}</td><td class="oce-tip-value">${value}</td></tr>`;
+  return `<div class="oce-tip-title">${e.name.toUpperCase()} &middot; ${e.year}</div>`+
+    `<div class="oce-tip-rule"></div>`+
+    `<table class="oce-tip-table">`+
     row('Area', `${e.areaAvg} avg &middot; <b>${e.area} max</b> M km\u00B2`)+
     row('Duration', `${e.dur} months`)+
     row('Compound \u0128', `<b>${e.I.toFixed(2)}</b> (p95)`)+

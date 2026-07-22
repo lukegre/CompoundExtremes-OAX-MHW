@@ -7,10 +7,10 @@ Input:
         cex_months(lat, lon)
 
 Output:
-    definition_2015/mhw.png
-    definition_2015/oax.png
-    definition_2015/cex.png
-    definition_2015/manifest.json
+    assets/img/definition_2015/mhw.png
+    assets/img/definition_2015/oax.png
+    assets/img/definition_2015/cex.png
+    assets/img/definition_2015/manifest.json
 
 The geometry intentionally matches ``build_annual_rasters.py`` and
 ``ocean-map-draw.js``: a Pacific-centred, equirectangular field cropped to
@@ -65,7 +65,7 @@ FIELDS = {
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NC_PATH = os.path.join(HERE, "..", "uploads", "num_extremes_2015.nc")
-OUT_DIR = os.path.join(HERE, "..", "definition_2015")
+OUT_DIR = os.path.join(HERE, "..", "assets", "img", "definition_2015")
 
 DPI = 100
 FIG_W = 14.40

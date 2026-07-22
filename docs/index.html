@@ -1,1 +1,485 @@
-Ocean Compound Extremes Infographic - scrolling.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An interactive history of compound marine heatwave and ocean-acidification extremes across the global ocean, 1982–2024.">
+<title>When Ocean Heatwaves Turn Acidic | Compound Ocean Extremes</title>
+<link rel="icon" href="./assets/img/favicon.ico?v=20260720" sizes="32x32">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/img/favicon-32x32.png?v=20260720">
+<link rel="icon" type="image/png" sizes="512x512" href="./assets/img/favicon.png?v=20260720">
+<link rel="apple-touch-icon" sizes="180x180" href="./assets/img/apple-touch-icon.png?v=20260720">
+<script src="./ocean-infographic.js?v=20260722-2" defer></script>
+<script src="./support.js" defer></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Source+Sans+3:wght@400;600;700&amp;family=Caveat:wght@500;700&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<link rel="stylesheet" href="./ocean-infographic.css">
+
+</helmet>
+<div ref="{{ rootRef }}" data-ocx-root class="ocx-root">
+
+  <div data-ocx-title class="ocx-title">
+    <div class="ocx-header-01" data-ocx-content="header.title">
+      <span>When Ocean </span><span class="ocx-header-02">Heatwaves </span><span class="ocx-header-03">Turn Acidic</span>
+    </div>
+    <div data-ocx-title-meta class="ocx-title-meta">
+      <div class="ocx-header-04" data-ocx-content="header.byline">Luke Gregor · Nicolas Gruber</div>
+    </div>
+    <img src="assets/img/ethz_logo.png" alt="ETH Zürich" class="ocx-header-logo"/>
+  </div>
+
+  <div ref="{{ viewportWarningRef }}" class="ocx-viewport-warning" role="alert" aria-live="polite">
+    <div class="ocx-viewport-warning-icon" aria-hidden="true">!</div>
+    <div class="ocx-viewport-warning-copy">
+      <div class="ocx-viewport-warning-title">Best viewed at 1400 px or wider</div>
+      <p class="ocx-viewport-warning-text">Your window is narrower than this infographic’s recommended width. You can keep browsing and scroll horizontally to see the full experience.</p>
+      <button class="ocx-viewport-warning-dismiss" type="button" onClick="{{ dismissViewportWarning }}">Continue browsing</button>
+    </div>
+  </div>
+
+  <!-- ============ two-column shell: sticky left (header+map) · scrolling right (narrative) ============ -->
+  <div class="ocx-header-06">
+
+  <!-- ==================== LEFT COLUMN — stays in frame ==================== -->
+  <div data-ocx-left class="ocx-left">
+    <div data-ocx-map-pin>
+      <div data-ocx-left-stack>
+        <div data-ocx-map-stage>
+
+  <!-- ============ Map (full width) ============ -->
+  <div data-screen-label="World map" class="ocx-header-07">
+    <div ref="{{ mapWrapRef }}" class="ocx-map-wrap">
+      <div ref="{{ mapRef }}" class="ocx-map"></div>
+      <div class="ocx-header-08"></div>
+      <div class="ocx-header-09"></div>
+      <div ref="{{ markersRef }}" class="ocx-markers"></div>
+      <!-- Year badge: shows the field currently on the map (the summed total, or a single year on bar hover) -->
+      <div ref="{{ yearBadgeRef }}" class="oce-ev-badge ocx-year-badge">TOTAL · 1982–2024</div>
+    </div>
+    <div class="ocx-pill ocx-header-10" data-tip="Hover or tap any circle to see that event's area, intensity and duration.">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE
+    </div>
+  </div>
+
+  <!-- ============ Map legend — stays with the map ============ -->
+  <div class="ocx-header-11">
+    <div class="ocx-header-12">
+      <div ref="{{ legendTitleRef }}" class="ocx-legend-title">WHERE DO COMPOUND EXTREMES HAPPEN?</div>
+      <p ref="{{ legendCaptionRef }}" class="ocx-legend-caption">Total months spent in a compound (OAX&nbsp;∩&nbsp;MHW) extreme at each location.</p>
+      <div ref="{{ legendSwatchRef }}" class="ocx-legend-swatch">
+        <span class="ocx-header-13"></span><span class="ocx-header-14"></span><span class="ocx-header-15"></span><span class="ocx-header-16"></span><span class="ocx-header-17"></span><span class="ocx-header-18"></span><span class="ocx-header-19"></span>
+      </div>
+      <div class="ocx-header-20">
+        <span class="ocx-header-21">0</span>
+        <span class="ocx-header-22">1</span>
+        <span class="ocx-header-23">2</span>
+        <span class="ocx-header-24">4</span>
+        <span class="ocx-header-25">8</span>
+        <span class="ocx-header-26">16</span>
+        <span class="ocx-header-27">32</span>
+        <span class="ocx-header-28">&gt;32</span>
+      </div>
+      <div class="ocx-header-29"><span>fewer extreme-months</span><span>more extreme-months</span></div>
+
+    </div>
+  </div>
+        </div>
+
+          <!-- ============ ROW 6 : the mechanism (interactive, full width) ============ -->
+          <div data-screen-label="Mechanism" class="ocx-header-30">
+            <div class="ocx-header-31" data-ocx-content="mechanism.title">The mechanism: a tug-of-war</div>
+            <p class="ocx-header-32" data-ocx-content="mechanism.copy">During marine heatwaves, warming raises <b class="ocx-text-ink">[H⁺]</b>, while changes in mixing and sDIC can oppose it. <b class="ocx-text-ink">Drag the control</b> to explore that balance, or choose The Blob for manuscript-derived event magnitudes.</p>
+
+            <div ref="{{ mechRef }}" data-ocx-mech class="ocx-mech">
+
+              <div data-ocx-mech-controls class="ocx-mech-controls">
+                <div class="ocx-header-33"><svg width="13" height="13" viewBox="0 0 24 24" fill="#c8531f"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>Experiment &mdash; your controls</div>
+
+                <div class="ocx-header-34">
+                  <button data-m="psrBtn" type="button" class="ocx-mech-psr-btn">Mid–low<br>lat.</button>
+                  <button data-m="ssrBtn" type="button" class="ocx-mech-ssr-btn">Mixing-driven<br>regions</button>
+                </div>
+
+                <div data-m="regimeDesc" class="ocx-mech-regime-desc">Permanently stratified waters: warming raises [H⁺], while the opposing sDIC response is comparatively weak.</div>
+
+                <div class="ocx-header-35">
+                  <div class="ocx-header-36">
+                    <label for="mech-event" class="ocx-header-37">Temperature anomaly <span class="ocx-text-orange">&#8596;</span></label>
+                  </div>
+                  <input id="mech-event" class="ocx-slider" data-m="event" type="range" min="0" max="1" step="0.01">
+                  <div class="ocx-header-38">
+                    <div data-m="gaugeMarker" class="ocx-mech-gauge-marker"></div>
+                  </div>
+                  <div class="ocx-header-39"><span>−1.5 °C</span><span>+2.0 °C</span></div>
+                </div>
+
+                <div data-ocx-scenarios class="ocx-scenarios">
+                  <div class="ocx-header-40">Jump to a scenario</div>
+                  <div class="ocx-header-41">
+                    <button data-preset="blob" type="button" class="ocx-scenario-button">The Blob · observed</button>
+                    <button data-preset="highrare" type="button" class="ocx-scenario-button">High-lat. warm · concept</button>
+                    <button data-preset="equatorial" type="button" class="ocx-scenario-button">El Niño · concept</button>
+                    <button data-preset="highmixed" type="button" class="ocx-scenario-button">Cold upwelling · concept</button>
+                    <button data-preset="reset" type="button" class="ocx-scenario-button">Reset</button>
+                  </div>
+                </div>
+              </div>
+
+              <div data-ocx-mech-visual class="ocx-mech-visual">
+
+                <div class="ocx-header-42">
+                  <div class="ocx-mech-score-card">
+                    <div class="ocx-mech-score-label">Temp. anomaly</div>
+                    <div data-m="tempScore" class="ocx-mech-score-value">+1.40 °C</div>
+                    <div data-m="mhwThreshold" class="ocx-mech-score-note">above local Q95</div>
+                  </div>
+                  <div class="ocx-mech-score-card">
+                    <div class="ocx-mech-score-label">Thermal Δ[H⁺]</div>
+                    <div data-m="thermalScore" class="ocx-mech-score-value">+0.41</div>
+                    <div class="ocx-mech-score-note">nmol/kg; raises [H⁺]</div>
+                  </div>
+                  <div class="ocx-mech-score-card">
+                    <div class="ocx-mech-score-label">sDIC Δ[H⁺]</div>
+                    <div data-m="dicScore" class="ocx-mech-dic-score">−0.21</div>
+                    <div class="ocx-mech-score-note">nmol/kg; opposes warming</div>
+                  </div>
+                  <div class="ocx-mech-score-card">
+                    <div class="ocx-mech-score-label">Net [H⁺] anomaly</div>
+                    <div data-m="hplusScore" class="ocx-mech-score-value">+0.18</div>
+                    <div data-m="oaxThreshold" class="ocx-mech-score-note">above local Q95</div>
+                  </div>
+                  <div class="ocx-mech-score-card">
+                    <div class="ocx-mech-score-label">Mechanism</div>
+                    <div data-m="alignmentScore" class="ocx-mech-score-value">aligned</div>
+                    <div data-m="mixScore" class="ocx-mech-score-note">surface mixing: low</div>
+                  </div>
+                </div>
+
+                <div data-m="thresholdNote" class="ocx-mech-threshold-note">The Blob values are from Table 1. Its driver split uses the manuscript’s mean compound-event balance (+0.41 thermal, −0.21 sDIC) with a small residual so the budget closes. Extremes are defined against local, season-specific detrended 95th-percentile thresholds—not universal absolute cutoffs.</div>
+
+                <div class="ocx-map-01">
+                  <svg viewBox="0 12 760 284" role="img" aria-label="Interactive schematic of stratification and compound extremes" class="ocx-map-02">
+                    <defs>
+                      <linearGradient id="mechSky" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#eef4f8"></stop><stop offset="100%" stop-color="#dbe8f0"></stop></linearGradient>
+                      <linearGradient id="mechHot" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#e66f4a"></stop><stop offset="38%" stop-color="#c84f36"></stop><stop offset="62%" stop-color="#7d6f74"></stop><stop offset="100%" stop-color="#2f6aa0"></stop></linearGradient>
+                      <linearGradient id="mechCool" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#9dc7d0"></stop><stop offset="50%" stop-color="#4f8fb0"></stop><stop offset="100%" stop-color="#255f86"></stop></linearGradient>
+                      <filter id="mechShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-opacity=".18"></feDropShadow></filter>
+                      <filter id="mechWhiteGlow" filterUnits="userSpaceOnUse" x="560" y="170" width="112" height="120" color-interpolation-filters="sRGB">
+                        <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="glowBlur"></feGaussianBlur>
+                        <feFlood flood-color="#ffffff" result="glowColor"></feFlood>
+                        <feComposite in="glowColor" in2="glowBlur" operator="in" result="glow"></feComposite>
+                        <feMerge><feMergeNode in="glow"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+                      </filter>
+                    </defs>
+                    <rect x="0" y="0" width="760" height="330" fill="url(#mechSky)"></rect>
+                    <circle cx="70" cy="60" r="20" fill="#f2b45a"></circle>
+                    <g stroke="#e8a13a" stroke-width="3.5" stroke-linecap="round">
+                      <line x1="70" y1="28" x2="70" y2="16"></line><line x1="70" y1="92" x2="70" y2="104"></line>
+                      <line x1="38" y1="60" x2="26" y2="60"></line><line x1="102" y1="60" x2="114" y2="60"></line>
+                      <line x1="47" y1="37" x2="38" y2="28"></line><line x1="93" y1="83" x2="102" y2="92"></line>
+                      <line x1="93" y1="37" x2="102" y2="28"></line><line x1="47" y1="83" x2="38" y2="92"></line>
+                    </g>
+                    <text data-m="regimeTitle" x="726" y="40" text-anchor="end" font-family="'Barlow Condensed',sans-serif" font-size="24" font-weight="700" letter-spacing=".02em" fill="#12222c">LOW– TO MID-LATITUDES (PSR)</text>
+                    <text data-m="regimeSub" x="726" y="64" text-anchor="end" font-family="'Source Sans 3',sans-serif" font-size="14" fill="#56605b">Thermal and [H⁺] anomalies tend to align</text>
+                    <path data-m="waterTop" d="M0 135 C50 122 100 148 150 135 C200 122 250 148 300 135 C350 122 400 148 450 135 C500 122 550 148 600 135 C650 122 700 148 760 135 L760 330 L0 330 Z" fill="url(#mechHot)"></path>
+                    <path d="M0 190 C70 172 120 208 190 190 C260 172 310 208 380 190 C450 172 500 208 570 190 C640 172 690 208 760 190 L760 330 L0 330 Z" fill="#1b4f70" opacity=".30"></path>
+                    <path d="M0 247 C70 230 120 265 190 247 C260 230 310 265 380 247 C450 230 500 265 570 247 C640 230 690 265 760 247 L760 330 L0 330 Z" fill="#12384f" opacity=".30"></path>
+                    <g>
+                      <line data-m="layer1" x1="48" y1="174" x2="478" y2="174" stroke="#fff8e7" stroke-width="4" opacity=".88" stroke-dasharray="18 10"></line>
+                      <line data-m="layer2" x1="74" y1="200" x2="486" y2="200" stroke="#fff8e7" stroke-width="4" opacity=".72" stroke-dasharray="18 10"></line>
+                      <line data-m="layer3" x1="102" y1="226" x2="470" y2="226" stroke="#fff8e7" stroke-width="4" opacity=".52" stroke-dasharray="18 10"></line>
+                      <text data-m="stratLabel" x="270" y="162" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="15" font-weight="700" letter-spacing=".03em" fill="#fff8e7">STRONG STRATIFICATION</text>
+                    </g>
+                    <g data-m="heatArrows" stroke="#b23b1c" stroke-width="6.5" fill="none" stroke-linecap="round" filter="url(#mechShadow)">
+                      <path d="M142 116 C142 96 142 88 142 75"></path><path d="M142 75 l-11 18 M142 75 l11 18"></path>
+                      <path d="M196 116 C196 96 196 88 196 75"></path><path d="M196 75 l-11 18 M196 75 l11 18"></path>
+                      <path d="M250 116 C250 96 250 88 250 75"></path><path d="M250 75 l-11 18 M250 75 l11 18"></path>
+                    </g>
+                    <g data-m="upwellArrows" stroke="#dff6f6" stroke-width="5" fill="none" stroke-linecap="round">
+                      <path d="M555 288 L555 182"></path><path d="M555 182 l-13 20 M555 182 l13 20"></path>
+                      <path d="M615 288 L615 165"></path><path d="M615 165 l-13 20 M615 165 l13 20"></path>
+                      <path d="M675 288 L675 196"></path><path d="M675 196 l-13 20 M675 196 l13 20"></path>
+                    </g>
+                    <g data-m="blockedMix" opacity="0">
+                      <line x1="587" y1="201" x2="645" y2="259" stroke="#b23b1c" stroke-width="9" stroke-linecap="round" filter="url(#mechWhiteGlow)"></line>
+                      <circle cx="616" cy="230" r="42" fill="none" stroke="#b23b1c" stroke-width="9" filter="url(#mechWhiteGlow)"></circle>
+                      <text x="616" y="292" text-anchor="middle" font-family="'Barlow Condensed',sans-serif" font-size="13" font-weight="700" letter-spacing=".04em" fill="#b23b1c" class="ocx-map-03">MIXING SUPPRESSED</text>
+                    </g>
+                    <g data-m="dicDots" fill="#dff4f2" opacity=".5"></g>
+                  </svg>
+                </div>
+
+                <div>
+                  <div data-m="outcomeHeading" class="ocx-mech-outcome-heading">Observed OAX ∩ MHW</div>
+                  <div data-m="outcomeExplain" class="ocx-mech-outcome-explain">The Blob preset uses the manuscript’s compound-event magnitudes: +1.40 °C and +0.18 nmol/kg [H⁺].</div>
+                </div>
+              </div>
+            </div>
+            <div class="ocx-pill ocx-map-04" data-tip="Switch regimes, drag the temperature slider, or choose a preset. Named values are observed; conceptual scenarios are clearly labelled."><svg width="12" height="12" viewBox="0 0 24 24" fill="#f2b45a"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>INTERACTIVE MODEL</div>
+          </div>
+      </div>
+    </div>
+
+  <!-- ==================== END LEFT COLUMN ==================== -->
+  </div>
+
+  <!-- ==================== RIGHT COLUMN — scrolling narrative ==================== -->
+  <div data-ocx-right class="ocx-right">
+
+    <!-- ============ ROW 1: Credits ============ -->
+    <div data-ocx-credits class="ocx-credits">
+      <span class="ocx-credits-eyebrow" data-ocx-content="credits.eyebrow">Based on the study</span>
+      <p class="ocx-credits-title" data-ocx-content="credits.title">Recent history of surface ocean acidification extremes that compound marine heatwaves</p>
+      <p class="ocx-credits-byline" data-ocx-content="credits.byline">Luke Gregor &amp; Nicolas Gruber · ETH Zürich</p>
+      <!-- <p class="ocx-credits-source" data-ocx-content="credits.source"><i>AGU Advances</i> (2025)</p> -->
+    </div>
+
+    <!-- ============ ROW 2: Intro ============ -->
+    <div data-ocx-intro class="ocx-intro">
+      <p data-ocx-intro-copy class="ocx-intro-copy" data-ocx-content="intro.copy">Marine heatwaves and ocean‑acidification extremes increasingly strike the same waters at the same time — <b class="ocx-text-ink">compound extremes</b> that stress marine life far more than either event alone. Here is their recent history across the global ocean, <b class="ocx-text-ink">1982–2024</b>.</p>
+    </div>
+
+    <!-- ============ ROW 3: Definitions ============ -->
+    <div data-ocx-definitions data-screen-label="Definitions" class="ocx-definitions">
+          <div data-ocx-definitions-head>
+            <div data-ocx-definitions-title data-ocx-content="definitions.title">How two extremes become compound</div>
+            <div data-ocx-definitions-subtitle data-ocx-content="definitions.subtitle">A 2015 example · Hover each part to update the map</div>
+          </div>
+          <div data-ocx-definitions-try class="ocx-pill ocx-definitions-try" data-tip="Hover MHW, OAX, the intersection symbol, or Compound to change the 2015 map."><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+          <div class="ocx-def-card ocx-definitions-02" data-definition="mhw" tabIndex="0" role="button" aria-label="Show marine heatwave months in 2015 on the map" onMouseEnter="{{ defMhwOn }}" onMouseLeave="{{ defMhwOff }}" onFocus="{{ defMhwOn }}" onBlur="{{ defMhwOff }}">
+            <svg width="26" height="40" viewBox="0 0 30 46" class="ocx-no-shrink"><rect x="11" y="4" width="8" height="26" rx="4" fill="#e6e0d0" stroke="#c94b2a" stroke-width="2"></rect><circle cx="15" cy="36" r="8" fill="#c94b2a"></circle><rect x="13" y="16" width="4" height="20" rx="2" fill="#c94b2a"></rect></svg>
+            <div>
+              <div class="ocx-def-title ocx-definitions-03" data-ocx-content="definitions.mhw.title">Marine Heatwave</div>
+              <p class="ocx-definitions-04" data-ocx-content="definitions.mhw.desc">Sea-surface temperature in the top 5% of its historical record.</p>
+            </div>
+          </div>
+          <div class="ocx-flow-card" data-definition="intersection" tabIndex="0" role="button" aria-label="Show MHW, OAX and compound extreme months together on the 2015 map" onMouseEnter="{{ defIntersectionOn }}" onMouseLeave="{{ defIntersectionOff }}" onFocus="{{ defIntersectionOn }}" onBlur="{{ defIntersectionOff }}">
+            <svg viewBox="0 0 58 112" aria-hidden="true">
+              <path class="ocx-flow-branch" d="M3 32 C16 32 17 51 29 51" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
+              <path class="ocx-flow-branch" d="M55 32 C42 32 41 51 29 51" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
+              <path class="ocx-flow-stem" d="M29 51 L29 74" fill="none" stroke="#8a836c" stroke-width="4" stroke-linecap="round"></path>
+              <path class="ocx-flow-arrowhead" d="M20 72 L29 90 L38 72 Z" fill="#8a836c"></path>
+            </svg>
+          </div>
+          <div class="ocx-def-card ocx-definitions-05" data-definition="oax" tabIndex="0" role="button" aria-label="Show ocean acidification extreme months in 2015 on the map" onMouseEnter="{{ defOaxOn }}" onMouseLeave="{{ defOaxOff }}" onFocus="{{ defOaxOn }}" onBlur="{{ defOaxOff }}">
+            <svg width="34" height="34" viewBox="0 0 40 40" class="ocx-no-shrink"><circle cx="20" cy="20" r="18" fill="#1f9aa6"></circle><text x="20" y="26" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="19" fill="#fff">H⁺</text></svg>
+            <div>
+              <div class="ocx-def-title ocx-definitions-06" data-ocx-content="definitions.oax.title">Ocean Acidification Extreme</div>
+              <p class="ocx-definitions-04" data-ocx-content="definitions.oax.desc">Hydrogen-ion concentration [H⁺] in the top 5% of its record.</p>
+            </div>
+          </div>
+          <div data-ocx-compound-row>
+            <div class="ocx-def-card ocx-definitions-07" data-definition="cex" tabIndex="0" role="button" aria-label="Show only compound extreme months in 2015 on the map" onMouseEnter="{{ defCexOn }}" onMouseLeave="{{ defCexOff }}" onFocus="{{ defCexOn }}" onBlur="{{ defCexOff }}">
+              <svg width="42" height="31" viewBox="0 0 46 34" class="ocx-no-shrink"><circle cx="18" cy="17" r="14" fill="#c94b2a" fill-opacity="0.75"></circle><circle cx="28" cy="17" r="14" fill="#1f9aa6" fill-opacity="0.7"></circle></svg>
+              <div>
+                <div class="ocx-def-title ocx-definitions-08" data-ocx-content="definitions.cex.title">Compound Extreme</div>
+                <p class="ocx-definitions-04" data-ocx-content="definitions.cex.desc">Both extremes in the same place and month.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+    <!-- ============ ROW 4 : El Niño bars + largest-events table ============ -->
+    <div data-ocx-enso class="ocx-enso">
+      <div class="ocx-method-29" data-ocx-content="enso.title">El Niño – La Niña connection</div>
+      <p class="ocx-method-30" data-ocx-content="enso.copy">Compound area peaks at the end of — or just after — El&nbsp;Niño events, often during the following La&nbsp;Niña. <b class="ocx-text-ink">Hover a bar</b> to trace that year in the table &amp; map.</p>
+      <div ref="{{ lineRef }}" class="ocx-line"></div>
+      <div class="ocx-pill ocx-method-31" data-tip="Hover any year's bar to trace that year across the table and map."><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+    </div>
+
+    <!-- ============ ROW 5 : largest-events table ============ -->
+    <div data-ocx-largest class="ocx-largest">
+      <div class="ocx-method-29" data-ocx-content="largest.title">The largest compound events</div>
+      <p class="ocx-method-32" data-ocx-content="largest.copy"><b class="ocx-text-ink">Hover a row</b> to locate it on the map and highlight its year in the chart.</p>
+      <table ref="{{ tableRef }}" class="ocx-table">
+        <thead>
+          <tr class="ocx-method-33">
+            <th data-sort="name" class="ocx-method-34 ocx-hover-ink">Event<span data-arrow="name" class="ocx-method-35">↕</span></th>
+            <th data-sort="year" class="ocx-method-34 ocx-hover-ink">Year<span data-arrow="year" class="ocx-method-35">↕</span></th>
+            <th data-sort="area" class="ocx-events-01 ocx-hover-ink"><span data-arrow="area" class="ocx-events-02">↕</span>Area&nbsp;(Mkm²)</th>
+            <th data-sort="dur" class="ocx-events-03 ocx-hover-ink"><span data-arrow="dur" class="ocx-events-02">↕</span>Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-key="blob" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--deep-red"></span>The Blob <span class="ocx-text-muted">(NE Pacific)</span></td><td class="ocx-table-cell">2015</td><td class="ocx-table-cell ocx-table-cell--number">12.6</td><td class="ocx-table-cell ocx-table-cell--duration">12 mo</td></tr>
+          <tr data-key="catl" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--dark-red"></span>Central Atlantic</td><td class="ocx-table-cell">2023</td><td class="ocx-table-cell ocx-table-cell--number">12.5</td><td class="ocx-table-cell ocx-table-cell--duration">14 mo</td></tr>
+          <tr data-key="seasia" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--amber"></span>Southeast Asia</td><td class="ocx-table-cell">1998</td><td class="ocx-table-cell ocx-table-cell--number">7.5</td><td class="ocx-table-cell ocx-table-cell--duration"><b>20 mo</b></td></tr>
+          <tr data-key="natl" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-events-04"></span>North Atlantic</td><td class="ocx-table-cell">2023</td><td class="ocx-table-cell ocx-table-cell--number">6.9</td><td class="ocx-table-cell ocx-table-cell--duration">11 mo</td></tr>
+          <tr data-key="spac" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-events-05"></span>South Pacific</td><td class="ocx-table-cell">2016</td><td class="ocx-table-cell ocx-table-cell--number">4.0</td><td class="ocx-table-cell ocx-table-cell--duration">8 mo</td></tr>
+          <tr data-key="gbr" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--amber"></span>Great Barrier Reef</td><td class="ocx-table-cell">2022</td><td class="ocx-table-cell ocx-table-cell--number">3.3</td><td class="ocx-table-cell ocx-table-cell--duration">9 mo</td></tr>
+          <tr data-key="med" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--dark-red"></span>Mediterranean Sea</td><td class="ocx-table-cell">2003</td><td class="ocx-table-cell ocx-table-cell--number">1.3</td><td class="ocx-table-cell ocx-table-cell--duration">4 mo</td></tr>
+          <tr data-key="mad" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--dark-red"></span>Madagascar</td><td class="ocx-table-cell">1987</td><td class="ocx-table-cell ocx-table-cell--number">1.0</td><td class="ocx-table-cell ocx-table-cell--duration">8 mo</td></tr>
+          <tr data-key="waus" class="ocx-table-row ocx-hover-paper"><td class="ocx-table-cell"><span class="ocx-event-dot ocx-event-dot--deep-red"></span>Western Australia <span class="ocx-events-06">★ most intense</span></td><td class="ocx-table-cell">2011</td><td class="ocx-table-cell ocx-table-cell--number">0.7</td><td class="ocx-table-cell ocx-table-cell--duration">6 mo</td></tr>
+        </tbody>
+      </table>
+
+      <div class="ocx-pill ocx-method-31" data-tip="Hover a row to locate the event on the map, or click a column heading to sort."><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+    </div>
+
+    <!-- ============ ROW 6 : size distribution + season ============ -->
+    <div data-ocx-dist data-screen-label="Size and season" class="ocx-dist">
+      <!-- ============ More common than chance ============ -->
+      <div data-screen-label="Frequency" class="ocx-events-coincidence">
+        <div data-ocx-freq-head class="ocx-freq-head">
+          <div class="ocx-method-29" data-ocx-content="frequency.title">More common than chance</div>
+          <div data-ocx-freq-pill class="ocx-pill ocx-freq-pill" data-tip="Hover the Low-to-mid-lat. or High-latitudes stat to spotlight those regions on the map above."><svg width="11" height="11" viewBox="0 0 24 24" fill="#b7ab8d"><path d="M4 2l7 18 2.6-6.8L20.4 11z"></path></svg>TRY IT</div>
+        </div>
+        <p class="ocx-events-08" data-ocx-content="frequency.copy">The two hazards do not overlap randomly: circulation and stratification make their coincidence strongly latitude-dependent.</p>
+        <div class="ocx-events-09">
+          <div onMouseEnter="{{ hlLowOn }}" onMouseLeave="{{ hlOff }}" class="ocx-events-10 ocx-hover-muted">
+            <div class="ocx-events-11" data-ocx-content="frequency.lowLabel">Low– to mid–lat.</div>
+            <div class="ocx-events-12" data-ocx-content="frequency.lowStat">3–4×</div>
+            <div class="ocx-events-13" data-ocx-content="frequency.lowNote">more frequent than by chance</div>
+          </div>
+          <div class="ocx-events-14"></div>
+          <div onMouseEnter="{{ hlHighOn }}" onMouseLeave="{{ hlOff }}" class="ocx-events-10 ocx-hover-muted">
+            <div class="ocx-events-11" data-ocx-content="frequency.highLabel">High latitudes</div>
+            <div class="ocx-events-15" data-ocx-content="frequency.highStat">~4×</div>
+            <div class="ocx-events-13" data-ocx-content="frequency.highNote"><b>less</b> frequent than by chance</div>
+          </div>
+        </div>
+      </div>
+      <!-- ============ /More common than chance ============ -->
+      <div data-ocx-small-events class="ocx-small-events">
+        <div class="ocx-method-29" data-ocx-content="small.title">Most events are small</div>
+        <div class="ocx-events-16">
+          <div ref="{{ donutRef }}" data-ocx-donut class="ocx-donut"></div>
+          <div data-ocx-small-copy>
+            <div class="ocx-events-17">
+              <div class="ocx-events-18"><span class="ocx-events-19"></span><b>75%</b>&nbsp;&lt; 1M km²</div>
+              <div class="ocx-events-18"><span class="ocx-events-20"></span><b>16%</b>&nbsp;1–2M km²</div>
+              <div class="ocx-events-21"><span class="ocx-events-22"></span><b>9%</b>&nbsp;&gt; 2M km²</div>
+            </div>
+            <p class="ocx-events-23" data-ocx-content="small.copy">Most common size <b class="ocx-text-orange">~500,000 km²</b> — roughly the area of Spain — lasting a single month.</p>
+          </div>
+        </div>
+
+      </div>
+      <div class="ocx-events-giants">
+        <div class="ocx-method-29" data-ocx-content="giants.title">But a few giants dominate</div>
+        <p class="ocx-events-25" data-ocx-content="giants.copy1">The largest <b>20%</b> of events contribute more than</p>
+        <div class="ocx-events-26">
+          <div data-ocx-giant-value class="ocx-giant-value">50%</div>
+          <div ref="{{ dotsRef }}" data-ocx-dots class="ocx-dots"></div>
+        </div>
+        <p class="ocx-events-27" data-ocx-content="giants.copy2">of the total compound-event area in the global ocean.</p>
+      </div>
+      <div class="ocx-events-seasons">
+        <div class="ocx-method-29" data-ocx-content="seasons.title">Summer is the danger season</div>
+        <div class="ocx-events-29">
+          <svg width="52" height="52" viewBox="0 0 52 52"><g stroke="#e8891c" stroke-width="3" stroke-linecap="round"><line x1="26" y1="4" x2="26" y2="12"></line><line x1="26" y1="40" x2="26" y2="48"></line><line x1="4" y1="26" x2="12" y2="26"></line><line x1="40" y1="26" x2="48" y2="26"></line><line x1="10" y1="10" x2="16" y2="16"></line><line x1="36" y1="36" x2="42" y2="42"></line><line x1="42" y1="10" x2="36" y2="16"></line><line x1="16" y1="36" x2="10" y2="42"></line></g><circle cx="26" cy="26" r="10" fill="#e8891c"></circle></svg>
+          <div class="ocx-events-30"><div class="ocx-events-31">2×</div><div class="ocx-events-32">summer vs winter</div></div>
+          <svg width="48" height="48" viewBox="0 0 48 48"><g stroke="#3b6fa0" stroke-width="2.4" stroke-linecap="round"><line x1="24" y1="4" x2="24" y2="44"></line><line x1="6" y1="14" x2="42" y2="34"></line><line x1="42" y1="14" x2="6" y2="34"></line><line x1="24" y1="4" x2="19" y2="9"></line><line x1="24" y1="4" x2="29" y2="9"></line><line x1="24" y1="44" x2="19" y2="39"></line><line x1="24" y1="44" x2="29" y2="39"></line></g></svg>
+        </div>
+        <p class="ocx-mechanism-01" data-ocx-content="seasons.copy">Compound extremes occur nearly twice as often in summer. Their latitude range expands poleward in summer and contracts toward the tropics in winter.</p>
+      </div>
+    </div>
+    
+    <!-- ============ Method: estimating extremes ============ -->
+    <div data-ocx-method data-screen-label="Method: estimating extremes" class="ocx-method">
+      <div class="ocx-definitions-09">
+        <div>
+          <div class="ocx-definitions-10" data-ocx-content="method.title">How do we decide what is extreme?</div>
+          <p class="ocx-definitions-11" data-ocx-content="method.intro">An extreme is unusual for that <b class="ocx-text-ink">location and time of year</b>—not simply the warmest or most acidic value on the map.</p>
+        </div>
+        <div class="ocx-method-01">1982–2024</div>
+      </div>
+
+      <div role="img" aria-label="Worked example: remove the long-term trend, collect the 43 detrended Januaries at one location, rank those January values, and flag the highest five percent" class="ocx-method-02">
+        <div class="ocx-method-03" data-ocx-content="method.exampleHeading">One concrete example: estimating January's threshold</div>
+        <div class="ocx-method-04">
+          <div class="ocx-method-example-step">
+            <svg viewBox="0 0 70 24" aria-hidden="true" class="ocx-method-05"><path d="M2 20 Q18 18 34 12 T68 3" fill="none" stroke="#8a836c" stroke-width="2" stroke-dasharray="4 3"></path><path d="M2 15 L68 15" stroke="#1f9aa6" stroke-width="2"></path></svg>
+            <div class="ocx-method-06">first remove the<br>quadratic trend</div>
+          </div>
+          <div class="ocx-method-arrow">→</div>
+          <div class="ocx-method-example-step">
+            <div class="ocx-method-07">43</div>
+            <div class="ocx-method-06">detrended Januaries<br>1982–2024</div>
+          </div>
+          <div class="ocx-method-arrow">→</div>
+          <div class="ocx-method-example-step">
+            <div class="ocx-method-08">
+              <span class="ocx-method-09"></span><span class="ocx-method-10"></span><span class="ocx-method-11"></span><span class="ocx-method-12"></span><span class="ocx-method-13"></span>
+            </div>
+            <div class="ocx-method-06">rank the<br>January values</div>
+          </div>
+          <div class="ocx-method-arrow">→</div>
+          <div class="ocx-method-14">
+            <div class="ocx-method-15">top 5%</div>
+            <div class="ocx-method-16">above Q95<br>= extreme</div>
+          </div>
+        </div>
+        <div class="ocx-method-17">
+          <span class="ocx-method-18">↻</span>
+          Repeat for every calendar month, at every ocean pixel, separately for SST and [H⁺].
+        </div>
+      </div>
+
+      <div class="ocx-method-19">
+        <div data-ocx-method-step>
+          <div data-ocx-method-num>1</div>
+          <div class="ocx-method-20" data-ocx-content="method.step1.title">Remove the long-term trend</div>
+          <p class="ocx-method-21" data-ocx-content="method.step1.body">At every ocean pixel, we first remove a quadratic trend from the monthly SST and <b>[H⁺]</b> series. This keeps the focus on unusually strong departures while preserving changes in variability.</p>
+        </div>
+        <div data-ocx-method-step>
+          <div data-ocx-method-num>2</div>
+          <div class="ocx-method-20" data-ocx-content="method.step2.title">Build the local record</div>
+          <p class="ocx-method-21" data-ocx-content="method.step2.body">From each detrended 1° time series, we collect matching calendar months into local records: all Januaries together, all Februaries together, and so on.</p>
+        </div>
+        <div data-ocx-method-step>
+          <div data-ocx-method-num>3</div>
+          <div class="ocx-method-20" data-ocx-content="method.step3.title">Respect the seasonal cycle</div>
+          <p class="ocx-method-21" data-ocx-content="method.step3.body">January is compared with Januaries, July with Julys, and so on. A month is extreme when it exceeds its month-of-year <b>95th percentile</b>.</p>
+        </div>
+        <div data-ocx-method-step>
+          <div data-ocx-method-num>4</div>
+          <div class="ocx-method-20" data-ocx-content="method.step4.title">Find the overlap</div>
+          <p class="ocx-method-21" data-ocx-content="method.step4.body">A compound extreme is recorded only when <b class="ocx-text-orange">SST</b> and <b class="ocx-text-teal">[H⁺]</b> both cross their local thresholds in the same pixel and month.</p>
+        </div>
+      </div>
+
+      <div class="ocx-method-22">
+        <div><div class="ocx-method-23">5%</div><div class="ocx-method-24">MHW months</div></div>
+        <div class="ocx-method-25">×</div>
+        <div><div class="ocx-method-23">5%</div><div class="ocx-method-24">OAX months</div></div>
+        <div class="ocx-method-25">=</div>
+        <div><div class="ocx-method-26">0.25%</div><div class="ocx-method-24">overlap expected by chance</div></div>
+      </div>
+
+      <p class="ocx-method-27" data-ocx-content="method.why"><b class="ocx-text-ink">Why not a fixed baseline?</b> With rapid warming and acidification, once-rare conditions quickly become common. Detrending lets us examine the processes that still create exceptional months within a changing ocean.</p>
+    </div>
+
+    <!-- ============ ROW 7: Footer ============ -->
+    <div data-ocx-footer class="ocx-footer">
+      <span data-ocx-content="footer.oax"><b class="ocx-text-white">OAX</b> Ocean Acidification Extreme</span>
+      <span data-ocx-content="footer.mhw"><b class="ocx-text-white">MHW</b> Marine Heatwave</span>
+      <span data-ocx-content="footer.dic"><b class="ocx-text-white">DIC</b> Dissolved Inorganic Carbon</span>
+      <span data-ocx-content="footer.hplus"><b class="ocx-text-white">[H⁺]</b> Hydrogen-ion concentration</span>
+      <span data-ocx-content="footer.data"><b class="ocx-text-white">Data</b> <a href="https://opensciencedata.esa.int/products/ocean-soda-ethz/ocean-soda-zarr" target="_blank" rel="noopener" class="ocx-mechanism-03">OceanSODA-ETHZ, 1982–2024</a></span>
+      <div class="ocx-footer-credit">
+        <span class="ocx-credits-logo-label">Research by</span>
+        <img src="assets/img/ethz_logo.png" alt="ETH Zürich" class="ocx-credits-logo"/>
+      </div>
+    </div>
+
+  <!-- ==================== END RIGHT COLUMN ==================== -->
+  </div>
+  <!-- ==================== end two-column shell ==================== -->
+  </div>
+
+  <div ref="{{ tipRef }}" class="oce-tip"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:2450},&quot;rasterOpacity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.9,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Raster&quot;},&quot;intensityScale&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;warm&quot;,&quot;reds&quot;,&quot;orangeRed&quot;,&quot;yellowOrangeBrown&quot;,&quot;inferno&quot;,&quot;magma&quot;,&quot;plasma&quot;,&quot;turbo&quot;,&quot;viridis&quot;,&quot;cividis&quot;,&quot;spectral&quot;],&quot;default&quot;:&quot;warm&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;circleScale&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.2,&quot;min&quot;:0.6,&quot;max&quot;:1.8,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;circleOpacity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.9,&quot;min&quot;:0.2,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;showTooltips&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Map&quot;},&quot;spotlightStrength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.68,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.02,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Spotlight&quot;},&quot;spotlightFadeMs&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:620,&quot;min&quot;:0,&quot;max&quot;:1200,&quot;step&quot;:20,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Spotlight&quot;}}">
+const Component = window.createOceanInfographicComponent(DCLogic, React);
+</script>
+</body>
+</html>

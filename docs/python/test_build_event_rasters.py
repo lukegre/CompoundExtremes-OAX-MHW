@@ -7,8 +7,9 @@ from PIL import Image
 import build_event_rasters as ber
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-EVENTS_DIR = os.path.join(HERE, "..", "annual", "events")
-MANIFEST = os.path.join(HERE, "..", "annual", "manifest.json")
+ANNUAL_DIR = os.path.join(HERE, "..", "assets", "img", "annual")
+EVENTS_DIR = os.path.join(ANNUAL_DIR, "events")
+MANIFEST = os.path.join(ANNUAL_DIR, "manifest.json")
 
 EXPECTED_KEYS = {"seasia", "med", "waus", "blob", "spac", "mad", "gbr", "natl", "catl"}
 

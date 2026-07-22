@@ -7,7 +7,7 @@ Input:
         n_extremes(year, lat, lon)  -- 0.25 deg grid, values ~0..11 per year,
         land encoded as 0 (no NaNs).
 
-Output (written to infographic/annual/):
+Output (written to infographic/assets/img/annual/):
     total.png                 -- sum over all years  (default map background)
     year_1982.png .. year_2024.png
     region_high.png           -- high-count cells only (spotlight: low-mid latitudes)
@@ -57,7 +57,7 @@ REGION_LOW_HATCH = "///"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NC_PATH = os.path.join(HERE, "..", "uploads", "n_extremes_annual.nc")
-OUT_DIR = os.path.join(HERE, "..", "annual")
+OUT_DIR = os.path.join(HERE, "..", "assets", "img", "annual")
 
 # Output raster resolution. Native lon is 1440 px wide; keep it crisp.
 DPI = 100

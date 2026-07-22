@@ -13,14 +13,16 @@ rebuilt as **editable components** and corrected against the source paper.
 
 | File | Purpose |
 |---|---|
-| `Ocean Compound Extremes Infographic - scrolling.html` | The current scrolling infographic. Open directly. |
+| `Ocean Compound Extremes Infographic - scrolling.html` | The current scrolling infographic template and the small Design Component bootstrap. |
 | `Ocean Compound Extremes Infographic.dc.html` | Earlier fixed-layout snapshot retained for reference. |
 | `HOW-TO-ADD-AN-ELEMENT.md` | Guide for adding a new box/panel to the poster. |
-| `ocean-infographic-base.css` | Base page styles (fonts, resets) loaded by the poster. |
+| `ocean-infographic.css` | Design tokens, layout, component states, typography, and interaction styles. |
+| `ocean-infographic.js` | Page behavior and chart/component lifecycle logic. |
 | `ocean-map-helpers.js` | Map data + pure helpers (events, event-circle color scale, manifest loader, tooltip markup). |
 | `ocean-map-draw.js` | Map SVG construction + interaction wiring (equirectangular; ocean field is an `<image>` overlay). |
-| `annual/` | **Pre-baked ocean-field images** — `total.png` (default background = extremes summed over all years), `year_<YYYY>.png` (one per year, shown on bar hover), `region_high/low.png` (spotlight masks), and `manifest.json` (levels/colors/labels/years). Rebuilt by `python/build_annual_rasters.py` from `uploads/n_extremes_annual.nc`. |
-| `definition_2015/` | **Definition-hover map images** — `mhw.png`, `oax.png`, and `cex.png`, plus their manifest. Rebuilt by `python/build_definition_rasters.py` from `uploads/num_extremes_2015.nc`. |
+| `assets/img/annual/` | **Pre-baked ocean-field images** — `total.png`, yearly fields, spotlight masks, event footprints, and `manifest.json`. Rebuilt by the raster scripts in `python/`. |
+| `assets/img/definition_2015/` | **Definition-hover map images** — `mhw.png`, `oax.png`, `cex.png`, `combined.png`, and their manifest. |
+| `assets/img/` | All image assets used by the current page, including favicons and the ETH Zürich logo. |
 | `ocean_raster.png` / `ocean_raster.json` | **Legacy.** The old frequency-vs-chance contour grid. No longer used by the current poster — kept only by the `v1 (snapshot)`. Safe to delete once the snapshot is retired. |
 | `python/` | Scripts to regenerate the ocean-field images and the standalone chart images (see §2 below). |
 | `uploads/` | Source materials only: the AGU paper PDF and `n_extremes_annual.nc` (the per-year field the map images are baked from). Keep this folder pruned. |
@@ -29,9 +31,16 @@ rebuilt as **editable components** and corrected against the source paper.
 
 ## 1. The interactive infographic (HTML)
 
-**`Ocean Compound Extremes Infographic - scrolling.html`** — the current full poster. Open it
-directly in a browser. It is responsive: a composed poster on wide screens,
-and it stacks into a single column on narrow screens / mobile.
+**`Ocean Compound Extremes Infographic - scrolling.html`** is the current full poster.
+Serve this directory over HTTP so the browser can load the JSON manifests and ES modules:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000/Ocean%20Compound%20Extremes%20Infographic%20-%20scrolling.html`.
+The intended composed layout is 1400 px or wider; narrower viewports retain the full poster and
+show a horizontal-scroll notice.
 
 Each panel is a self-contained block you can edit independently:
 
@@ -40,14 +49,14 @@ Each panel is a self-contained block you can edit independently:
 | Title / header | template markup (top) |
 | Definition strip (MHW + OAX = compound) | template markup |
 | "More common than chance" stat cards | template markup |
-| **World frequency map + event circles** | `events` array in the logic class + `_drawMap()` |
+| **World frequency map + event circles** | `EVENTS` in `ocean-map-helpers.js`; rendering in `ocean-map-draw.js` |
 | Legend / how-to-read | template markup |
-| Donut — size of events | `_drawDonut()` |
-| **"A few giants dominate" dot grid** | `_drawDots()` |
+| Donut — size of events | `_drawDonut()` in `ocean-infographic.js` |
+| **"A few giants dominate" dot grid** | `_drawDots()` in `ocean-infographic.js` |
 | Summer vs winter | template markup |
-| El Niño – La Niña line chart | `_drawLine()` |
+| El Niño – La Niña line chart | `_drawLine()` in `ocean-infographic.js` |
 | 43-year timeline ring | `RING_AREA`-style map inside `_drawRing()` |
-| **The mechanism: a tug-of-war** (interactive explorer) | template markup with `data-m="…"` hooks + `_mechInit()` / `_mechUpdate()` / `_mechCalc()` in the logic class |
+| **The mechanism: a tug-of-war** (interactive explorer) | template markup with `data-m="…"` hooks + `_mechInit()` / `_mechUpdate()` / `_mechCalc()` in `ocean-infographic.js` |
 | **Top events table** | template markup (`<tbody>` rows, `data-key` links each row to its map circle) |
 
 **Interactive touches:** hover one of the three definition cards to compare the
@@ -64,7 +73,7 @@ align. The Blob preset uses Table 1's observed +1.40 °C and +0.18 nmol kg⁻¹
 values; conceptual scenarios are labelled as such. Local, season-specific
 detrended Q95 thresholds are stated explicitly rather than represented as
 universal absolute cutoffs. Wiring lives in the `_mech*` methods, keyed to the
-template by `data-m` / `data-preset` attributes under the `mechRef` container.
+template by `data-m` / `data-preset` attributes under the `mechRef` container in `ocean-infographic.js`.
 `_mechCalc()` keeps the observed Blob preset separate from the
 manuscript-scale conceptual response used by the slider.
 
@@ -73,7 +82,8 @@ event-circle intensity colour scale (`warm` / `reds` / `viridis`), circle-size
 multiplier, circle opacity, ocean-field overlay opacity (`rasterOpacity`), and tooltips
 on/off. The map projection is fixed to equirectangular (required for the pre-baked field
 images to overlay linearly). The ocean-field palette/levels are baked in — change them in
-`python/build_annual_rasters.py` and re-run. Any text or single colour can be edited in place.
+`python/build_annual_rasters.py` and re-run. Edit reusable colors in the custom properties at the
+top of `ocean-infographic.css`; edit page copy and semantic structure in the HTML template.
 
 ---
 
@@ -86,8 +96,8 @@ HTML and with each other.
 ```bash
 cd python
 pip install -r requirements.txt
-python build_annual_rasters.py   # -> ../annual/*.png + manifest.json (the map's ocean-field images)
-python build_definition_rasters.py # -> ../definition_2015/*.png + manifest.json
+python build_annual_rasters.py      # -> ../assets/img/annual/*.png + manifest.json
+python build_definition_rasters.py  # -> ../assets/img/definition_2015/*.png + manifest.json
 python map_events.py             # -> output/map_events.png + .svg
 python timeline_ring.py          # -> output/timeline_ring.png + .svg
 python elnino_lanina.py          # -> output/elnino_lanina.png + .svg
