@@ -63,12 +63,12 @@
 
   "largest": {
     "title": "The largest compound events",
-    "copy": "<b class=\"ocx-text-ink\">Hover a row</b> to locate it on the map and highlight its year in the chart."
+    "copy": "<b class=\"ocx-text-ink\">Hover a row</b> to locate it on the map and highlight its year in the chart, or <b class=\"ocx-text-ink\">click a column heading</b> to sort."
   },
 
   "frequency": {
     "title": "More common than chance",
-    "copy": "The two hazards do not overlap randomly: circulation and stratification make their coincidence strongly latitude-dependent.",
+    "copy": "The two hazards do not overlap randomly: circulation and stratification make their coincidence strongly latitude-dependent. <b class=\"ocx-text-ink\">Hover either figure</b> to spotlight those latitudes on the map.",
     "lowLabel": "Low– to mid–lat.",
     "lowStat": "3–4×",
     "lowNote": "more frequent than by chance",

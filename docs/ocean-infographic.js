@@ -11,7 +11,7 @@
   // content object is almost always ready by first paint. If content.json is
   // missing or malformed, the fallback text baked into index.html is shown.
   var OCX_CONTENT = null;
-  var OCX_CONTENT_READY = fetch("./content.json?v=20260722")
+  var OCX_CONTENT_READY = fetch("./content.json?v=20260813")
     .then(function (r) {
       return r.ok ? r.json() : null;
     })
@@ -169,6 +169,12 @@
           } catch (e) {
             console.warn("mech", e);
           }
+          // Last: the cues need the charts they demonstrate to exist already.
+          try {
+            this._wireAttentionCues();
+          } catch (e) {
+            console.warn("cues", e);
+          }
         }
         _arrangeLayout() {
           const root = this.rootRef.current;
@@ -202,10 +208,14 @@
         }
         componentWillUnmount() {
           if (this._handoffObserver) this._handoffObserver.disconnect();
+          if (this._tableCueObserver) this._tableCueObserver.disconnect();
           if (this._handoffResize)
             window.removeEventListener("resize", this._handoffResize);
+          if (this._tableCueResize)
+            window.removeEventListener("resize", this._tableCueResize);
           if (this._definitionLeaveTimer)
             clearTimeout(this._definitionLeaveTimer);
+          if (this._mapLiveTimer) clearTimeout(this._mapLiveTimer);
         }
         componentDidUpdate() {
           this._applyContent();
@@ -342,9 +352,13 @@
             }
           } else {
             if (title) title.textContent = "WHERE DO COMPOUND EXTREMES HAPPEN?";
+            // The trailing hint carries the affordance the map's old INTERACTIVE pill used to
+            // (that slot is now the Zenodo download). Prose is the cheapest place to put it:
+            // the narrative already cues "Hover a bar" and "Drag the control" the same way.
             if (caption)
               caption.innerHTML =
-                "Total months spent in a compound (OAX&nbsp;∩&nbsp;MHW) extreme at each location.";
+                "Total months spent in a compound (OAX&nbsp;∩&nbsp;MHW) extreme at each location. " +
+                '<b class="ocx-text-ink">Hover any circle</b> for that event’s area, intensity and duration.';
           }
         }
 
@@ -358,6 +372,7 @@
             this._definitionManifest.fields[key];
           const el = this.mapRef.current;
           if (on) {
+            this._flashMapLive();
             if (this._definitionLeaveTimer) {
               clearTimeout(this._definitionLeaveTimer);
               this._definitionLeaveTimer = null;
@@ -426,6 +441,7 @@
         // Leaves the badge alone while it's expanded into an event info box (event hover owns it then).
         _setMapYear(year) {
           if (!this._manifest) return;
+          if (year != null) this._flashMapLive();
           this._curYear = year == null ? null : year;
           // Adjacent year columns are scrubbed rapidly. Paint each field immediately
           // instead of leaving two full-map layers in overlapping opacity transitions.
@@ -799,6 +815,17 @@
               .attr("opacity", 0)
               .style("transition", "opacity 160ms ease")
               .style("pointer-events", "none");
+            const pulseBar =
+              yr === 1998
+                ? gb
+                    .append("rect")
+                    .attr("class", "oce-bar-pulse")
+                    .attr("x", x(yr))
+                    .attr("y", y(v))
+                    .attr("width", x.bandwidth())
+                    .attr("height", plotBot - y(v))
+                    .attr("rx", 1)
+                : null;
             const bar = gb
               .append("rect")
               .attr("class", "oce-bar")
@@ -836,6 +863,7 @@
               .attr("fill", "transparent")
               .style("cursor", "pointer")
               .on("mouseenter", function (ev) {
+                if (yr === 1998) self._cueRetire("enso");
                 bar
                   .attr("fill-opacity", 1)
                   .attr("stroke", "#12222c")
@@ -855,6 +883,9 @@
                 self._setMapYear(null);
                 self._tip(null);
               });
+            // Attention cue: an outline matching only the 1998 bar expands until the
+            // reader hovers it. The full-column hit target and highlight stay still.
+            if (pulseBar) self._cuePulse("enso", pulseBar.node());
           });
           const lg = svg
             .append("g")
@@ -890,6 +921,7 @@
         }
 
         _mapHighlight(mode) {
+          if (mode) this._flashMapLive();
           const el = this.mapRef.current;
           if (el && el.__oceHighlight)
             el.__oceHighlight(mode, {
@@ -898,7 +930,108 @@
               rasterOpacity: this.props.rasterOpacity ?? 0.85,
             });
         }
+
+        // ---- discoverability -----------------------------------------------------
+        // Almost every cue on this page used to be hover-triggered, which cannot help a
+        // reader discover anything: you have to already be hovering to see it. The two
+        // methods below add the missing half — a signal that arrives before the pointer.
+
+        // The narrative column and the map are in separate columns, so a reader who never
+        // hovers never learns that one drives the other. The first time anything in the
+        // narrative changes the map, pulse the map frame once to connect cause and effect.
+        // Once only: after that the reader knows, and a repeating flash would be noise.
+        _flashMapLive() {
+          if (this._mapLiveShown) return;
+          const frame = this.rootRef.current
+            ? this.rootRef.current.querySelector("[data-screen-label='World map']")
+            : null;
+          if (!frame) return;
+          this._mapLiveShown = true;
+          frame.classList.add("ocx-map-live");
+          this._mapLiveTimer = setTimeout(
+            () => frame.classList.remove("ocx-map-live"),
+            1300,
+          );
+        }
+
+        // Exactly one element per storyboard panel breathes until the reader hovers it,
+        // then retires for the rest of the session. This replaces the scroll-triggered
+        // play-once cues, which a reader who arrived mid-animation never saw at all: a
+        // standing pulse waits for the reader instead of firing at the viewport.
+        // Each cue is a single mark — the arrow, one row, one bar, one number, the thumb —
+        // so the panel is never twitching in more than one place at a time.
+
+        // Mark an element as pulsing. Named, so a mark redrawn by d3 (the ENSO bar) can
+        // ask again after a re-render and still stay retired.
+        _cuePulse(name, el) {
+          if (!el) return;
+          if (
+            window.matchMedia &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          )
+            return; // resting cues (dotted rules, arrows, prose) still stand alone
+          this._cueRetired = this._cueRetired || {};
+          if (this._cueRetired[name]) return;
+          el.classList.add("ocx-cue-pulse");
+          el.setAttribute("data-ocx-cue-pulse", name);
+        }
+        // Stop a cue permanently: the reader has reached it, so the hint has done its job.
+        _cueRetire(name) {
+          this._cueRetired = this._cueRetired || {};
+          if (this._cueRetired[name]) return;
+          this._cueRetired[name] = true;
+          const root = this.rootRef.current;
+          if (!root) return;
+          root
+            .querySelectorAll(`[data-ocx-cue-pulse="${name}"]`)
+            .forEach((el) => {
+              el.classList.remove("ocx-cue-pulse");
+              el.removeAttribute("data-ocx-cue-pulse");
+            });
+        }
+        _wireAttentionCues() {
+          const root = this.rootRef.current;
+          if (!root) return;
+          const reduced =
+            window.matchMedia &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (reduced) return; // resting cues (dotted rules, arrows, prose) still stand alone
+
+          // `hover` is the element that retires the cue when the pointer reaches it —
+          // usually the control the pulsing mark lives inside, since the mark itself is
+          // often too small (an arrowhead) or pointer-transparent (an SVG path) to hover.
+          // The ENSO bar is wired in _drawLine and the slider thumb in _mechInit, because
+          // both are created outside this pass.
+          const cues = [
+            {
+              name: "flow",
+              el: "[data-ocx-definitions] .ocx-flow-arrow-pulse",
+              hover: "[data-ocx-definitions] .ocx-flow-card",
+            },
+            {
+              name: "largest",
+              el: "[data-ocx-largest] .ocx-table-pulse-frame",
+              hover: "[data-ocx-largest] tr[data-key='blob']",
+            },
+            {
+              name: "freq",
+              el: ".ocx-events-09 .ocx-stat-pulse-frame",
+              hover: ".ocx-events-09 .ocx-inspect",
+            },
+          ];
+          cues.forEach((c) => {
+            const el = root.querySelector(c.el);
+            if (!el) return;
+            this._cuePulse(c.name, el);
+            const target = (c.hover && root.querySelector(c.hover)) || el;
+            const retire = () => this._cueRetire(c.name);
+            target.addEventListener("mouseenter", retire, { once: true });
+            // Keyboard readers reach the same marks by tab, and deserve the same quiet.
+            target.addEventListener("focus", retire, { once: true });
+          });
+        }
         _setActive(key, on) {
+          if (on && key === "blob") this._cueRetire("largest"); // see _setActiveYear
           const ev = this.events.find((e) => e.key === key);
           if (!ev) return;
           const map = this.markersRef.current || this.mapRef.current;
@@ -936,6 +1069,9 @@
           }
         }
         _setActiveYear(year, on) {
+          // A pulsing mark outranks the highlight styles these setters write, so any
+          // cross-panel highlight of a cued mark retires its cue first.
+          if (on && year === 1998) this._cueRetire("enso");
           const keys = this.events
             .filter((e) => e.year === year)
             .map((e) => e.key);
@@ -948,6 +1084,22 @@
               }
             });
           }
+        }
+        _syncTablePulseFrame() {
+          const tb = this.tableRef.current;
+          const wrap = tb ? tb.closest(".ocx-table-wrap") : null;
+          const row = tb ? tb.querySelector('tr[data-key="blob"]') : null;
+          if (!wrap || !row) return;
+          const wrapRect = wrap.getBoundingClientRect();
+          const rowRect = row.getBoundingClientRect();
+          wrap.style.setProperty(
+            "--ocx-table-cue-top",
+            `${rowRect.top - wrapRect.top}px`,
+          );
+          wrap.style.setProperty(
+            "--ocx-table-cue-height",
+            `${rowRect.height}px`,
+          );
         }
         _wireSort() {
           const tb = this.tableRef.current;
@@ -965,6 +1117,16 @@
           };
           this._sort = { col: null, dir: 1 };
           tb.querySelectorAll("th[data-sort]").forEach((th) => {
+            // These are the only genuinely clickable controls in the panel, so give them
+            // a real keyboard path rather than leaving them mouse-only.
+            if (!th.hasAttribute("tabindex")) th.setAttribute("tabindex", "0");
+            th.setAttribute("role", "button");
+            th.addEventListener("keydown", (ev) => {
+              if (ev.key === "Enter" || ev.key === " ") {
+                ev.preventDefault();
+                th.click();
+              }
+            });
             th.addEventListener("click", () => {
               const col = th.getAttribute("data-sort");
               // numeric columns default to descending (largest first); name defaults ascending
@@ -984,9 +1146,11 @@
                 return 0;
               });
               rows.forEach((r) => tbody.appendChild(r));
-              // update arrow indicators
+              // Update arrow indicators. Clearing the inline opacity (rather than setting
+              // it to 0) hands the unsorted columns back to the CSS resting value, so the
+              // arrows stay faintly visible and the table keeps advertising that it sorts.
               tb.querySelectorAll("span[data-arrow]").forEach((s) => {
-                s.style.opacity = 0;
+                s.style.opacity = "";
                 s.textContent = "↕";
               });
               const arrow = tb.querySelector(`span[data-arrow="${col}"]`);
@@ -994,6 +1158,7 @@
                 arrow.style.opacity = 1;
                 arrow.textContent = dir > 0 ? "▲" : "▼";
               }
+              requestAnimationFrame(() => self._syncTablePulseFrame());
             });
           });
         }
@@ -1002,20 +1167,45 @@
           if (!tb) return;
           const self = this;
           this._wireSort();
+          this._syncTablePulseFrame();
+          requestAnimationFrame(() => this._syncTablePulseFrame());
+          const wrap = tb.closest(".ocx-table-wrap");
+          const blobRow = tb.querySelector('tr[data-key="blob"]');
+          if (window.ResizeObserver && wrap && blobRow) {
+            if (this._tableCueObserver) this._tableCueObserver.disconnect();
+            this._tableCueObserver = new ResizeObserver(() =>
+              this._syncTablePulseFrame(),
+            );
+            this._tableCueObserver.observe(wrap);
+            this._tableCueObserver.observe(blobRow);
+          }
+          if (!this._tableCueResize) {
+            this._tableCueResize = () =>
+              requestAnimationFrame(() => this._syncTablePulseFrame());
+            window.addEventListener("resize", this._tableCueResize);
+          }
           tb.querySelectorAll("tr[data-key]").forEach((row) => {
             const key = row.getAttribute("data-key");
-            row.style.cursor = "pointer";
-            row.addEventListener("mouseenter", () => {
+            // cursor now comes from .ocx-inspect, alongside the dotted cue on the name cell.
+            const enter = () => {
               self._setActive(key, true);
               self._setEventField(key, true);
               self._setEventBadge(key, true, true);
-            });
-            row.addEventListener("mouseleave", () => {
+              self._flashMapLive();
+            };
+            const leave = () => {
               self._setActive(key, false);
               self._setEventField(key, false);
               self._setEventBadge(key, false);
               self._tip(null);
-            });
+            };
+            row.addEventListener("mouseenter", enter);
+            row.addEventListener("mouseleave", leave);
+            // Focus parity with the definition cards: a keyboard reader can walk the rows
+            // and drive the map exactly as a pointer does.
+            row.setAttribute("tabindex", "0");
+            row.addEventListener("focus", enter);
+            row.addEventListener("blur", leave);
           });
         }
 
@@ -1127,15 +1317,17 @@
             TEAL = "#1f9aa6",
             GREEN = "#3f7a4c";
 
+          // Selected state is a class, not inline style: inline background/color could never
+          // be overridden by a :hover rule, which is why these toggles used to sit completely
+          // dead under the pointer. The regime hues now live in the stylesheet.
           [
-            ["psrBtn", "psr", RED],
-            ["ssrBtn", "ssr", TEAL],
-          ].forEach(([id, regime, color]) => {
+            ["psrBtn", "psr"],
+            ["ssrBtn", "ssr"],
+          ].forEach(([id, regime]) => {
             const button = q(id),
               active = this._mech.regime === regime;
             if (button) {
-              button.style.background = active ? color : "transparent";
-              button.style.color = active ? "#fff" : "#6f7873";
+              button.classList.toggle("is-active", active);
               button.setAttribute("aria-pressed", String(active));
             }
           });
@@ -1315,11 +1507,18 @@
             psr.addEventListener("click", () => this._mechSetRegime("psr"));
           if (ssr)
             ssr.addEventListener("click", () => this._mechSetRegime("ssr"));
-          if (slider)
+          if (slider) {
+            // The thumb's pulse has done its job the moment the reader reaches the
+            // control — hovering it is enough, moving it is not required.
+            const retireThumb = () => slider.classList.add("ocx-cue-done");
+            slider.addEventListener("mouseenter", retireThumb, { once: true });
+            slider.addEventListener("focus", retireThumb, { once: true });
             slider.addEventListener("input", () => {
+              retireThumb();
               this._mech.preset = null;
               this._mechUpdate();
             });
+          }
           root.querySelectorAll("[data-preset]").forEach((btn) => {
             btn.addEventListener("click", () => {
               const pr = btn.dataset.preset;

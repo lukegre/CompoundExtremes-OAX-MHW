@@ -132,6 +132,16 @@ input[type="range"].ocx-slider::-moz-range-thumb {
 input[type="range"].ocx-slider:hover::-moz-range-thumb {
   animation: none;
 }
+/* The pulse is a discovery cue, not decoration: it breathes until the reader
+   reaches the control, and once they have hovered or moved the thumb it never
+   plays again (JS adds .ocx-cue-done). Retiring on contact is what keeps a
+   standing pulse from becoming noise. */
+input[type="range"].ocx-slider.ocx-cue-done::-webkit-slider-thumb {
+  animation: none;
+}
+input[type="range"].ocx-slider.ocx-cue-done::-moz-range-thumb {
+  animation: none;
+}
 input[type="range"].ocx-slider::-moz-range-track {
   height: 10px;
   border-radius: 6px;
@@ -261,6 +271,184 @@ input[type="range"].ocx-slider::-moz-range-track {
 .ocx-flow-card:hover .ocx-flow-arrowhead,
 .ocx-flow-card:focus-visible .ocx-flow-arrowhead {
   animation: ocxArrowNudge 0.55s ease-in-out infinite alternate;
+}
+
+/* ── Interactive affordance tokens ──────────────────────────────────────────
+   Two resting-state languages, so a reader can tell the kinds of live element
+   apart before touching either:
+     .ocx-inspect — hover or focus it and the map or a chart responds
+     .ocx-act     — click it and something changes (sort, preset, regime)
+   Both stay quiet at rest. The .ocx-inspect cue is a dotted hairline under the
+   element's *label* ([data-ocx-cue]) rather than a border around its whole box:
+   it reads as a hint instead of a frame, and text-decoration costs no layout
+   height. Once the dotted rule is learned in one panel it carries to them all,
+   which is what the three near-identical "TRY IT" pills used to pay for. */
+#dc-root .ocx-inspect {
+  cursor: pointer;
+  border-radius: 6px;
+  transition:
+    background 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+#dc-root .ocx-inspect:hover,
+#dc-root .ocx-inspect:focus-visible {
+  background: #f0ead9;
+}
+#dc-root .ocx-inspect:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(200, 83, 31, 0.5);
+}
+#dc-root .ocx-inspect [data-ocx-cue] {
+  text-decoration: underline dotted #bcae92;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.16s ease;
+}
+#dc-root .ocx-inspect:hover [data-ocx-cue],
+#dc-root .ocx-inspect:focus-visible [data-ocx-cue] {
+  text-decoration-color: var(--ocx-orange);
+}
+
+/* Clickable. Deliberately carries no colour of its own — each element keeps the
+   hover it already had — only the shared press and focus behaviour that tells a
+   reader this one is a real button rather than something to hover. */
+#dc-root .ocx-act {
+  cursor: pointer;
+  transition:
+    background 0.14s ease,
+    border-color 0.14s ease,
+    color 0.14s ease,
+    transform 0.08s ease;
+}
+#dc-root .ocx-act:active {
+  transform: translateY(1px);
+}
+#dc-root .ocx-act:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(200, 83, 31, 0.5);
+}
+
+/* ── Attention cue ──────────────────────────────────────────────────────────
+   Exactly one mark per storyboard panel gets a separate cue layer. The cue
+   grows away from the stationary mark and fades fully before the loop resets,
+   so no part of the animation travels back inward. */
+@keyframes ocxPulseOutStroke {
+  0% {
+    stroke-width: var(--ocx-pulse-stroke-start, 0px);
+    opacity: 0.72;
+  }
+  100% {
+    stroke-width: 18px;
+    opacity: 0;
+  }
+}
+@keyframes ocxPulseOutHalo {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 83, 31, 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 9px rgba(200, 83, 31, 0);
+  }
+}
+
+/* SVG outlines sit behind the real arrow/bar. The real mark masks the inward
+   half of the growing stroke, leaving only the outward-moving edge visible. */
+.ocx-flow-arrow-pulse {
+  pointer-events: none;
+}
+.ocx-flow-arrow-pulse path {
+  stroke: var(--ocx-orange);
+  stroke-width: 0;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+.ocx-flow-arrow-pulse .ocx-flow-pulse-line {
+  --ocx-pulse-stroke-start: 4px;
+}
+.ocx-flow-arrow-pulse.ocx-cue-pulse path,
+#dc-root rect.oce-bar-pulse.ocx-cue-pulse {
+  animation: ocxPulseOutStroke 1.8s ease-out infinite;
+}
+#dc-root rect.oce-bar-pulse {
+  fill: none;
+  stroke: var(--ocx-orange);
+  stroke-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Empty overlays fit the row and number but draw no border. Their shadow spread
+   matches the slider pulse: it emanates from the mark, expands only outward,
+   and becomes transparent before the animation resets. */
+#dc-root .ocx-table-wrap {
+  position: relative;
+}
+#dc-root .ocx-table-pulse-frame,
+#dc-root .ocx-stat-pulse-frame {
+  position: absolute;
+  border: 0;
+  box-shadow: none;
+  pointer-events: none;
+}
+#dc-root .ocx-table-pulse-frame {
+  top: var(--ocx-table-cue-top, 0);
+  right: 0;
+  left: 0;
+  height: var(--ocx-table-cue-height, 0);
+  border-radius: 0;
+  z-index: 2;
+}
+#dc-root .ocx-stat-pulse-frame {
+  inset: 0;
+  border-radius: 5px;
+}
+#dc-root .ocx-stat-pulse-wrap {
+  display: inline-block;
+  position: relative;
+  padding: 0 2px;
+}
+#dc-root .ocx-table-pulse-frame.ocx-cue-pulse,
+#dc-root .ocx-stat-pulse-frame.ocx-cue-pulse {
+  animation: ocxPulseOutHalo 1.8s ease-out infinite;
+}
+
+/* One-time signal that the sticky map answers to the scrolling column: the first
+   time a right-column control drives the map, the map frame pulses once. Without
+   it, a reader who never hovers never learns the two columns are connected. */
+@keyframes ocxMapLive {
+  0% {
+    box-shadow: inset 0 0 0 0 rgba(200, 83, 31, 0);
+  }
+  25% {
+    box-shadow: inset 0 0 0 3px rgba(200, 83, 31, 0.5);
+  }
+  100% {
+    box-shadow: inset 0 0 0 3px rgba(200, 83, 31, 0);
+  }
+}
+#dc-root .ocx-header-07.ocx-map-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  border-radius: 8px;
+  animation: ocxMapLive 1200ms ease-out;
+}
+
+/* Readers who ask for less motion keep every resting-state cue — the dotted
+   rules, the sort arrows, the prose hints — and lose only the moving parts. */
+@media (prefers-reduced-motion: reduce) {
+  #dc-root .ocx-cue-pulse,
+  #dc-root .ocx-header-07.ocx-map-live::after,
+  .ocx-flow-card:hover .ocx-flow-arrowhead,
+  .ocx-flow-card:focus-visible .ocx-flow-arrowhead,
+  input[type="range"].ocx-slider::-webkit-slider-thumb,
+  input[type="range"].ocx-slider::-moz-range-thumb {
+    animation: none;
+  }
 }
 html {
   height: auto !important;
@@ -468,11 +656,6 @@ body {
   color: var(--ocx-muted);
   margin-top: 3px;
 }
-[data-ocx-definitions-try] {
-  position: absolute !important;
-  top: 17px;
-  right: 10px;
-}
 [data-ocx-compound-row] {
   grid-area: compound;
   display: flex;
@@ -548,22 +731,6 @@ body {
   font-size: 19px !important;
   margin: 0 !important;
   padding: 0 !important;
-}
-[data-ocx-freq-pill] {
-  position: absolute !important;
-  top: auto !important;
-  right: 12px !important;
-  bottom: 12px !important;
-}
-[data-ocx-freq-pill]::after {
-  top: auto;
-  bottom: calc(100% + 8px);
-}
-[data-ocx-freq-pill]::before {
-  top: auto;
-  bottom: calc(100% + 3px);
-  border-bottom-color: transparent;
-  border-top-color: var(--ocx-ink);
 }
 [data-ocx-small-events] > :nth-child(2) {
   flex-wrap: wrap;
@@ -793,6 +960,13 @@ body {
   font-weight: 700;
   font-size: 10.5px;
   color: var(--ocx-body);
+}
+/* These looked like buttons but were inert until clicked — nothing responded to the
+   pointer, which reads as "this page is a picture". */
+#dc-root .ocx-scenario-button:hover {
+  background: #f6eeda;
+  border-color: #bfae87;
+  color: var(--ocx-ink);
 }
 #dc-root .ocx-table-cell {
   padding: 6px 6px 6px 0;
@@ -1182,21 +1356,12 @@ body {
   border-radius: 8px;
   border: 1px solid #ddd0b0;
 }
-#dc-root .ocx-mech-psr-btn {
-  flex: 1;
-  border: 0;
-  cursor: pointer;
-  border-radius: 6px;
-  padding: 8px 5px;
-  font-family: "Barlow Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 11.5px;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  line-height: 1.05;
-  background: var(--ocx-orange);
-  color: #fff;
-}
+/* Regime toggles. The selected state used to be painted by _mechUpdate as inline
+   style.background/color, which no :hover rule could ever beat — so these two had
+   no pointer feedback whatsoever. The state is now a class (.is-active, toggled in
+   _mechUpdate) and all the colour lives here, which lets the inactive button
+   respond to the pointer in its own regime's hue. */
+#dc-root .ocx-mech-psr-btn,
 #dc-root .ocx-mech-ssr-btn {
   flex: 1;
   border: 0;
@@ -1211,6 +1376,22 @@ body {
   line-height: 1.05;
   background: transparent;
   color: #6f7873;
+}
+#dc-root .ocx-mech-psr-btn.is-active {
+  background: var(--ocx-orange);
+  color: #fff;
+}
+#dc-root .ocx-mech-ssr-btn.is-active {
+  background: var(--ocx-teal);
+  color: #fff;
+}
+#dc-root .ocx-mech-psr-btn:not(.is-active):hover {
+  background: rgba(200, 83, 31, 0.13);
+  color: var(--ocx-ink);
+}
+#dc-root .ocx-mech-ssr-btn:not(.is-active):hover {
+  background: rgba(31, 154, 166, 0.15);
+  color: var(--ocx-ink);
 }
 #dc-root .ocx-mech-regime-desc {
   font-family: "Source Sans 3", sans-serif;
@@ -1441,20 +1622,6 @@ body {
   align-items: center;
   gap: 18px;
   flex-wrap: wrap;
-}
-#dc-root .ocx-definitions-try {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(250, 246, 236, 0.92);
-  border: 1px solid #ddd2b8;
-  color: #8a836c;
-  font-family: "Barlow Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: 0.09em;
-  padding: 3px 9px 3px 7px;
-  border-radius: 20px;
 }
 #dc-root .ocx-definitions-02 {
   grid-area: mhw;
@@ -1834,9 +2001,14 @@ body {
   cursor: pointer;
   user-select: none;
 }
+/* Sort arrows are visible at rest. They used to be opacity:0 until a column had
+   been clicked, so the one genuinely clickable thing in this panel was also the
+   only one with no cue at all. _wireSort clears the inline opacity on reset so
+   this resting value applies again, and sets 1 on the active column. */
 #dc-root .ocx-method-35 {
-  opacity: 0;
+  opacity: 0.32;
   margin-left: 3px;
+  transition: opacity 0.15s ease;
 }
 #dc-root .ocx-events-01 {
   padding: 5px 6px 6px 0;
@@ -1846,8 +2018,13 @@ body {
   user-select: none;
 }
 #dc-root .ocx-events-02 {
-  opacity: 0;
+  opacity: 0.32;
   margin-right: 3px;
+  transition: opacity 0.15s ease;
+}
+#dc-root .ocx-act:hover .ocx-method-35,
+#dc-root .ocx-act:hover .ocx-events-02 {
+  opacity: 0.85;
 }
 #dc-root .ocx-events-03 {
   padding: 5px 0 6px 6px;
@@ -1902,21 +2079,6 @@ body {
   margin-bottom: 10px;
   padding-top: 10px;
   margin-top: -10px;
-}
-#dc-root .ocx-freq-pill {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(250, 246, 236, 0.85);
-  border: 1px solid #ddd2b8;
-  color: #8a836c;
-  font-family: "Barlow Condensed", sans-serif;
-  font-weight: 700;
-  font-size: 10px;
-  letter-spacing: 0.09em;
-  padding: 3px 9px 3px 7px;
-  border-radius: 20px;
 }
 #dc-root .ocx-events-08 {
   margin: 0 0 10px;
@@ -2126,13 +2288,11 @@ body {
   text-decoration: underline;
 }
 
-/* Static hover states formerly expressed through runtime style-* attributes */
-.ocx-hover-muted:hover {
-  background: #efe7d5;
-}
-.ocx-hover-paper:hover {
-  background: #f2ead6;
-}
+/* Static hover states formerly expressed through runtime style-* attributes.
+   The old .ocx-hover-muted (#efe7d5) and .ocx-hover-paper (#f2ead6) tints are gone:
+   they were two more shades of the same idea, and .ocx-inspect now owns one tint for
+   every hover-to-inspect element on the page. This one stays because it is a genuine
+   per-element treatment for the sortable headers, not a duplicate affordance. */
 .ocx-hover-ink:hover {
   color: var(--ocx-ink);
 }
