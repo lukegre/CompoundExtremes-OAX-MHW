@@ -1772,6 +1772,33 @@ body {
   padding: 3px 9px 3px 7px;
   border-radius: 20px;
 }
+/* Link-flavoured pill: same geometry and type as the TRY IT pills, but
+   clickable — used above the events table and inside the credits box. */
+#dc-root .ocx-download-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(250, 246, 236, 0.85);
+  border: 1px solid #ddd2b8;
+  color: #8a836c;
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  padding: 3px 9px 3px 7px;
+  border-radius: 20px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+#dc-root .ocx-download-pill:hover {
+  background: var(--ocx-ink);
+  border-color: var(--ocx-ink);
+  color: #f2f0e8;
+}
 #dc-root .ocx-largest {
   flex: 1 1 360px;
   min-width: 320px;
